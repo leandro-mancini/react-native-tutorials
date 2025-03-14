@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
         color: "#8696BB",
         fontSize: 16,
         flex: 1,
-        overflow: "hidden"
+        overflow: "hidden",
+        fontFamily: "Poppins-Regular"
     },
   });

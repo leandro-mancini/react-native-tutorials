@@ -30,12 +30,13 @@ const styles = StyleSheet.create({
     hello: {
         color: "#8696BB",
         fontSize: 16,
-        lineHeight: 16
+        lineHeight: 16,
+        fontFamily: "Poppins-Regular"
     },
     me: {
         color: "#0D1B34",
         fontSize: 20,
         lineHeight: 20,
-        fontWeight: "bold"
+        fontFamily: "Poppins-Bold"
     }
 })

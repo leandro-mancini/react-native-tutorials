@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 16,
         lineHeight: 16,
-        fontWeight: "bold",
+        fontFamily: "Poppins-SemiBold"
     },
     doctors: {
         gap: 16

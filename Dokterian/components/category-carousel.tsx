@@ -51,7 +51,8 @@ const styles = StyleSheet.create({
     },
     text: {
       fontSize: 14,
-      lineHeight: 14,
-      color: "#8696BB"
+      lineHeight: 18,
+      color: "#8696BB",
+      fontFamily: "Poppins-Regular"
     },
 });

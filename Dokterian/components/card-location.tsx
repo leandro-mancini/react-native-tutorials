@@ -22,7 +22,7 @@ export const CardLocation = ({ avatarUrl, name, specialty, review, time, kms }: 
             <Text style={styles.specialty}>{specialty}</Text>
           </View>
           <View style={styles.infoKms}>
-            <Ionicons name="location-outline" size={16} color="#8696BB" />
+            <Ionicons name="location-outline" size={14} color="#8696BB" />
             <Text style={styles.kms}>{kms}</Text>
           </View>
         </View>
@@ -47,11 +47,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     boxShadow: "2 12 20 0 rgba(90, 117, 167, 0.06)"
-    // shadowColor: "black",
-    // shadowOffset: {width: 0, height: 3},
-    // shadowOpacity: 0.2,
-    // shadowRadius: 5,
-    // elevation: 2,
   },
   infoDoctor: {
     flexDirection: "row",
@@ -78,23 +73,26 @@ const styles = StyleSheet.create({
   },
   kms: {
     color: "#8696BB",
-    fontSize: 14,
-    lineHeight: 14
+    fontSize: 12,
+    lineHeight: 14,
+    fontFamily: "Poppins-Regular"
   },
   name: {
     color: "#0D1B34",
-    fontWeight: "bold",
+    fontFamily: "Poppins-Bold",
     fontSize: 16,
     lineHeight: 16
   },
   specialty: {
     color: "#8696BB",
     fontSize: 14,
-    lineHeight: 14
+    lineHeight: 18,
+    fontFamily: "Poppins-Regular"
   },
   dateTime: {
     color: "#FEB052",
     fontSize: 12,
-    lineHeight: 12
+    lineHeight: 12,
+    fontFamily: "Poppins-Regular"
   },
 });

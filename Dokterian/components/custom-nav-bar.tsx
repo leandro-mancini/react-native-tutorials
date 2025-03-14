@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   text: {
     color: PRIMARY_COLOR,
     marginLeft: 8,
-    fontWeight: "500",
-    fontSize: 14
+    fontSize: 14,
+    fontFamily: "Nunito-Bold"
   },
 });

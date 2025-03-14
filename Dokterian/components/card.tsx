@@ -63,18 +63,20 @@ const styles = StyleSheet.create({
     },
     name: {
       color: "white",
-      fontWeight: "bold",
+      fontFamily: "Poppins-Bold",
       fontSize: 16,
       lineHeight: 16
     },
     specialty: {
       color: "#CBE1FF",
       fontSize: 14,
-      lineHeight: 14
+      lineHeight: 18,
+      fontFamily: "Poppins-Regular"
     },
     dateTime: {
       color: "white",
       fontSize: 12,
-      lineHeight: 12
+      lineHeight: 12,
+      fontFamily: "Poppins-Regular"
     },
 });
