@@ -59,6 +59,8 @@ react {
  */
 def enableProguardInReleaseBuilds = false
 
+def hermesEnabled = project.hasProperty('hermesEnabled') ? project.hermesEnabled : true
+
 /**
  * The preferred build flavor of JavaScriptCore (JSC)
  *

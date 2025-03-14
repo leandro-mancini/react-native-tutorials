@@ -5,7 +5,7 @@ import { HomeScreen } from "./home";
 import { ScheduleScreen } from "./schedule";
 import { MessagesScreen } from "./messages";
 import { ProfileScreen } from "./profile";
-import { CustomNavBar } from '../components/custom-nav-bar'
+import { CustomNavBar } from '../components/custom-nav-bar';
 
 const RootTabs = createBottomTabNavigator({
     screenOptions({ route }) {
@@ -14,7 +14,11 @@ const RootTabs = createBottomTabNavigator({
             tabBarShowLabel: false,
             tabBarStyle: {
                 height: 80,
-                backgroundColor: '#fff',
+                elevation: 0,
+                shadowOpacity: 0,
+                borderTopWidth: 0,
+                backgroundColor: 'white',
+                paddingHorizontal: 16
             },
             tabBarButton: (props) => <CustomNavBar {...props} route={route} />
         }

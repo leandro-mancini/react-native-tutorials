@@ -1,78 +1,100 @@
 import React from "react";
-import { Animated, Text, TouchableOpacity } from "react-native";
-import Ionicons from '@react-native-vector-icons/ionicons'
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import Ionicons from '@react-native-vector-icons/ionicons';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
-const getIconName = (routeName: string) => {
+const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+
+const PRIMARY_COLOR = "#63B4FF";
+const SECONDARY_COLOR = "#8696BB";
+
+const getIconByRouteName = (routeName: string, color: string, selected: boolean) => {
+    const iconSize = 24;
+
     switch (routeName) {
       case 'Home':
-        return 'home-outline';
+        return <Ionicons name={selected ? "home" : "home-outline"} size={iconSize} color={color} />
       case 'Schedule':
-        return 'calendar-outline';
+        return <Ionicons name={selected ? "calendar-sharp" : "calendar-outline"} size={iconSize} color={color} />
       case 'Messages':
-        return 'chatbubble-outline';
+        return <Ionicons name={selected ? "chatbubble-ellipses-sharp" : "chatbubble-ellipses-outline"} size={iconSize} color={color} />
       case 'Profile':
-        return 'person-outline';
+        return <Ionicons name={selected ? "person" : "person-outline"} size={iconSize} color={color} />
       default:
-        return 'circle-outline';
+        return <Ionicons name="at-circle" size={iconSize} color={color} />
     }
 };
 
+const getLabelByRouteName = (routeName: string) => {
+  switch (routeName) {
+    case 'Home':
+      return "Início";
+    case 'Schedule':
+      return "Agenda";
+    case 'Messages':
+      return "Pedidos";
+    case 'Profile':
+      return "Perfil";
+    default:
+      return "Opção";
+  }
+};
+
 export const CustomNavBar = ({ accessibilityState, onPress, route }: any) => {
-    const isSelected = accessibilityState.selected;
-    const animation = React.useRef(new Animated.Value(0)).current;
-  
-    React.useEffect(() => {
-      Animated.timing(animation, {
-        toValue: isSelected ? 1 : 0,
-        duration: 200,
-        useNativeDriver: false,
-      }).start();
-    }, [isSelected]);
-  
-    return (
-      <TouchableOpacity
+  const isSelected = accessibilityState.selected;
+
+  return (
+    <View style={styles.container}>
+      <AnimatedTouchableOpacity
+        layout={LinearTransition.springify().mass(0.4)}
+        key={route.key}
         onPress={onPress}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginVertical: 16,
-          backgroundColor: isSelected ? 'rgba(99, 180, 255, 0.10)' : 'transparent',
-          borderRadius: 8,
-          height: 48,
-          paddingHorizontal: 12,
-        }}
+        style={[
+          styles.tabItem,
+          { backgroundColor: isSelected ? "rgba(99, 180, 255, 0.10)" : "transparent" },
+        ]}
       >
-        <Animated.View
-          style={{
-            transform: [
-              {
-                translateX: animation.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, 0],
-                }),
-              },
-            ],
-          }}
-        >
-          <Ionicons name={getIconName(route.name)} size={24} color={isSelected ? '#63B4FF' : '#8696BB'} />
-        </Animated.View>
-  
-        <Animated.View
-          style={{
-            opacity: animation,
-            transform: [
-              {
-                translateX: animation.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, 10],
-                }),
-              },
-            ],
-          }}
-        >
-          {isSelected && <Text style={{ color: '#63B4FF', fontWeight: 'bold', fontSize: 14 }}>{route.name}</Text>}
-        </Animated.View>
-      </TouchableOpacity>
-    );
+        {getIconByRouteName(
+          route.name,
+          isSelected ? PRIMARY_COLOR : SECONDARY_COLOR,
+          isSelected
+        )}
+        {isSelected && (
+          <Animated.Text
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(200)}
+            style={styles.text}
+          >
+            {getLabelByRouteName(route.name)}
+          </Animated.Text>
+        )}
+      </AnimatedTouchableOpacity>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    alignSelf: "center",
+    paddingHorizontal: 0,
+  },
+  tabItem: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    height: 48,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  text: {
+    color: PRIMARY_COLOR,
+    marginLeft: 8,
+    fontWeight: "500",
+    fontSize: 14
+  },
+});
