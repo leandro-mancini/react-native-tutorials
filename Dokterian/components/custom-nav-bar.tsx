@@ -13,7 +13,7 @@ const getIconByRouteName = (routeName: string, color: string, selected: boolean)
 
     switch (routeName) {
       case 'Home':
-        return <Ionicons name={selected ? "home" : "home-outline"} size={iconSize} color={color} />
+        return <Ionicons name={selected ? "business" : "business-outline"} size={iconSize} color={color} />
       case 'Schedule':
         return <Ionicons name={selected ? "calendar-sharp" : "calendar-outline"} size={iconSize} color={color} />
       case 'Messages':

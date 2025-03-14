@@ -1,6 +1,7 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStaticNavigation } from "@react-navigation/native";
+import { createStackNavigator, TransitionPresets } from "@react-navigation/stack"
 import { HomeScreen } from "./home";
 import { ScheduleScreen } from "./schedule";
 import { MessagesScreen } from "./messages";
@@ -20,7 +21,8 @@ const RootTabs = createBottomTabNavigator({
                 backgroundColor: 'white',
                 paddingHorizontal: 16
             },
-            tabBarButton: (props) => <CustomNavBar {...props} route={route} />
+            tabBarButton: (props) => <CustomNavBar {...props} route={route} />,
+            // ...TransitionPresets.SlideFromRightIOS,
         }
     },
     screens: {
@@ -31,10 +33,13 @@ const RootTabs = createBottomTabNavigator({
     },
 });
 
+// const Stack = createStackNavigator();
 const Navigation = createStaticNavigation(RootTabs);
 
 export default function _layout() {
     return (
-        <Navigation />
+        // <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Navigation />
+        // </Stack.Navigator>
     );
 }
