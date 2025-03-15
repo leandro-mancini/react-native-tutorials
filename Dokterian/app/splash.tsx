@@ -5,8 +5,6 @@ export const SplashScreen = ({ navigation }: any) => {
     const logoScale = useRef(new Animated.Value(0)).current;
     const textOpacity = useRef(new Animated.Value(0)).current;
 
-    console.log('navigation', navigation)
-
     useEffect(() => {
         Animated.sequence([
           Animated.timing(logoScale, {
@@ -22,7 +20,7 @@ export const SplashScreen = ({ navigation }: any) => {
           }),
         ]).start(() => {
           setTimeout(() => {
-            // navigation.replace("Home");
+            navigation.replace("Main");
           }, 2000);
         });
     }, [navigation]);
