@@ -9,12 +9,11 @@ interface NearDoctorProps {
 export const NearDoctor = ({ doctors }: NearDoctorProps) => {
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Near Doctor</Text>
+            <Text style={styles.title}>Médicos próximos</Text>
             <View style={styles.doctors}>
                 {doctors.map((doctor) => (
-                    <Ripple rippleContainerBorderRadius={16}>
+                    <Ripple key={doctor.id} rippleContainerBorderRadius={16}>
                         <CardLocation
-                            key={doctor.id}
                             avatarUrl={doctor.avatarUrl}
                             name={doctor.name}
                             specialty={doctor.specialty}
