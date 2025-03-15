@@ -39,7 +39,7 @@ export const HomeScreen = () => {
           <SearchButton placeholder="Procure um médico ou problema de saúde" />
           <CategoryCarousel categories={categories} onSelect={(category) => console.log(`Selecionado: ${category}`)} />
         </View>
-        <NearDoctor doctors={doctors} />
+        {/* <NearDoctor doctors={doctors} /> */}
       </View>
     </ScrollView>
   );

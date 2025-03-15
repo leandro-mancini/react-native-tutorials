@@ -7,6 +7,7 @@ import { ScheduleScreen } from "./schedule";
 import { MessagesScreen } from "./messages";
 import { ProfileScreen } from "./profile";
 import { CustomNavBar } from '../components/custom-nav-bar';
+import { SplashScreen } from "./splash";
 
 const RootTabs = createBottomTabNavigator({
     screenOptions({ route }) {
@@ -26,6 +27,7 @@ const RootTabs = createBottomTabNavigator({
         }
     },
     screens: {
+        Splash: SplashScreen,
         Home: HomeScreen,
         Schedule: ScheduleScreen,
         Messages: MessagesScreen,
