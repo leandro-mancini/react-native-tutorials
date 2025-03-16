@@ -1,8 +1,6 @@
 import React, { useEffect } from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import LottieView from "lottie-react-native";
-
-const { width, height } = Dimensions.get("window");
 
 export const SplashScreen = ({ navigation }: any) => {
   useEffect(() => {
@@ -42,8 +40,8 @@ const styles = StyleSheet.create({
   },
   backgroundAnimation: {
     position: "absolute",
-    width: width,
-    height: height,
+    width: "100%",
+    height: "100%",
   },
   logoAnimation: {
     width: 200,
