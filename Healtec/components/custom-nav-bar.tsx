@@ -53,6 +53,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "center",
     paddingHorizontal: 0,
+    boxShadow: "0 -5 30 0 rgba(151, 151, 150, 0.14)"
   },
   tabItem: {
     flexDirection: "row",

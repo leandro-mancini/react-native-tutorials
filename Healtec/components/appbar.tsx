@@ -44,7 +44,6 @@ export const AppBar = ({ username, avatarUrl, onIconPress }: AppBarProps) => {
 
 const styles = StyleSheet.create({
     background: {
-        flex: 1,
         backgroundColor: "#4C4DDC",
     },
   container: {
@@ -90,7 +89,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 14,
     padding: 16,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: "rgba(237,237,252,0.20)",
     gap: 8
   },
