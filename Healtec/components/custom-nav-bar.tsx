@@ -1,7 +1,6 @@
 import React from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Ionicons from '@react-native-vector-icons/ionicons';
-import { Text } from "react-native-gesture-handler";
 import Ripple from "react-native-material-ripple";
 import { Icon } from "./icon";
 
@@ -14,14 +13,11 @@ const getIconByRouteName = (routeName: string, color: string, selected: boolean)
     switch (routeName) {
       case 'Home':
         return <Icon name={selected ? "HomeBoldIcon" : "HomeIcon"} size={iconSize} color={color} />
-        // return <Ionicons name={selected ? "business" : "business-outline"} size={iconSize} color={color} />
       case 'AppointmentDetail':
         return <Icon name={selected ? "CalendarBoldIcon" : "CalendarIcon"} size={iconSize} color={color} />
       case 'VoiceCall':
-        // return <Icon name="MessageIcon" size={iconSize} color={color} />
         return <Icon name={selected ? "MessageBoldIcon" : "MessageIcon"} size={iconSize} color={color} />
       case 'Profile':
-        // return <Icon name="ProfileIcon" size={iconSize} color={color} />
         return <Icon name={selected ? "ProfileBoldIcon" : "ProfileIcon"} size={iconSize} color={color} />
       default:
         return <Ionicons name="at-circle" size={iconSize} color={color} />
