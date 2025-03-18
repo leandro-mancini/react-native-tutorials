@@ -10,6 +10,7 @@ import { AppointmentDetailScreen } from './appointment-detail';
 import { VoiceCallScreen } from './voice-call';
 import { OnboardingScreen } from './onboarding';
 import { CustomNavBar } from '../components/custom-nav-bar';
+import { ProfileScreen } from './profile';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -27,7 +28,7 @@ function BottomTabNavigator() {
           shadowOpacity: 0,
           borderTopWidth: 0,
           backgroundColor: "white",
-          paddingHorizontal: 16,
+          paddingHorizontal: 0,
         },
         tabBarButton: (props) => <CustomNavBar {...props} route={route} />,
       })}
@@ -35,7 +36,7 @@ function BottomTabNavigator() {
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="AppointmentDetail" component={AppointmentDetailScreen} />
       <Tab.Screen name="VoiceCall" component={VoiceCallScreen} />
-      {/* <Tab.Screen name="Profile" component={ProfileScreen} /> */}
+      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 }

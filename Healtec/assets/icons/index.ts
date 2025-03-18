@@ -1,0 +1,8 @@
+export { default as CalendarIcon } from "./calendar.svg"
+export { default as CalendarBoldIcon } from "./calendar-bold.svg"
+export { default as HomeIcon } from "./home-2.svg"
+export { default as HomeBoldIcon } from "./home-2-bold.svg"
+export { default as MessageIcon } from "./message.svg"
+export { default as MessageBoldIcon } from "./message-bold.svg"
+export { default as ProfileIcon } from "./profile.svg"
+export { default as ProfileBoldIcon } from "./profile-bold.svg"

@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-vector-icons/common": "^11.0.0",
     "@react-native-vector-icons/ionicons": "^7.4.0",
     "@react-navigation/bottom-tabs": "^7.2.1",
     "@react-navigation/native": "^7.0.15",
@@ -21,7 +22,9 @@
     "react-native-material-ripple": "^0.9.1",
     "react-native-pager-view": "^6.7.0",
     "react-native-safe-area-context": "^5.3.0",
-    "react-native-screens": "^4.9.2"
+    "react-native-screens": "^4.9.2",
+    "react-native-svg": "^15.11.2",
+    "react-native-svg-transformer": "^1.5.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

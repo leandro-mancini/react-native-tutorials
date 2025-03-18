@@ -1,40 +1,31 @@
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Ionicons from '@react-native-vector-icons/ionicons';
+import { Text } from "react-native-gesture-handler";
+import Ripple from "react-native-material-ripple";
+import { Icon } from "./icon";
 
-const PRIMARY_COLOR = "#63B4FF";
-const SECONDARY_COLOR = "#8696BB";
+const PRIMARY_COLOR = "#4C4DDC";
+const SECONDARY_COLOR = "#939393";
 
 const getIconByRouteName = (routeName: string, color: string, selected: boolean) => {
     const iconSize = 24;
 
     switch (routeName) {
       case 'Home':
-        return <Ionicons name={selected ? "business" : "business-outline"} size={iconSize} color={color} />
-      case 'Schedule':
-        return <Ionicons name={selected ? "calendar-sharp" : "calendar-outline"} size={iconSize} color={color} />
-      case 'Messages':
-        return <Ionicons name={selected ? "chatbubble-ellipses-sharp" : "chatbubble-ellipses-outline"} size={iconSize} color={color} />
+        return <Icon name={selected ? "HomeBoldIcon" : "HomeIcon"} size={iconSize} color={color} />
+        // return <Ionicons name={selected ? "business" : "business-outline"} size={iconSize} color={color} />
+      case 'AppointmentDetail':
+        return <Icon name={selected ? "CalendarBoldIcon" : "CalendarIcon"} size={iconSize} color={color} />
+      case 'VoiceCall':
+        // return <Icon name="MessageIcon" size={iconSize} color={color} />
+        return <Icon name={selected ? "MessageBoldIcon" : "MessageIcon"} size={iconSize} color={color} />
       case 'Profile':
-        return <Ionicons name={selected ? "person" : "person-outline"} size={iconSize} color={color} />
+        // return <Icon name="ProfileIcon" size={iconSize} color={color} />
+        return <Icon name={selected ? "ProfileBoldIcon" : "ProfileIcon"} size={iconSize} color={color} />
       default:
         return <Ionicons name="at-circle" size={iconSize} color={color} />
     }
-};
-
-const getLabelByRouteName = (routeName: string) => {
-  switch (routeName) {
-    case 'Home':
-      return "Início";
-    case 'Schedule':
-      return "Agenda";
-    case 'Messages':
-      return "Pedidos";
-    case 'Profile':
-      return "Perfil";
-    default:
-      return "Opção";
-  }
 };
 
 export const CustomNavBar = ({ accessibilityState, onPress, route }: any) => {
@@ -42,20 +33,17 @@ export const CustomNavBar = ({ accessibilityState, onPress, route }: any) => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
+      <Ripple
         key={route.key}
         onPress={onPress}
-        style={[
-          styles.tabItem,
-          { backgroundColor: isSelected ? "rgba(99, 180, 255, 0.10)" : "transparent" },
-        ]}
+        style={styles.tabItem}
       >
         {getIconByRouteName(
           route.name,
           isSelected ? PRIMARY_COLOR : SECONDARY_COLOR,
           isSelected
         )}
-      </TouchableOpacity>
+      </Ripple>
     </View>
   );
 }
@@ -74,8 +62,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    height: 48,
     paddingHorizontal: 12,
     borderRadius: 8,
+    width: "100%",
+    height: "100%",
   },
 });

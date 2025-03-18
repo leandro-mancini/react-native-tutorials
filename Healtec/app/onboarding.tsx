@@ -13,10 +13,14 @@ const pages = [
     { id: "3", text: "Receba recomendações personalizadas de saúde", description: "Obtenha dicas de saúde e orientações personalizadas de especialistas para melhorar seu bem-estar." },
 ];
 
-const Slider = () => {
+const Slider = ({ navigation }: any) => {
     const pagerRef = useRef<PagerView>(null);
     const currentIndex = useRef(new Animated.Value(0)).current;
     const [contentHeight, setContentHeight] = useState(200);
+
+    const handlePress = () => {
+        navigation.replace("Main");
+    }
 
     return (
         <View style={styles.slider}>
@@ -43,7 +47,7 @@ const Slider = () => {
                 <View>
                     <BulletIndicator total={3} currentIndex={currentIndex} />
                 </View>
-                <Ripple style={styles.button} rippleContainerBorderRadius={14}>
+                <Ripple style={styles.button} rippleContainerBorderRadius={14} onPress={handlePress}>
                     <Text style={styles.buttonText}>Começar</Text>
                 </Ripple>
             </View>
@@ -51,7 +55,7 @@ const Slider = () => {
     );
 }
 
-export const OnboardingScreen = () => {
+export const OnboardingScreen = ({ navigation }: any) => {
     return (
         <View style={styles.container}>
             <LottieView 
@@ -64,7 +68,7 @@ export const OnboardingScreen = () => {
             <View style={styles.imageContainer}>
                 <Image style={styles.image} source={require("../assets/images/image_onboarding.png")} />
             </View>
-            <Slider />
+            <Slider navigation={navigation} />
         </View>
     );
 }
