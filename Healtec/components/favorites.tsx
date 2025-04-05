@@ -3,7 +3,7 @@ import { Card } from "./card";
 import { TextButton } from "./text-button";
 
 interface FavoritesProps {
-    items: { id: string; title: string; description: string; }[];
+    items: { id: string; name: string; specialty: string; rank: string; image: string; }[];
 }
 
 const { width } = Dimensions.get("window");
@@ -22,8 +22,17 @@ export const Favorites = ({ items }: FavoritesProps) => {
                 keyExtractor={(item) => item.id}
                 renderItem={({ item, index }) => {
                     return (
-                        <View style={[styles.favoriteItem, index === 0 && styles.favoriteFirstItem]}>
-                            <Card />
+                        <View style={[
+                            styles.favoriteItem, 
+                            index === 0 && styles.favoriteFirstItem,
+                            index === items.length -1 && styles.favoriteLastItem
+                        ]}>
+                            <Card
+                                name={item.name}
+                                image={item.image}
+                                rank={item.rank}
+                                specialty={item.specialty}
+                            />
                         </View>
                     );
                 }}
@@ -33,7 +42,10 @@ export const Favorites = ({ items }: FavoritesProps) => {
 }
 
 const styles = StyleSheet.create({
-    container: {},
+    container: {
+        // gap: 16,
+        marginBottom: -32
+    },
     info: {
         flexDirection: "row",
         alignItems: "center",
@@ -44,17 +56,21 @@ const styles = StyleSheet.create({
     infoTitle: {
         fontFamily: "Inter_18pt-Medium",
         fontSize: 16,
-        lineHeight: 18
+        lineHeight: 18,
     },
     favoriteItem: {
       justifyContent: "center",
       alignItems: "center",
-      marginHorizontal: 6,
+      marginHorizontal: 8,
+      paddingBottom: 32,
+      paddingTop: 16,
       width: (width / 2) - 24,
-      paddingBlock: 16
     },
     favoriteFirstItem: {
         marginLeft: 24,
+    },
+    favoriteLastItem: {
+        marginRight: 24,
     },
     button: {
       backgroundColor: "white",

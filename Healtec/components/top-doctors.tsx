@@ -4,7 +4,15 @@ import { TextButton } from "./text-button";
 import { CardList } from "./card-list";
 
 interface TopDoctorsProps {
-    items: { id: string; name: string, avatarUrl: string, specialty: string, review: string, rank: string; clinic: string; }[];
+    items: { 
+        id: string;
+        name: string;
+        clinic: string;
+        specialty: string;
+        review: string;
+        rank: string;
+        image: string;
+    }[];
 }
 
 export const TopDoctors = ({ items }: TopDoctorsProps) => {

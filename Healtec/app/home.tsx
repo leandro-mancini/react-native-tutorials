@@ -8,6 +8,74 @@ import { TopDoctors } from "../components/top-doctors";
 const EXPANDED_HEIGHT = 180;
 const COLLAPSED_HEIGHT = 92;
 
+const favorites = [
+  {
+    id: "1",
+    name: "Dr. Pedro Lima",
+    specialty: "Cardiologista",
+    rank: "4.8",
+    image: "https://img.freepik.com/fotos-gratis/medico-sorridente-com-estretoscopio-isolado-em-cinza_651396-974.jpg?t=st=1743869584~exp=1743873184~hmac=0069f8ed3421cc64eea081bec3156d848f23f8605e56b46e41e97281787898ac&w=1800",
+  },
+  {
+    id: "2",
+    name: "Dra. Ana Beatriz",
+    specialty: "Dermatologista",
+    rank: "4.9",
+    image: "https://img.freepik.com/fotos-gratis/mulher-medica-vestindo-jaleco-com-estetoscopio-isolado_1303-29791.jpg?t=st=1743870548~exp=1743874148~hmac=a1b4b1366d07d1f517c08878029b55ac7074c07fe146a9a447b8c1ec284a50e0&w=2000",
+  },
+  {
+    id: "3",
+    name: "Dr. Carlos Mendes",
+    specialty: "Pediatra",
+    rank: "4.7",
+    image: "https://img.freepik.com/fotos-gratis/trabalhadores-de-saude-medicina-covid-19-e-conceito-de-auto-quarentena-pandemica-enfermeira-hispanica-sorridente-alegre-medico-do-pronto-socorro-usando-uniforme-e-oculos-conversando-com-o-paciente-na-clinica_1258-58757.jpg?t=st=1743870586~exp=1743874186~hmac=ef5cee4a1dc01186c07d395b2cfade183960519dacd3419885733849e7bf45e0&w=2000",
+  },
+  {
+    id: "4",
+    name: "Dra. Juliana Torres",
+    specialty: "Neurologista",
+    rank: "4.6",
+    image: "https://img.freepik.com/fotos-gratis/trabalhadores-de-saude-prevenindo-o-conceito-de-campanha-de-quarentena-de-virus-medico-asiatico-alegre-e-amigavel-com-prancheta-durante-o-check-up-diario-em-pe-fundo-branco_1258-107867.jpg?t=st=1743870620~exp=1743874220~hmac=039b7fc868fe4726868fdb365ff183d58ddf38403907b83c2d2f2095bd2e76d5&w=2000",
+  },
+  {
+    id: "5",
+    name: "Dr. Rafael Souza",
+    specialty: "Ortopedista",
+    rank: "4.5",
+    image: "https://img.freepik.com/fotos-gratis/retrato-do-doutor-adulto-meados-de-bem-sucedido-com-bracos-cruzados_1262-12865.jpg?t=st=1743870638~exp=1743874238~hmac=4fb6eaaa113329dfc63966e88d593144beb325c60357d775137fbeaa8fcd6976&w=2000",
+  },
+];
+
+const topDoctors = [
+  {
+    id: "1",
+    name: "Dr. Henrique Castro",
+    clinic: "Vitta Saúde",
+    specialty: "Oftalmologista",
+    review: "(85 avaliações)",
+    rank: "4.7",
+    image: "https://img.freepik.com/fotos-premium/jovem-medico-masculino-em-estetoscopio-uniforme-sorridente-na-camera_1187-7603.jpg?w=2000",
+  },
+  {
+    id: "2",
+    name: "Dra. Mariana Ribeiro",
+    clinic: "Clin Vida",
+    specialty: "Ginecologista",
+    review: "(132 avaliações)",
+    rank: "4.9",
+    image: "https://img.freepik.com/fotos-premium/retrato-de-medico-sorridente-no-hospital_1048944-32456617.jpg?w=2000",
+  },
+  {
+    id: "3",
+    name: "Dr. Felipe Nunes",
+    clinic: "Centro Med+",
+    specialty: "Urologista",
+    review: "(98 avaliações)",
+    rank: "4.6",
+    image: "https://img.freepik.com/fotos-gratis/jovem-medico-de-tiro-medio-sorridente_23-2149870590.jpg?w=2000",
+  },
+];
+
 export const HomeScreen = () => {
     const scrollY = useRef(new Animated.Value(0)).current;
     const headerHeight = scrollY.interpolate({
@@ -26,19 +94,6 @@ export const HomeScreen = () => {
         { id: "7", name: "🤯 Enxaqueca" },
         { id: "8", name: "🥴 Tontura" },
         { id: "9", name: "😷 Gripe" },
-    ];
-
-    const favorites = [
-        { id: "1", title: "Card 1", description: "Descrição do Card 1" },
-        { id: "2", title: "Card 2", description: "Descrição do Card 2" },
-        { id: "3", title: "Card 2", description: "Descrição do Card 2" },
-        { id: "4", title: "Card 2", description: "Descrição do Card 2" },
-    ];
-
-    const topDoctors = [
-        { id: "1", avatarUrl: "https://img.freepik.com/fotos-gratis/confiante-olhando-para-a-camera-jovem-medico-vestindo-uniforme-de-medico-com-estetoscopio-isolado-na-parede-rosa-com-espaco-de-copia_141793-90966.jpg?t=st=1741985186~exp=1741988786~hmac=8aa5bfb68f77ddffd8f57132e398103db5f5447558565f9fd7e779f67210d938&w=1800", name: "Dr. Pedro Lima", specialty: "Cardiologista", review: "(120 avaliações)", rank: "4,8", clinic: "Vcare Clinic" },
-        { id: "2", avatarUrl: "https://img.freepik.com/fotos-gratis/jovem-medico-barbudo-vestindo-jaleco-branco-com-estetoscopio-olhando-para-a-camera-confuso_141793-28210.jpg?t=st=1741985214~exp=1741988814~hmac=abaf2e35cad4b6dfb54e079fc9dc8ae57d51e879bf326776eb03aaa29e95cdea&w=1800", name: "Dr. André Santos", specialty: "Dermatologista", review: "(240 avaliações)", rank: "4,5", clinic: "Vcare Clinic" },
-        { id: "3", avatarUrl: "https://img.freepik.com/fotos-gratis/medico-homem-barbudo-vestindo-jaleco-branco-com-estetoscopio-no-pescoco-usando-oculos-olhando-para-a-camera-sorrindo-confiante-em-pe-sobre-um-fundo-laranja_141793-110795.jpg?t=st=1741985259~exp=1741988859~hmac=2bbe8e0705922d8513db5386905dc1b05add0b34679959941696b9010f1893b1&w=2000", name: "Dr. Carlos Mendes", specialty: "Pediatra", review: "(98 avaliações)", rank: "4,4", clinic: "Vcare Clinic" },
     ];
 
     return (
@@ -76,13 +131,13 @@ export const HomeScreen = () => {
 
 const styles = StyleSheet.create({
     animatedHeader: {
-        position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-    overflow: "hidden",
-      },
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 10,
+      overflow: "hidden",
+    },
     screen: {
         flex: 1
     },
