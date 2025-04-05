@@ -1,6 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, ImageBackground } from "react-native";
-import Ionicons from '@react-native-vector-icons/ionicons';
+import { View, Text, StyleSheet, ImageBackground } from "react-native";
 import { Avatar } from "./avatar";
 import { IconButton } from "./icon-button";
 import { Icon } from "./icon";
@@ -10,13 +9,14 @@ interface AppBarProps {
   username: string;
   avatarUrl: string;
   onIconPress?: () => void;
+  collapsedHeight: any
 }
 
-export const AppBar = ({ username, avatarUrl, onIconPress }: AppBarProps) => {
+export const AppBar = ({ username, avatarUrl, onIconPress, collapsedHeight }: AppBarProps) => {
   return (
     <ImageBackground
       source={require("../assets/images/background-appbar.png")}
-      style={styles.background}
+      style={[styles.background, { minHeight: collapsedHeight || 92 }]}
       resizeMode="cover"
     >
         <View style={styles.container}>
@@ -33,10 +33,12 @@ export const AppBar = ({ username, avatarUrl, onIconPress }: AppBarProps) => {
                 </IconButton>
             </View>
 
-            <Ripple style={styles.searchContainer} rippleContainerBorderRadius={14}>
+            {(!collapsedHeight || collapsedHeight < 120) && (
+              <Ripple style={styles.searchContainer} rippleContainerBorderRadius={14}>
                 <Icon name="SearchNormalIcon" size={24} color="rgba(237,237,252,0.40)" />
                 <Text style={styles.searchText}>Pesquisar Doutor...</Text>
-            </Ripple>
+              </Ripple>
+            )}
         </View>
     </ImageBackground>
   );

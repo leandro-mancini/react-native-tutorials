@@ -63,6 +63,7 @@ export const OnboardingScreen = ({ navigation }: any) => {
                 autoPlay
                 loop
                 resizeMode="cover"
+                speed={0.5}
                 style={styles.backgroundAnimation}
             />
             <View style={styles.imageContainer}>
@@ -83,6 +84,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         width: "100%",
         height: "100%",
+        opacity: 0.3
     },
     imageContainer: {
         width: width,
