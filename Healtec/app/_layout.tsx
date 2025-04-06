@@ -11,6 +11,7 @@ import { VoiceCallScreen } from './voice-call';
 import { OnboardingScreen } from './onboarding';
 import { CustomNavBar } from '../components/custom-nav-bar';
 import { ProfileScreen } from './profile';
+import { DetailScreen } from './detail';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -50,6 +51,8 @@ function RootNavigator() {
 
       {/* Telas com Bottom Navigator */}
       <Stack.Screen name="Main" component={BottomTabNavigator} />
+      <Stack.Screen name="Detail" component={DetailScreen} />
+      <Stack.Screen name="VoiceCall" component={VoiceCallScreen} />
     </Stack.Navigator>
   );
 }

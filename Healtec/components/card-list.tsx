@@ -3,20 +3,29 @@ import { Icon } from "./icon";
 import Ionicons from '@react-native-vector-icons/ionicons';
 import Ripple from "react-native-material-ripple";
 
-export const CardList = () => {
+interface CardListProps {
+    name: string;
+    clinic: string;
+    specialty: string;
+    reviews: string;
+    rating: string;
+    image: string;
+}
+
+export const CardList = ({ clinic, image, name, rating, reviews, specialty }: CardListProps) => {
     return (
         <Ripple onPress={() => {}} rippleContainerBorderRadius={12} rippleColor="#4894FE">
             <View style={styles.container}>
-                <Image style={styles.image} source={{ uri: "https://img.freepik.com/fotos-gratis/confiante-olhando-para-a-camera-jovem-medico-vestindo-uniforme-de-medico-com-estetoscopio-isolado-na-parede-rosa-com-espaco-de-copia_141793-90966.jpg?t=st=1741985186~exp=1741988786~hmac=8aa5bfb68f77ddffd8f57132e398103db5f5447558565f9fd7e779f67210d938&w=1800" }} />
+                <Image style={styles.image} source={{ uri: image }} />
                 <View style={styles.info}>
                     <View style={styles.infoDoctor}>
-                        <Text style={styles.doctorName}>Dr. Esther</Text>
-                        <Text style={styles.doctorSpec}>Dentist | Vcare Clinic</Text>
+                        <Text style={styles.doctorName}>{name}</Text>
+                        <Text style={styles.doctorSpec}>{specialty} | {clinic}</Text>
                     </View>
                     <View style={styles.rating}>
                         <Icon name="StarIcon" color="#FFD33C" fill="#FFD33C" size={14} />
-                        <Text style={styles.ratingText}>4.5</Text>
-                        <Text style={styles.reviewsText}>(234 avaliações)</Text>
+                        <Text style={styles.ratingText}>{rating}</Text>
+                        <Text style={styles.reviewsText}>({reviews} avaliações)</Text>
                     </View>
                 </View>
                 <Ionicons name="chevron-forward" size={16} style={{ margin: 10 }} color="#939393" />
@@ -30,7 +39,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         width: "100%",
         backgroundColor: "white",
-        boxShadow: "0 3 30 0 rgba(16,16,16,0.03)",
+        boxShadow: "0 3 30 0 rgba(16,16,16,0.05)",
         padding: 8,
         flexDirection: "row",
         gap: 16,

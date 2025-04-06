@@ -1,28 +1,19 @@
 import { Image, StyleSheet, Text, View } from "react-native";
-import { Icon } from "./icon";
-import Ripple from "react-native-material-ripple";
-import { useNavigation } from "@react-navigation/native";
 
-interface CardProps {
+interface CardDetailProps {
     name: string;
     specialty: string;
-    rating: string;
     image: string;
-    style?: any;
 }
 
-export const Card = ({ name, specialty, image, rating, style }: CardProps) => {
+export const CardDetail = ({ name, specialty, image }: CardDetailProps) => {
     return (
-        <View style={[styles.container, style]}>
+        <View style={[styles.container]}>
             <Image style={styles.image} source={{ uri: image }} />
             <View style={styles.info}>
                 <View style={styles.infoDoctor}>
                     <Text style={styles.doctorName} numberOfLines={1} ellipsizeMode="tail">{name}</Text>
-                    <Text style={styles.doctorSpec}>{specialty}</Text>
-                </View>
-                <View style={styles.rating}>
-                    <Icon name="StarIcon" color="#FFD33C" fill="#FFD33C" size={14} />
-                    <Text style={styles.ratingText}>{rating}</Text>
+                    <Text style={styles.doctorSpec}>{specialty} | Vcare Clinic</Text>
                 </View>
             </View>
         </View>
@@ -34,33 +25,30 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         backgroundColor: "white",
         boxShadow: "0 3 30 0 rgba(16,16,16,0.05)",
+        width: "100%"
     },
     image: {
         width: "100%",
-        height: 140,
+        height: 200,
         borderTopLeftRadius: 8,
         borderTopRightRadius: 8
     },
     info: {
         width: "100%",
-        padding: 8,
-        paddingBottom: 12,
+        paddingHorizontal: 12,
+        paddingTop: 16,
+        paddingBottom: 20,
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "flex-start"
-    },
-    rating: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 4
+        alignItems: "center"
     },
     infoDoctor: {
         gap: 4
     },
     doctorName: {
         color: "#101010",
-        fontSize: 14,
-        lineHeight: 16,
+        fontSize: 16,
+        lineHeight: 18,
         fontFamily: "Inter_18pt-Medium",
     },
     doctorSpec: {
@@ -69,9 +57,4 @@ const styles = StyleSheet.create({
         lineHeight: 14,
         fontFamily: "Inter_18pt-Light"
     },
-    ratingText: {
-        fontSize: 10,
-        lineHeight: 12,
-        fontFamily: "Inter_18pt-Medium"
-    }
 })

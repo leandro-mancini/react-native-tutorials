@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import { TextButton } from "./text-button";
 import { CardList } from "./card-list";
+import { useNavigation } from "@react-navigation/native";
 
 interface TopDoctorsProps {
     items: { 
@@ -9,13 +10,17 @@ interface TopDoctorsProps {
         name: string;
         clinic: string;
         specialty: string;
-        review: string;
-        rank: string;
+        reviews: string;
+        rating: string;
         image: string;
+        patients: string;
+        aboutMe: string;
     }[];
 }
 
 export const TopDoctors = ({ items }: TopDoctorsProps) => {
+    const navigation = useNavigation();
+    
     return (
         <View style={styles.container}>
             <View style={styles.info}>
@@ -24,8 +29,21 @@ export const TopDoctors = ({ items }: TopDoctorsProps) => {
             </View>
             <View style={styles.doctors}>
                 {items.map((item) => (
-                    <Ripple key={item.id} rippleContainerBorderRadius={16}>
-                        <CardList />
+                    <Ripple
+                        key={item.id}
+                        rippleContainerBorderRadius={16}
+                        onPress={() => 
+                            navigation.navigate("Detail", { doctor: item })
+                        }
+                    >
+                        <CardList
+                            clinic={item.clinic}
+                            image={item.image}
+                            name={item.name}
+                            rating={item.rating}
+                            reviews={item.reviews}
+                            specialty={item.specialty}
+                        />
                     </Ripple>
                 ))}
             </View>

@@ -36,7 +36,7 @@ export const AppBar = ({ username, avatarUrl, onIconPress, collapsedHeight }: Ap
             {(!collapsedHeight || collapsedHeight < 120) && (
               <Ripple style={styles.searchContainer} rippleContainerBorderRadius={14}>
                 <Icon name="SearchNormalIcon" size={24} color="rgba(237,237,252,0.40)" />
-                <Text style={styles.searchText}>Pesquisar Doutor...</Text>
+                <Text style={styles.searchText}>Pesquisar Médico...</Text>
               </Ripple>
             )}
         </View>

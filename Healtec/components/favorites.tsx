@@ -1,14 +1,28 @@
 import { Dimensions, FlatList, StyleSheet, Text, View } from "react-native";
 import { Card } from "./card";
 import { TextButton } from "./text-button";
+import { useNavigation } from "@react-navigation/native";
+import Ripple from "react-native-material-ripple";
 
 interface FavoritesProps {
-    items: { id: string; name: string; specialty: string; rank: string; image: string; }[];
+    items: {
+        id: string;
+        name: string;
+        specialty: string;
+        rating: string;
+        image: string;
+        patients: string;
+        yearsExp: string;
+        reviews: string;
+        aboutMe: string;
+    }[];
 }
 
 const { width } = Dimensions.get("window");
 
 export const Favorites = ({ items }: FavoritesProps) => {
+    const navigation = useNavigation();
+    
     return (
         <View style={styles.container}>
             <View style={styles.info}>
@@ -27,12 +41,20 @@ export const Favorites = ({ items }: FavoritesProps) => {
                             index === 0 && styles.favoriteFirstItem,
                             index === items.length -1 && styles.favoriteLastItem
                         ]}>
-                            <Card
-                                name={item.name}
-                                image={item.image}
-                                rank={item.rank}
-                                specialty={item.specialty}
-                            />
+                            <Ripple
+                                onPress={() => 
+                                    navigation.navigate("Detail", { doctor: item })
+                                }
+                                rippleContainerBorderRadius={8}
+                                rippleColor="#4894FE"
+                            >
+                                <Card
+                                    name={item.name}
+                                    image={item.image}
+                                    rating={item.rating}
+                                    specialty={item.specialty}
+                                />
+                            </Ripple>
                         </View>
                     );
                 }}
@@ -43,7 +65,6 @@ export const Favorites = ({ items }: FavoritesProps) => {
 
 const styles = StyleSheet.create({
     container: {
-        // gap: 16,
         marginBottom: -32
     },
     info: {
