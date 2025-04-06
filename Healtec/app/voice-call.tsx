@@ -1,8 +1,7 @@
-import { Dimensions, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Icon } from "../components/icon";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
-
-const { width } = Dimensions.get("window");
+import Ripple from "react-native-material-ripple";
 
 type Doctor = {
     name: string;
@@ -42,17 +41,21 @@ export const VoiceCallScreen = () => {
                 </View>
             
                 <View style={styles.actionContainer}>
-                    <TouchableOpacity style={styles.iconButton}>
-                        <Icon name="VolumeHighIcon" size={24} color="#fff" />
-                    </TouchableOpacity>
-            
-                    <TouchableOpacity style={styles.hangupButton} onPress={() => navigation.goBack()}>
-                        <Icon name="CallIcon" size={24} color="#fff" />
-                    </TouchableOpacity>
-            
-                    <TouchableOpacity style={styles.iconButton}>
-                        <Icon name="Microphone2Icon" size={24} color="#fff" />
-                    </TouchableOpacity>
+                    <Ripple style={styles.iconButton} rippleContainerBorderRadius={28}>
+                        <Icon name="VolumeHighIcon" size={16} color="#fff" />
+                    </Ripple>
+
+                    <Ripple
+                        rippleContainerBorderRadius={28}
+                        style={styles.hangupButton}
+                        onPress={() => navigation.goBack()}
+                    >
+                        <Icon name="CallIcon" size={24} color="#fff" fill="#FFF" />
+                    </Ripple>
+
+                    <Ripple style={styles.iconButton} rippleContainerBorderRadius={28}>
+                        <Icon name="Microphone2Icon" size={16} color="#fff" />
+                    </Ripple>
                 </View>
             </View>
         </ImageBackground>
@@ -71,27 +74,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingVertical: 40,
         flex: 1
-    },
-    callTimerContainer: {
-      marginTop: 40,
-      width: "100%",
-      alignItems: "flex-end",
-      paddingHorizontal: 20,
-    },
-    callTimerContent: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: "rgba(255,255,255,0.3)",
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 20,
-    },
-    dot: {
-      width: 8,
-      height: 8,
-      backgroundColor: "red",
-      borderRadius: 4,
-      marginRight: 6,
     },
     callTimerText: {
       color: "white",
@@ -116,29 +98,24 @@ const styles = StyleSheet.create({
       lineHeight: 22,
       fontFamily: "Inter_18pt-SemiBold"
     },
-    status: {
-      color: "white",
-      fontSize: 14,
-      opacity: 0.8,
-    },
     actionContainer: {
       flexDirection: "row",
       justifyContent: "space-around",
-      width: width - 80,
       alignItems: "center",
+      gap: 24
     },
     iconButton: {
       backgroundColor: "rgba(255,255,255,0.2)",
-      width: 56,
-      height: 56,
+      width: 40,
+      height: 40,
       borderRadius: 28,
       justifyContent: "center",
       alignItems: "center",
     },
     hangupButton: {
       backgroundColor: "red",
-      width: 72,
-      height: 72,
+      width: 56,
+      height: 56,
       borderRadius: 36,
       justifyContent: "center",
       alignItems: "center",
