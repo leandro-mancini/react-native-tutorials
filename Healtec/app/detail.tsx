@@ -17,6 +17,7 @@ type Doctor = {
     yearsExp: string;
     reviews: string;
     aboutMe: string;
+    isFavorite: boolean;
 };
   
 type DetailRouteParams = {
@@ -44,6 +45,7 @@ export const DetailScreen = () => {
                     name={doctor.name}
                     image={doctor.image}
                     specialty={doctor.specialty}
+                    isFavorite={doctor.isFavorite}
                 />
                 <Experience
                     patients={doctor.patients}

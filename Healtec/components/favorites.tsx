@@ -15,6 +15,7 @@ interface FavoritesProps {
         yearsExp: string;
         reviews: string;
         aboutMe: string;
+        isFavorite: boolean;
     }[];
 }
 

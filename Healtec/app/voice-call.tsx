@@ -1,7 +1,9 @@
-import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Animated, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Icon } from "../components/icon";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import Ripple from "react-native-material-ripple";
+import LottieView from "lottie-react-native";
+import { useEffect, useRef } from "react";
 
 type Doctor = {
     name: string;
@@ -24,6 +26,24 @@ export const VoiceCallScreen = () => {
     const navigation = useNavigation();
     const route = useRoute<RouteProp<DetailRouteParams, "Detail">>();
     const { doctor } = route.params;
+    const pulseAnim = useRef(new Animated.Value(1)).current;
+
+    useEffect(() => {
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(pulseAnim, {
+              toValue: 1.1,
+              duration: 1000,
+              useNativeDriver: true,
+            }),
+            Animated.timing(pulseAnim, {
+              toValue: 1,
+              duration: 1000,
+              useNativeDriver: true,
+            }),
+          ])
+        ).start();
+    }, [pulseAnim]);
     
     return (
         <ImageBackground
@@ -33,10 +53,21 @@ export const VoiceCallScreen = () => {
         >
             <View style={styles.container}>
                 <View style={styles.profileContainer}>
-                    <Image
-                    source={{ uri: doctor.image }}
-                    style={styles.avatar}
-                    />
+                    <View style={styles.avatarContainer}>
+                        <Animated.View style={{ zIndex: 10, transform: [{ scale: pulseAnim }] }}>
+                            <Image
+                                source={{ uri: doctor.image }}
+                                style={styles.avatar}
+                            />
+                        </Animated.View>
+                        <LottieView 
+                            source={require("../assets/animations/voice_call.json")}
+                            autoPlay
+                            loop
+                            duration={2000}
+                            style={styles.voiceCallAnimation}
+                        />
+                    </View>
                     <Text style={styles.name}>{doctor.name}</Text>
                 </View>
             
@@ -84,19 +115,35 @@ const styles = StyleSheet.create({
       alignItems: "center",
       justifyContent: "center",
       flex: 1,
-      gap: 8,
+      gap: 16,
+    },
+    avatarContainer: {
+        position: "relative",
+        width: 100,
+        height: 100
+    },
+    voiceCallAnimation: {
+        width: 100,
+        height: 100,
+        position: "absolute",
+        top: 0,
+        left: 0,
+        zIndex: 1,
+        transform: "scale(2.8)"
     },
     avatar: {
       width: 100,
       height: 100,
       borderRadius: 50,
       borderColor: "white",
+      position: "relative",
+      zIndex: 10,
     },
     name: {
       color: "white",
       fontSize: 20,
       lineHeight: 22,
-      fontFamily: "Inter_18pt-SemiBold"
+      fontFamily: "Inter_18pt-SemiBold",
     },
     actionContainer: {
       flexDirection: "row",
@@ -113,7 +160,7 @@ const styles = StyleSheet.create({
       alignItems: "center",
     },
     hangupButton: {
-      backgroundColor: "red",
+      backgroundColor: "tomato",
       width: 56,
       height: 56,
       borderRadius: 36,

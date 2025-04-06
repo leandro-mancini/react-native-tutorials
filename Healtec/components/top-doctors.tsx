@@ -15,6 +15,7 @@ interface TopDoctorsProps {
         image: string;
         patients: string;
         aboutMe: string;
+        isFavorite: boolean;
     }[];
 }
 
