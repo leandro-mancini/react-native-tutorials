@@ -12,6 +12,10 @@ Cada aplicação neste repositório aborda um cenário específico e demonstra c
 
 [![Dokterian](./Dokterian/cover.png)](./Dokterian)
 
+### 🔹 **2. Healtec**
+
+[![Healtec](./Healtec/cover.png)](./Healtec)
+
 
 ## 🛠️ Como Utilizar
 Cada aplicação neste repositório serve como referência para implementação de funcionalidades no React Native.
