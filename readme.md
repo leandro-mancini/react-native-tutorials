@@ -21,7 +21,7 @@ Cada aplicação neste repositório aborda um cenário específico e demonstra c
 Cada aplicação neste repositório serve como referência para implementação de funcionalidades no React Native.
 1. Clone este repositório:
    ```sh
-   git clone https://github.com/seu-usuario/react-native-tutorials.git
+   git clone https://github.com/leandro-mancini/react-native-tutorials.git
    ```
 2. Acesse a pasta da aplicação desejada e explore o código-fonte.
 3. Utilize as ideias e padrões apresentados para aprimorar seus projetos.
