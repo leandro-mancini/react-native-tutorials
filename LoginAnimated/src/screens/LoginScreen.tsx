@@ -131,7 +131,7 @@ export const LoginScreen: React.FC = () => {
               );
 
               // 4.3) expande para tela cheia (como transição)
-              const expandCfg = { duration: 620, easing: Easing.inOut(Easing.cubic) };
+              const expandCfg = { duration: 300, easing: Easing.inOut(Easing.cubic) };
               w.value = withDelay(100, withTiming(SCREEN_W, expandCfg));
               h.value = withDelay(100, withTiming(SCREEN_H, expandCfg));
               r.value = withDelay(100, withTiming(0, expandCfg));
@@ -139,7 +139,7 @@ export const LoginScreen: React.FC = () => {
 
               // 4.4) (opcional) após a expansão, faça navegação ou reset
               // setTimeout(() => runOnJS(reset)(), 900);
-            }, 700); // <— pausa após o check (ajuste a gosto)
+            }, 2000); // <— pausa após o check (ajuste a gosto)
           }
         }
       )
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   subtitle: { color: 'rgba(255,255,255,0.8)', marginTop: 4, fontSize: 16 },
 
   // IMPORTANTE: flex:1 + center para permitir a expansão a tela cheia
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  center: { alignItems: 'center' },
 
   cardWrapper: {
     borderRadius: 20,
