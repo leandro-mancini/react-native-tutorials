@@ -30,12 +30,13 @@ const TEXT_START_TOP = 100;
 const TEXT_TARGET_TOP = 48;
 const TEXT_LIFT = TEXT_START_TOP - TEXT_TARGET_TOP;
 
-const SOFT_OUT = Easing.bezier(0.16, 1, 0.3, 1);
+const SOFT_OUT = Easing.bezier(.87, 0.02, 0.28, 1);
 
 export const LoginFormScreen: React.FC<Props> = () => {
   // fundo/elementos
-  const slopeTY = useSharedValue(SLOPE_H);
-  const buildingsTY = useSharedValue(SLOPE_H);
+  const slopeTY = useSharedValue(280);
+  const buildingsTY = useSharedValue(0);
+  const treeTY = useSharedValue(0);
   const carTY = useSharedValue(0);
 
   // textos
@@ -56,8 +57,9 @@ export const LoginFormScreen: React.FC<Props> = () => {
   useEffect(() => {
     // base
     slopeTY.value = withTiming(0, { duration: 650, easing: SOFT_OUT });
-    buildingsTY.value = withDelay(200, withTiming(-425, { duration: 700, easing: SOFT_OUT }));
-    carTY.value = withDelay(100, withTiming(-435, { duration: 900, easing: SOFT_OUT }));
+    buildingsTY.value = withDelay(100, withTiming(-310, { duration: 700, easing: SOFT_OUT }));
+    treeTY.value = withDelay(200, withTiming(-310, { duration: 700, easing: SOFT_OUT }));
+    carTY.value = withDelay(0, withTiming(-275, { duration: 900, easing: SOFT_OUT }));
 
     // textos
     headingTX.value = withDelay(120, withTiming(EXIT_DX, { duration: 520, easing: SOFT_OUT }));
@@ -91,7 +93,7 @@ export const LoginFormScreen: React.FC<Props> = () => {
     transform: [{ translateY: buildingsTY.value }, { scale: 1 }, { translateX: -30 }],
   }));
   const treeStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: buildingsTY.value - 20 }, { scale: 1.1 }, { translateX: -30 }],
+    transform: [{ translateY: treeTY.value - 135 }, { scale: 1.1 }, { translateX: -30 }],
   }));
   const carStyle = useAnimatedStyle(() => ({ transform: [{ translateY: carTY.value }] }));
 
@@ -137,7 +139,7 @@ export const LoginFormScreen: React.FC<Props> = () => {
 
       {/* área branca inclinada */}
       <Animated.View style={[styles.whiteWrap, slopeStyle]} pointerEvents="none">
-        <WhiteSlope color="#fff" stretch slope={5} anchor="top" />
+        <WhiteSlope color="#FFF" height={588} slope={30} anchor="bottom" />
       </Animated.View>
 
       {/* carro */}
@@ -207,9 +209,9 @@ const styles = StyleSheet.create({
   welcomeTextSubheading: { fontSize: 16, color: "#333" },
 
   // lottie/white slope
-  whiteWrap: { position: "absolute", bottom: 0, left: -BLEED, right: -BLEED, height: SLOPE_H, overflow: "hidden", zIndex: 5 },
-  buildingsWrap: { width, height: height * 0.5, position: "absolute", bottom: 100, transform: [{ scale: 1.2 }], zIndex: 1 },
-  carWrap: { position: "absolute", bottom: 60, left: -15, width: CAR_W, height: 150, zIndex: 10 },
+  whiteWrap: { position: "absolute", bottom: 0, left: -BLEED, right: -BLEED, height: 588, overflow: "hidden", zIndex: 5 },
+  buildingsWrap: { width, height: height * 0.5, position: "absolute", bottom: 215, transform: [{ scale: 1.2 }], zIndex: 1 },
+  carWrap: { position: "absolute", bottom: 215, left: -15, width: CAR_W, height: 150, zIndex: 10 },
   treeWrap: { position: "absolute", bottom: 30, right: -150, height: 300, width: 300, zIndex: 1 },
 
   // Form

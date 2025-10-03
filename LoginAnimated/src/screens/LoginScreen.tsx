@@ -54,7 +54,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     // base
     slopeTY.value = withTiming(0, { duration: 650, easing: SOFT_OUT });
-    buildingsTY.value = withDelay(200, withTiming(-160, { duration: 700, easing: SOFT_OUT }));
+    buildingsTY.value = withDelay(100, withTiming(-160, { duration: 700, easing: SOFT_OUT }));
     carTY.value = withDelay(0, withTiming(-155, { duration: 900, easing: SOFT_OUT }));
 
     // textos
