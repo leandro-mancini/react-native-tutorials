@@ -55,6 +55,10 @@ export const LandingScreen: React.FC<Props> = ({ navigation }) => {
         <LottieView source={require("../../assets/buildings.json")} autoPlay loop style={StyleSheet.absoluteFill} />
       </Animated.View>
 
+      <Animated.View style={[styles.treeWrap, buildingsStyle]}>
+        <LottieView source={require("../../assets/tree.json")} autoPlay loop={false} style={StyleSheet.absoluteFill} />
+      </Animated.View>
+
       <Animated.View style={[styles.whiteWrap, slopeStyle]} pointerEvents="none">
         <WhiteSlope color="#fff" height={150} slope={30} anchor="bottom" />
       </Animated.View>
@@ -67,9 +71,10 @@ export const LandingScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFD700", justifyContent: "flex-end", alignItems: "stretch" },
-  background: { ...StyleSheet.absoluteFillObject, backgroundColor: "#FFD700" },
+  container: { flex: 1, backgroundColor: "#F6DC00", justifyContent: "flex-end", alignItems: "stretch" },
+  background: { ...StyleSheet.absoluteFillObject, backgroundColor: "#F6DC00" },
   whiteWrap: { position: "absolute", bottom: 0, left: -BLEED, right: -BLEED, height: SLOPE_H, overflow: "hidden", zIndex: 5 },
   buildingsWrap: { width, height: height * 0.5, position: "absolute", bottom: 100, transform: [{ scale: 1.2 }], zIndex: 1 },
   carWrap: { position: "absolute", bottom: 60, left: -15, width: CAR_W, height: 150, zIndex: 10 },
+  treeWrap: { position: "absolute", bottom: 30, right: -150, height: 300, width: 300, zIndex: 1 },
 });

@@ -151,12 +151,10 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
       {/* prédios (sobem) */}
       <Animated.View style={[styles.buildingsWrap, buildingsStyle]}>
         <City style={StyleSheet.absoluteFill} />
-        {/* <LottieView
-          source={require("../../assets/buildings.json")}
-          autoPlay
-          loop
-          style={StyleSheet.absoluteFill}
-        /> */}
+      </Animated.View>
+
+      <Animated.View style={[styles.treeWrap, buildingsStyle]}>
+        <LottieView source={require("../../assets/tree.json")} autoPlay loop={false} style={StyleSheet.absoluteFill} />
       </Animated.View>
 
       {/* carro (sobe) */}
@@ -202,8 +200,8 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFD700", justifyContent: "flex-end", alignItems: "stretch" },
-  background: { ...StyleSheet.absoluteFillObject, backgroundColor: "#FFD700" },
+  container: { flex: 1, backgroundColor: "#F6DC00", justifyContent: "flex-end", alignItems: "stretch" },
+  background: { ...StyleSheet.absoluteFillObject, backgroundColor: "#F6DC00" },
 
   // viewport fixo com a ALTURA FINAL da área branca
   whiteViewport: {
@@ -233,6 +231,8 @@ const styles = StyleSheet.create({
     transform: [{ scale: 1.2 }],
     zIndex: 1,
   },
+
+  treeWrap: { position: "absolute", bottom: 20, right: -150, height: 300, width: 300, zIndex: 1 },
 
   carWrap: {
     position: "absolute",
@@ -265,6 +265,6 @@ const styles = StyleSheet.create({
   btnDark: { backgroundColor: "#111" },
   btnText: { fontSize: 12 },
   btnTextDark: { color: "#050607" },
-  btnTextLight: { color: "#fff" },
+  btnTextLight: { color: "#F6DC00" },
   pressed: { opacity: 0.85 },
 });
