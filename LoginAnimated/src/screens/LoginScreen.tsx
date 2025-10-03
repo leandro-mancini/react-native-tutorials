@@ -180,7 +180,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
         <Animated.View style={[styles.btnWrap, btn1Style]}>
           <Pressable
             style={({ pressed }) => [styles.btn, styles.btnPrimary, pressed && styles.pressed]}
-            onPress={() => {/* fluxo de login real aqui */}}
+            onPress={() => navigation.navigate("LoginForm")}
           >
             <Text style={[styles.btnText, styles.btnTextDark]}>Entrar</Text>
           </Pressable>
@@ -189,7 +189,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
         <Animated.View style={[styles.btnWrap, btn2Style]}>
           <Pressable
             style={({ pressed }) => [styles.btn, styles.btnDark, pressed && styles.pressed]}
-            onPress={() => navigation.navigate("SignUp")}
+            onPress={() => {}}
           >
             <Text style={[styles.btnText, styles.btnTextLight]}>Criar conta</Text>
           </Pressable>
