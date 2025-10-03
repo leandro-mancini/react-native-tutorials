@@ -24,58 +24,69 @@ const SLOPE_H = Math.round(height * 0.38);
 const CAR_W = 150;
 const BLEED = 40;
 
-// onde o container de texto começa (igual à Landing)
 const TEXT_START_TOP = 100;
-// para onde queremos levar (topo próximo do statusbar)
 const TEXT_TARGET_TOP = 48;
-// quanto o texto precisa subir
 const TEXT_LIFT = TEXT_START_TOP - TEXT_TARGET_TOP;
 
-// easing suave
 const SOFT_OUT = Easing.bezier(0.16, 1, 0.3, 1);
 
 export const LoginScreen: React.FC<Props> = ({ navigation }) => {
-  // animações já existentes
+  // fundo/elementos
   const slopeTY = useSharedValue(SLOPE_H);
-  const buildingsTY = useSharedValue(SLOPE_H * 0.5 + 60);
-  const carTX = useSharedValue(-CAR_W - 32);
+  const buildingsTY = useSharedValue(SLOPE_H);
+  const carTY = useSharedValue(0);
 
-  // textos: começam do ponto final da Landing (0) e sobem para o topo (-TEXT_LIFT)
+  // textos
   const headingTY = useSharedValue(0);
   const headingOP = useSharedValue(1);
   const subTY = useSharedValue(0);
   const subOP = useSharedValue(1);
 
+  // botões (stagger)
+  const btn1TY = useSharedValue(20);
+  const btn1OP = useSharedValue(0);
+  const btn1SC = useSharedValue(0.98);
+
+  const btn2TY = useSharedValue(20);
+  const btn2OP = useSharedValue(0);
+  const btn2SC = useSharedValue(0.98);
+
   useEffect(() => {
-    // área branca / prédios / carro (como antes)
+    // base
     slopeTY.value = withTiming(0, { duration: 650, easing: SOFT_OUT });
-    buildingsTY.value = withDelay(200, withTiming(0, { duration: 700, easing: SOFT_OUT }));
-    carTX.value = withDelay(300, withTiming(0, { duration: 900, easing: SOFT_OUT }));
+    buildingsTY.value = withDelay(200, withTiming(-160, { duration: 700, easing: SOFT_OUT }));
+    carTY.value = withDelay(100, withTiming(-155, { duration: 900, easing: SOFT_OUT }));
 
-    // textos sobem para o topo (heading primeiro, sub depois)
-    headingTY.value = withDelay(
-      120,
-      withTiming(-TEXT_LIFT, { duration: 700, easing: SOFT_OUT })
-    );
-    headingOP.value = 1; // mantém visível (sem fade)
+    // textos
+    headingTY.value = withDelay(120, withTiming(-TEXT_LIFT, { duration: 700, easing: SOFT_OUT }));
+    subTY.value     = withDelay(280, withTiming(-TEXT_LIFT, { duration: 700, easing: SOFT_OUT }));
 
-    subTY.value = withDelay(
-      280, // entra após o heading
-      withTiming(-TEXT_LIFT, { duration: 700, easing: SOFT_OUT })
-    );
-    subOP.value = 1;
+    // botões: entram depois do movimento principal
+    const BASE = 900; // comece após carro/prédios
+    const GAP  = 140; // intervalo entre botões
 
-    // se houver navegação para outro step, faça depois que as animações terminarem
-    // const t = setTimeout(() => navigation.replace("LoginForm"), 1400);
-    // return () => clearTimeout(t);
-  }, [slopeTY, buildingsTY, carTX, headingTY, subTY, headingOP, subOP]);
+    // btn 1
+    btn1TY.value = withDelay(BASE, withTiming(0, { duration: 420, easing: SOFT_OUT }));
+    btn1OP.value = withDelay(BASE, withTiming(1, { duration: 360 }));
+    btn1SC.value = withDelay(BASE, withTiming(1, { duration: 420, easing: SOFT_OUT }));
 
-  // estilos animados
+    // btn 2
+    btn2TY.value = withDelay(BASE + GAP, withTiming(0, { duration: 420, easing: SOFT_OUT }));
+    btn2OP.value = withDelay(BASE + GAP, withTiming(1, { duration: 360 }));
+    btn2SC.value = withDelay(BASE + GAP, withTiming(1, { duration: 420, easing: SOFT_OUT }));
+  }, [
+    slopeTY, buildingsTY, carTY,
+    headingTY, subTY,
+    btn1TY, btn1OP, btn1SC,
+    btn2TY, btn2OP, btn2SC
+  ]);
+
+  // animated styles
   const slopeStyle = useAnimatedStyle(() => ({ transform: [{ translateY: slopeTY.value }] }));
   const buildingsStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: buildingsTY.value }, { scale: 1.1 }, { translateX: -16 }],
   }));
-  const carStyle = useAnimatedStyle(() => ({ transform: [{ translateX: carTX.value }] }));
+  const carStyle = useAnimatedStyle(() => ({ transform: [{ translateY: carTY.value }] }));
 
   const headingStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: headingTY.value }],
@@ -86,11 +97,20 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
     opacity: subOP.value,
   }));
 
+  const btn1Style = useAnimatedStyle(() => ({
+    transform: [{ translateY: btn1TY.value }, { scale: btn1SC.value }],
+    opacity: btn1OP.value,
+  }));
+  const btn2Style = useAnimatedStyle(() => ({
+    transform: [{ translateY: btn2TY.value }, { scale: btn2SC.value }],
+    opacity: btn2OP.value,
+  }));
+
   return (
     <View style={styles.container}>
       <View style={styles.background} />
 
-      {/* textos de boas-vindas: começam onde terminaram na Landing e sobem */}
+      {/* textos */}
       <View style={styles.welcomeTextContainer}>
         <Animated.Text style={[styles.welcomeTextHeading, headingStyle]}>
           Bem-vindo!
@@ -120,13 +140,13 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
         <Car />
       </Animated.View>
 
-      {/* CTAs (stagger) */}
+      {/* CTAs (stagger bottom→top + fade) */}
       <View style={styles.ctaWrap}>
-        <Animated.View style={[styles.btnWrap]}>
+        <Animated.View style={[styles.btnWrap, btn1Style]}>
           <ButtonPrimary text="Entrar" onPress={() => navigation.replace("LoginForm")} />
         </Animated.View>
 
-        <Animated.View style={[styles.btnWrap]}>
+        <Animated.View style={[styles.btnWrap, btn2Style]}>
           <ButtonSecondary text="Criar conta" onPress={() => navigation.replace("LoginForm")} />
         </Animated.View>
       </View>
@@ -151,5 +171,5 @@ const styles = StyleSheet.create({
 
   // CTAs
   ctaWrap: { position: "absolute", left: 24, right: 24, bottom: 60, gap: 14, zIndex: 20 },
-  btnWrap: {},
+  btnWrap: {}, // wrapper animável por botão
 });
