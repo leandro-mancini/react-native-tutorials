@@ -12,7 +12,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { WhiteSlope } from "../components/WhiteSlope";
 import type { RootStackParamList } from "../navigation";
-import { Buildings } from "../components/Buildings";
+import { City } from "../components/City";
 import { Tree } from "../components/Tree";
 import { Car } from "../components/car";
 
@@ -99,7 +99,7 @@ export const LandingScreen: React.FC<Props> = ({ navigation }) => {
 
       {/* prédios */}
       <Animated.View style={[styles.buildingsWrap, buildingsStyle]}>
-        <Buildings />
+        <City />
       </Animated.View>
 
       {/* árvore (se tiver) */}

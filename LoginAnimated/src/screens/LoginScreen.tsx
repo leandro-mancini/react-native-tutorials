@@ -12,6 +12,9 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { WhiteSlope } from "../components/WhiteSlope";
 import type { RootStackParamList } from "../navigation";
+import { Car } from "../components/car";
+import { Tree } from "../components/Tree";
+import { City } from "../components/City";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
@@ -29,28 +32,6 @@ const CAR_LIFT = 170;
 
 const CAR_W = 150;
 const BLEED = 40;
-
-const City = ({style}: any) => {
-  const cityRef = useRef<LottieView>(null);
-
-  useEffect(() => {
-    cityRef.current?.play(); // começa do início
-    const t = setTimeout(() => {
-      cityRef.current?.pause(); // pausa no ponto atual (≈ N segundos depois)
-    }, 4500); // 4.5s
-    return () => clearTimeout(t);
-  }, []);
-
-  return (
-    <LottieView
-      ref={cityRef}
-      source={require("../../assets/buildings.json")}
-      autoPlay={true}
-      loop={false}
-      style={style}
-    />
-  );
-};
 
 export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   // --- Área branca em slide: começa mostrando SLOPE_H e revela até TARGET_SLOPE_H
@@ -154,17 +135,12 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
       </Animated.View>
 
       <Animated.View style={[styles.treeWrap, buildingsStyle]}>
-        <LottieView source={require("../../assets/tree.json")} autoPlay loop={false} style={StyleSheet.absoluteFill} />
+        <Tree />
       </Animated.View>
 
       {/* carro (sobe) */}
       <Animated.View style={[styles.carWrap, carStyle]}>
-        <LottieView
-          source={require("../../assets/car.json")}
-          autoPlay
-          loop
-          style={StyleSheet.absoluteFill}
-        />
+        <Car />
       </Animated.View>
 
       {/* ===== Área branca com TOPO INCLINADO em SLIDE ===== */}
