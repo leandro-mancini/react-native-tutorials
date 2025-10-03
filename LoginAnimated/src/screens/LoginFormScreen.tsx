@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet, Dimensions, Text } from "react-native";
+import { View, StyleSheet, Dimensions, Text, Pressable, TextInput } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -44,14 +44,14 @@ export const LoginFormScreen: React.FC<Props> = () => {
   const subTX = useSharedValue(0);
   const subOP = useSharedValue(1);
 
-  // botões (stagger)
-  const btn1TY = useSharedValue(20);
-  const btn1OP = useSharedValue(0);
-  const btn1SC = useSharedValue(0.98);
-
-  const btn2TY = useSharedValue(20);
-  const btn2OP = useSharedValue(0);
-  const btn2SC = useSharedValue(0.98);
+  // form
+  const f1TY = useSharedValue(16), f1OP = useSharedValue(0);
+  const f2TY = useSharedValue(16), f2OP = useSharedValue(0);
+  const f3TY = useSharedValue(16), f3OP = useSharedValue(0); // forgot
+  const f4TY = useSharedValue(16), f4OP = useSharedValue(0); // login button
+  const f5TY = useSharedValue(16), f5OP = useSharedValue(0); // divider
+  const f6TY = useSharedValue(16), f6OP = useSharedValue(0); // signup button
+  
 
   useEffect(() => {
     // base
@@ -66,25 +66,23 @@ export const LoginFormScreen: React.FC<Props> = () => {
     subTX.value = withDelay(280, withTiming(EXIT_DX, { duration: 520, easing: SOFT_OUT }));
     subOP.value = withDelay(140, withTiming(0, { duration: 500, easing: SOFT_OUT }));
 
-    // botões: entram depois do movimento principal
-    const BASE = 900; // comece após carro/prédios
-    const GAP  = 140; // intervalo entre botões
-
-    // btn 1
-    btn1TY.value = withDelay(BASE, withTiming(0, { duration: 420, easing: SOFT_OUT }));
-    btn1OP.value = withDelay(BASE, withTiming(1, { duration: 360 }));
-    btn1SC.value = withDelay(BASE, withTiming(1, { duration: 420, easing: SOFT_OUT }));
-
-    // btn 2
-    btn2TY.value = withDelay(BASE + GAP, withTiming(0, { duration: 420, easing: SOFT_OUT }));
-    btn2OP.value = withDelay(BASE + GAP, withTiming(1, { duration: 360 }));
-    btn2SC.value = withDelay(BASE + GAP, withTiming(1, { duration: 420, easing: SOFT_OUT }));
+    // form
+    const BASE = 700, GAP = 110;
+    const enter = (ty: any, op: any, d: number) => {
+      ty.value = withDelay(BASE + d, withTiming(0, { duration: 380, easing: Easing.out(Easing.cubic) }));
+      op.value = withDelay(BASE + d, withTiming(1, { duration: 340 }));
+    };
+    enter(f1TY, f1OP, 0);          // email
+    enter(f2TY, f2OP, GAP);        // password
+    enter(f3TY, f3OP, GAP * 2);    // forgot
+    enter(f4TY, f4OP, GAP * 3);    // login btn
+    enter(f5TY, f5OP, GAP * 4);    // divider
+    enter(f6TY, f6OP, GAP * 5);    // signup btn
+    
   }, [
     slopeTY, buildingsTY, carTY,
     headingTX, headingOP,
     subTX, subOP,
-    btn1TY, btn1OP, btn1SC,
-    btn2TY, btn2OP, btn2SC
   ]);
 
   // animated styles
@@ -106,14 +104,12 @@ export const LoginFormScreen: React.FC<Props> = () => {
     opacity: subOP.value,
   }));
 
-  const btn1Style = useAnimatedStyle(() => ({
-    transform: [{ translateY: btn1TY.value }, { scale: btn1SC.value }],
-    opacity: btn1OP.value,
-  }));
-  const btn2Style = useAnimatedStyle(() => ({
-    transform: [{ translateY: btn2TY.value }, { scale: btn2SC.value }],
-    opacity: btn2OP.value,
-  }));
+  const s1 = useAnimatedStyle(() => ({ transform: [{ translateY: f1TY.value }], opacity: f1OP.value }));
+  const s2 = useAnimatedStyle(() => ({ transform: [{ translateY: f2TY.value }], opacity: f2OP.value }));
+  const s3 = useAnimatedStyle(() => ({ transform: [{ translateY: f3TY.value }], opacity: f3OP.value }));
+  const s4 = useAnimatedStyle(() => ({ transform: [{ translateY: f4TY.value }], opacity: f4OP.value }));
+  const s5 = useAnimatedStyle(() => ({ transform: [{ translateY: f5TY.value }], opacity: f5OP.value }));
+  const s6 = useAnimatedStyle(() => ({ transform: [{ translateY: f6TY.value }], opacity: f6OP.value }));
 
   return (
     <View style={styles.container}>
@@ -149,14 +145,52 @@ export const LoginFormScreen: React.FC<Props> = () => {
         <Car />
       </Animated.View>
 
-      {/* CTAs (stagger bottom→top + fade) */}
-      <View style={styles.ctaWrap}>
-        <Animated.View style={[styles.btnWrap, btn1Style]}>
-          <ButtonPrimary text="Entrar" onPress={() => {}} />
+      {/* Form */}
+      <View style={styles.form}>
+        <View style={{ flex: 1 }}>
+            <Animated.View style={s1}>
+                <View style={styles.inputRow}>
+                    <Text style={styles.icon}>✉️</Text>
+                    <TextInput
+                      placeholder="Email"
+                      placeholderTextColor="#777"
+                      style={styles.input}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                    />
+                    <Text style={styles.suffix}>✓</Text>
+                </View>
+                <View style={styles.underlineYellow} />
+            </Animated.View>
+
+            <Animated.View style={[{ marginTop: 18 }, s2]}>
+                <View style={styles.inputRow}>
+                    <Text style={styles.icon}>🔒</Text>
+                    <TextInput placeholder="Password" secureTextEntry placeholderTextColor="#777" style={styles.input} />
+                    <Text style={styles.suffix}>👁️</Text>
+                </View>
+                <View style={styles.underline} />
+            </Animated.View>
+
+            <Animated.View style={[{ alignItems: "flex-end", marginTop: 10 }, s3]}>
+                <Pressable onPress={() => {}}>
+                    <Text style={styles.forgot}>Forgot password?</Text>
+                </Pressable>
+            </Animated.View>
+
+            <Animated.View style={[{ marginTop: 22 }, s4]}>
+              <ButtonPrimary text="Entrar" onPress={() => { /* autenticar */ }} />
+            </Animated.View>
+        </View>
+
+        <Animated.View style={[styles.dividerWrap, s5]}>
+          <View style={styles.divider} />
+          <Text style={{ color: "#bbb", marginHorizontal: 10 }}>ou</Text>
+          <View style={styles.divider} />
         </Animated.View>
 
-        <Animated.View style={[styles.btnWrap, btn2Style]}>
-          <ButtonSecondary text="Criar conta" onPress={() => {}} />
+        <Animated.View style={[s6]}>
+          <ButtonSecondary text="Criar conta" onPress={() => { /* ir para signup */ }} />
         </Animated.View>
       </View>
     </View>
@@ -178,7 +212,15 @@ const styles = StyleSheet.create({
   carWrap: { position: "absolute", bottom: 60, left: -15, width: CAR_W, height: 150, zIndex: 10 },
   treeWrap: { position: "absolute", bottom: 30, right: -150, height: 300, width: 300, zIndex: 1 },
 
-  // CTAs
-  ctaWrap: { position: "absolute", left: 24, right: 24, bottom: 60, gap: 14, zIndex: 20 },
-  btnWrap: {}, // wrapper animável por botão
+  // Form
+  form: { position: "absolute", left: 24, right: 24, bottom: 24, zIndex: 5, display: 'flex', flexDirection: 'column', height: 380 },
+  inputRow: { height: 46, flexDirection: "row", alignItems: "center", gap: 10, },
+  icon: { width: 22, textAlign: "center", fontSize: 16 },
+  input: { flex: 1, fontSize: 16, color: "#111" },
+  suffix: { width: 22, textAlign: "center", fontSize: 16, color: "#111" },
+  underlineYellow: { height: 2, backgroundColor: "#FFD700" },
+  underline: { height: 1, backgroundColor: "#111" },
+  forgot: { color: "#FFD700" },
+  dividerWrap: { marginVertical: 18, flexDirection: "row", alignItems: "center", justifyContent: "center", },
+  divider: { flex: 1, height: 1, backgroundColor: "#E6E6E6" },
 });
