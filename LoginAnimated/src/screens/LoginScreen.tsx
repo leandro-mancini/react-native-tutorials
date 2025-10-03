@@ -38,9 +38,14 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const buildingsTY = useSharedValue(0);
   const carTY = useSharedValue(0);
 
-  // CTAs
-  const ctaTY = useSharedValue(16);
-  const ctaOP = useSharedValue(0);
+  // Botões (stagger: btn1 entra, depois btn2)
+  const btn1TY = useSharedValue(16);
+  const btn1OP = useSharedValue(0);
+  const btn1SC = useSharedValue(0.98);
+
+  const btn2TY = useSharedValue(16);
+  const btn2OP = useSharedValue(0);
+  const btn2SC = useSharedValue(0.98);
 
   useEffect(() => {
     // 1) Área branca: slide de baixo para cima
@@ -67,13 +72,32 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
       })
     );
 
-    // 4) CTAs
-    ctaTY.value = withDelay(
-      700,
-      withTiming(0, { duration: 450, easing: Easing.out(Easing.cubic) })
+    // 4) Stagger de botões
+    const BASE = 700;     // começa depois da transição principal
+    const GAP = 140;      // atraso entre os botões
+
+    // Botão 1
+    btn1TY.value = withDelay(
+      BASE,
+      withTiming(0, { duration: 420, easing: Easing.out(Easing.cubic) })
     );
-    ctaOP.value = withDelay(700, withTiming(1, { duration: 400 }));
-  }, [whiteTY, buildingsTY, carTY, ctaTY, ctaOP]);
+    btn1OP.value = withDelay(BASE, withTiming(1, { duration: 380 }));
+    btn1SC.value = withDelay(
+      BASE,
+      withTiming(1, { duration: 420, easing: Easing.out(Easing.cubic) })
+    );
+
+    // Botão 2 (entra depois)
+    btn2TY.value = withDelay(
+      BASE + GAP,
+      withTiming(0, { duration: 420, easing: Easing.out(Easing.cubic) })
+    );
+    btn2OP.value = withDelay(BASE + GAP, withTiming(1, { duration: 380 }));
+    btn2SC.value = withDelay(
+      BASE + GAP,
+      withTiming(1, { duration: 420, easing: Easing.out(Easing.cubic) })
+    );
+  }, [whiteTY, buildingsTY, carTY, btn1TY, btn1OP, btn1SC, btn2TY, btn2OP, btn2SC]);
 
   // animated styles
   const whiteSlideStyle = useAnimatedStyle(() => ({
@@ -88,9 +112,14 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
     transform: [{ translateY: carTY.value }],
   }));
 
-  const ctaStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: ctaTY.value }],
-    opacity: ctaOP.value,
+  const btn1Style = useAnimatedStyle(() => ({
+    transform: [{ translateY: btn1TY.value }, { scale: btn1SC.value }],
+    opacity: btn1OP.value,
+  }));
+
+  const btn2Style = useAnimatedStyle(() => ({
+    transform: [{ translateY: btn2TY.value }, { scale: btn2SC.value }],
+    opacity: btn2OP.value,
   }));
 
   return (
@@ -120,34 +149,31 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
       {/* ===== Área branca com TOPO INCLINADO em SLIDE ===== */}
       <View style={styles.whiteViewport} pointerEvents="none">
         <Animated.View style={[styles.whiteSlide, whiteSlideStyle]}>
-          {/* IMPORTANTE: sem background aqui; o WhiteSlope pinta tudo em branco com topo inclinado */}
-          {/* <WhiteSlope
-            color="#fff"
-            slope={30}
-            bleed={BLEED}
-            anchor="top"
-            stretch
-          /> */}
+          {/* WhiteSlope pinta o branco e define a inclinação do topo */}
           <WhiteSlope color="#fff" stretch slope={5} anchor="top" />
         </Animated.View>
       </View>
 
-      {/* CTAs */}
-      <Animated.View style={[styles.ctaWrap, ctaStyle]}>
-        <Pressable
-          style={({ pressed }) => [styles.btn, styles.btnDark, pressed && styles.pressed]}
-          onPress={() => {/* fluxo de login real aqui */}}
-        >
-          <Text style={[styles.btnText, styles.btnTextLight]}>Entrar</Text>
-        </Pressable>
+      {/* CTAs (stagger) */}
+      <View style={styles.ctaWrap}>
+        <Animated.View style={[styles.btnWrap, btn1Style]}>
+          <Pressable
+            style={({ pressed }) => [styles.btn, styles.btnPrimary, pressed && styles.pressed]}
+            onPress={() => {/* fluxo de login real aqui */}}
+          >
+            <Text style={[styles.btnText, styles.btnTextDark]}>Entrar</Text>
+          </Pressable>
+        </Animated.View>
 
-        <Pressable
-          style={({ pressed }) => [styles.btn, styles.btnPrimary, pressed && styles.pressed]}
-          onPress={() => navigation.navigate("SignUp")}
-        >
-          <Text style={[styles.btnText, styles.btnTextDark]}>Criar conta</Text>
-        </Pressable>
-      </Animated.View>
+        <Animated.View style={[styles.btnWrap, btn2Style]}>
+          <Pressable
+            style={({ pressed }) => [styles.btn, styles.btnDark, pressed && styles.pressed]}
+            onPress={() => navigation.navigate("SignUp")}
+          >
+            <Text style={[styles.btnText, styles.btnTextLight]}>Criar conta</Text>
+          </Pressable>
+        </Animated.View>
+      </View>
     </View>
   );
 };
@@ -162,19 +188,18 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: -BLEED,
     right: -BLEED,
-    height: 345,
+    height: 345, // ou TARGET_SLOPE_H se preferir diretamente
     overflow: "hidden",
     zIndex: 5,
   },
 
-  // conteúdo que desliza (AGORA sem background!)
+  // conteúdo que desliza (sem background)
   whiteSlide: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     height: TARGET_SLOPE_H,
-    // backgroundColor: "#fff",  // <- remova/DEIXE TRANSPARENTE para a inclinação aparecer
   },
 
   buildingsWrap: {
@@ -195,28 +220,28 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
 
+  // ===== CTAs =====
   ctaWrap: {
     position: "absolute",
     left: 24,
     right: 24,
-    bottom: 24,
-    gap: 12,
-    zIndex: 5,
+    bottom: 60,
+    gap: 14,
+    zIndex: 20,
+  },
+  btnWrap: {
+    // wrapper animável por botão
   },
   btn: {
-    height: 52,
-    borderRadius: 12,
+    height: 48,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
   },
-  btnPrimary: { backgroundColor: "#FFD700" },
+  btnPrimary: { backgroundColor: "#F6DC00" },
   btnDark: { backgroundColor: "#111" },
-  btnText: { fontSize: 16, fontWeight: "600" },
-  btnTextDark: { color: "#111" },
+  btnText: { fontSize: 12 },
+  btnTextDark: { color: "#050607" },
   btnTextLight: { color: "#fff" },
   pressed: { opacity: 0.85 },
 });
