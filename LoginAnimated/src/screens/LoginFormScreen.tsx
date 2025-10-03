@@ -56,15 +56,15 @@ export const LoginFormScreen: React.FC<Props> = () => {
   useEffect(() => {
     // base
     slopeTY.value = withTiming(0, { duration: 650, easing: SOFT_OUT });
-    buildingsTY.value = withDelay(200, withTiming(-160, { duration: 700, easing: SOFT_OUT }));
-    carTY.value = withDelay(100, withTiming(-155, { duration: 900, easing: SOFT_OUT }));
+    buildingsTY.value = withDelay(200, withTiming(-425, { duration: 700, easing: SOFT_OUT }));
+    carTY.value = withDelay(100, withTiming(-435, { duration: 900, easing: SOFT_OUT }));
 
     // textos
     headingTX.value = withDelay(120, withTiming(EXIT_DX, { duration: 520, easing: SOFT_OUT }));
-    headingOP.value = withDelay(120, withTiming(0, { duration: 500, easing: SOFT_OUT }));
+    headingOP.value = withDelay(60, withTiming(0, { duration: 500, easing: SOFT_OUT }));
 
     subTX.value = withDelay(280, withTiming(EXIT_DX, { duration: 520, easing: SOFT_OUT }));
-    subOP.value = withDelay(280, withTiming(0, { duration: 500, easing: SOFT_OUT }));
+    subOP.value = withDelay(140, withTiming(0, { duration: 500, easing: SOFT_OUT }));
 
     // botões: entram depois do movimento principal
     const BASE = 900; // comece após carro/prédios
@@ -90,7 +90,10 @@ export const LoginFormScreen: React.FC<Props> = () => {
   // animated styles
   const slopeStyle = useAnimatedStyle(() => ({ transform: [{ translateY: slopeTY.value }] }));
   const buildingsStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: buildingsTY.value }, { scale: 1.1 }, { translateX: -16 }],
+    transform: [{ translateY: buildingsTY.value }, { scale: 1 }, { translateX: -30 }],
+  }));
+  const treeStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: buildingsTY.value - 20 }, { scale: 1.1 }, { translateX: -30 }],
   }));
   const carStyle = useAnimatedStyle(() => ({ transform: [{ translateY: carTY.value }] }));
 
@@ -132,7 +135,7 @@ export const LoginFormScreen: React.FC<Props> = () => {
       </Animated.View>
 
       {/* árvore */}
-      <Animated.View style={[styles.treeWrap, buildingsStyle]}>
+      <Animated.View style={[styles.treeWrap, treeStyle]}>
         <Tree />
       </Animated.View>
 
