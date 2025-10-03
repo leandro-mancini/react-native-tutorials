@@ -12,6 +12,9 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { WhiteSlope } from "../components/WhiteSlope";
 import type { RootStackParamList } from "../navigation";
+import { Buildings } from "../components/Buildings";
+import { Tree } from "../components/Tree";
+import { Car } from "../components/car";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Landing">;
 
@@ -56,7 +59,7 @@ export const LandingScreen: React.FC<Props> = ({ navigation }) => {
 
     // timeout opcional para navegar
     const t = setTimeout(() => {
-      // navigation.replace("Login");
+      navigation.replace("Login");
     }, 4500);
     return () => clearTimeout(t);
   }, [navigation, slopeTY, buildingsTY, carTX, headingTX, headingOP, subTX, subOP]);
@@ -96,22 +99,12 @@ export const LandingScreen: React.FC<Props> = ({ navigation }) => {
 
       {/* prédios */}
       <Animated.View style={[styles.buildingsWrap, buildingsStyle]}>
-        <LottieView
-          source={require("../../assets/buildings.json")}
-          autoPlay
-          loop
-          style={StyleSheet.absoluteFill}
-        />
+        <Buildings />
       </Animated.View>
 
       {/* árvore (se tiver) */}
       <Animated.View style={[styles.treeWrap, buildingsStyle]}>
-        <LottieView
-          source={require("../../assets/tree.json")}
-          autoPlay
-          loop={false}
-          style={StyleSheet.absoluteFill}
-        />
+        <Tree />
       </Animated.View>
 
       {/* área branca inclinada */}
@@ -121,12 +114,7 @@ export const LandingScreen: React.FC<Props> = ({ navigation }) => {
 
       {/* carro */}
       <Animated.View style={[styles.carWrap, carStyle]}>
-        <LottieView
-          source={require("../../assets/car.json")}
-          autoPlay
-          loop
-          style={StyleSheet.absoluteFill}
-        />
+        <Car />
       </Animated.View>
     </View>
   );
