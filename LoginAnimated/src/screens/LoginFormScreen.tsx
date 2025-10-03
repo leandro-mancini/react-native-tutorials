@@ -25,6 +25,7 @@ const SLOPE_H = Math.round(height * 0.75);
 const CAR_W = 150;
 const BLEED = 40;
 
+const EXIT_DX = -width * 0.6;
 const TEXT_START_TOP = 100;
 const TEXT_TARGET_TOP = 48;
 const TEXT_LIFT = TEXT_START_TOP - TEXT_TARGET_TOP;
@@ -38,9 +39,9 @@ export const LoginFormScreen: React.FC<Props> = () => {
   const carTY = useSharedValue(0);
 
   // textos
-  const headingTY = useSharedValue(0);
+  const headingTX = useSharedValue(0);
   const headingOP = useSharedValue(1);
-  const subTY = useSharedValue(0);
+  const subTX = useSharedValue(0);
   const subOP = useSharedValue(1);
 
   // botões (stagger)
@@ -59,8 +60,11 @@ export const LoginFormScreen: React.FC<Props> = () => {
     carTY.value = withDelay(100, withTiming(-155, { duration: 900, easing: SOFT_OUT }));
 
     // textos
-    headingTY.value = withDelay(120, withTiming(-TEXT_LIFT, { duration: 700, easing: SOFT_OUT }));
-    subTY.value     = withDelay(280, withTiming(-TEXT_LIFT, { duration: 700, easing: SOFT_OUT }));
+    headingTX.value = withDelay(120, withTiming(EXIT_DX, { duration: 520, easing: SOFT_OUT }));
+    headingOP.value = withDelay(120, withTiming(0, { duration: 500, easing: SOFT_OUT }));
+
+    subTX.value = withDelay(280, withTiming(EXIT_DX, { duration: 520, easing: SOFT_OUT }));
+    subOP.value = withDelay(280, withTiming(0, { duration: 500, easing: SOFT_OUT }));
 
     // botões: entram depois do movimento principal
     const BASE = 900; // comece após carro/prédios
@@ -77,7 +81,8 @@ export const LoginFormScreen: React.FC<Props> = () => {
     btn2SC.value = withDelay(BASE + GAP, withTiming(1, { duration: 420, easing: SOFT_OUT }));
   }, [
     slopeTY, buildingsTY, carTY,
-    headingTY, subTY,
+    headingTX, headingOP,
+    subTX, subOP,
     btn1TY, btn1OP, btn1SC,
     btn2TY, btn2OP, btn2SC
   ]);
@@ -90,11 +95,11 @@ export const LoginFormScreen: React.FC<Props> = () => {
   const carStyle = useAnimatedStyle(() => ({ transform: [{ translateY: carTY.value }] }));
 
   const headingStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: headingTY.value }],
+    transform: [{ translateY: -TEXT_LIFT }, { translateX: headingTX.value }],
     opacity: headingOP.value,
   }));
   const subStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: subTY.value }],
+    transform: [{ translateY: -TEXT_LIFT }, { translateX: subTX.value }],
     opacity: subOP.value,
   }));
 
