@@ -74,20 +74,20 @@ export const LoginFormScreen: React.FC<Props> = () => {
 
   useEffect(() => {
     // 1) branco termina de subir (slide)
-    whiteTY.value = withTiming(0, { duration: 650, easing: Easing.out(Easing.cubic) });
+    whiteTY.value = withTiming(0, { duration: 1500, easing: Easing.out(Easing.in(Easing.cubic)) });
 
     // 2) cidade/carro continuam a subir (pequeno ajuste) + city scale volta pra 1
     buildingsTY.value = withDelay(
       80,
-      withTiming(-(PREV_BUILDINGS_LIFT + EXTRA_BUILDINGS_LIFT), { duration: 600, easing: Easing.out(Easing.cubic) })
+      withTiming(-(PREV_BUILDINGS_LIFT + EXTRA_BUILDINGS_LIFT), { duration: 1650, easing: Easing.out(Easing.cubic) })
     );
     carTY.value = withDelay(
       80,
-      withTiming(-(PREV_CAR_LIFT + EXTRA_CAR_LIFT), { duration: 600, easing: Easing.out(Easing.cubic) })
+      withTiming(-(PREV_CAR_LIFT + EXTRA_CAR_LIFT), { duration: 1650, easing: Easing.out(Easing.cubic) })
     );
     buildingsScale.value = withDelay(
       80,
-      withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) })
+      withTiming(1, { duration: 1650, easing: Easing.out(Easing.cubic) })
     );
 
     // 3) formulário entra com stagger
@@ -140,48 +140,51 @@ export const LoginFormScreen: React.FC<Props> = () => {
       {/* área branca com topo inclinado (slide) */}
       <View style={styles.whiteViewport} pointerEvents="none">
         <Animated.View style={[styles.whiteSlide, whiteSlideStyle]}>
-          <WhiteSlope color="#fff" stretch slope={0} anchor="top" />
+          {/* <WhiteSlope color="#fff" stretch slope={0} anchor="top" /> */}
+          <WhiteSlope color="#fff" stretch slope={5} anchor="top" />
         </Animated.View>
       </View>
 
       {/* ======= FORM ======= */}
       <View style={styles.form}>
-        <Animated.View style={s1}>
-          <View style={styles.inputRow}>
-            <Text style={styles.icon}>✉️</Text>
-            <TextInput
-              placeholder="Email"
-              defaultValue="uixdesign.me@gmail.com"
-              placeholderTextColor="#777"
-              style={styles.input}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            <Text style={styles.suffix}>✓</Text>
-          </View>
-          <View style={styles.underlineYellow} />
-        </Animated.View>
+        <View style={{ flex: 1 }}>
+            <Animated.View style={s1}>
+                <View style={styles.inputRow}>
+                    <Text style={styles.icon}>✉️</Text>
+                    <TextInput
+                    placeholder="Email"
+                    defaultValue="uixdesign.me@gmail.com"
+                    placeholderTextColor="#777"
+                    style={styles.input}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    />
+                    <Text style={styles.suffix}>✓</Text>
+                </View>
+                <View style={styles.underlineYellow} />
+            </Animated.View>
 
-        <Animated.View style={[{ marginTop: 18 }, s2]}>
-          <View style={styles.inputRow}>
-            <Text style={styles.icon}>🔒</Text>
-            <TextInput placeholder="Password" secureTextEntry placeholderTextColor="#777" style={styles.input} />
-            <Text style={styles.suffix}>👁️</Text>
-          </View>
-          <View style={styles.underline} />
-        </Animated.View>
+            <Animated.View style={[{ marginTop: 18 }, s2]}>
+                <View style={styles.inputRow}>
+                    <Text style={styles.icon}>🔒</Text>
+                    <TextInput placeholder="Password" secureTextEntry placeholderTextColor="#777" style={styles.input} />
+                    <Text style={styles.suffix}>👁️</Text>
+                </View>
+                <View style={styles.underline} />
+            </Animated.View>
 
-        <Animated.View style={[{ alignItems: "flex-end", marginTop: 10 }, s3]}>
-          <Pressable onPress={() => {}}>
-            <Text style={styles.forgot}>Forgot password?</Text>
-          </Pressable>
-        </Animated.View>
+            <Animated.View style={[{ alignItems: "flex-end", marginTop: 10 }, s3]}>
+                <Pressable onPress={() => {}}>
+                    <Text style={styles.forgot}>Forgot password?</Text>
+                </Pressable>
+            </Animated.View>
 
-        <Animated.View style={[{ marginTop: 22 }, s4]}>
-          <Pressable style={[styles.btn, styles.btnPrimary]} onPress={() => { /* autenticar */ }}>
-            <Text style={[styles.btnText, styles.btnTextDark]}>Log in</Text>
-          </Pressable>
-        </Animated.View>
+            <Animated.View style={[{ marginTop: 22 }, s4]}>
+                <Pressable style={[styles.btn, styles.btnPrimary]} onPress={() => { /* autenticar */ }}>
+                    <Text style={[styles.btnText, styles.btnTextDark]}>Log in</Text>
+                </Pressable>
+            </Animated.View>
+        </View>
 
         <Animated.View style={[styles.dividerWrap, s5]}>
           <View style={styles.divider} />
@@ -218,7 +221,7 @@ const styles = StyleSheet.create({
     width,
     height: height * 0.5,
     position: "absolute",
-    bottom: 245,
+    bottom: 220,
     zIndex: 1,
     transform: [{ scale: 1.2 }],
   },
@@ -227,7 +230,7 @@ const styles = StyleSheet.create({
 
   carWrap: {
     position: "absolute",
-    bottom: 220,
+    bottom: 190,
     left: -15,
     width: CAR_W,
     height: 150,
@@ -240,6 +243,9 @@ const styles = StyleSheet.create({
     right: 24,
     bottom: 24,
     zIndex: 5,
+    display: 'flex',
+    flexDirection: 'column',
+    height: 380
   },
   inputRow: {
     height: 46,

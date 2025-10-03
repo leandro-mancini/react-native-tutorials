@@ -72,7 +72,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     // 1) Área branca: slide de baixo para cima
     whiteTY.value = withTiming(0, {
-      duration: 700,
+      duration: 1500,
       easing: Easing.out(Easing.cubic),
     });
 
@@ -80,7 +80,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
     buildingsTY.value = withDelay(
       100,
       withTiming(-BUILDINGS_LIFT, {
-        duration: 650,
+        duration: 1650,
         easing: Easing.out(Easing.cubic),
       })
     );
@@ -89,7 +89,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
     carTY.value = withDelay(
       100,
       withTiming(-CAR_LIFT, {
-        duration: 650,
+        duration: 1650,
         easing: Easing.out(Easing.cubic),
       })
     );
