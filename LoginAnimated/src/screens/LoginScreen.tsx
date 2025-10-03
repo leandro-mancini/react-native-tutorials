@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from "react";
-import { View, StyleSheet, Dimensions, Pressable, Text } from "react-native";
+import React, { useEffect } from "react";
+import { View, StyleSheet, Dimensions, Text } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -7,168 +7,127 @@ import Animated, {
   withDelay,
   Easing,
 } from "react-native-reanimated";
-import LottieView from "lottie-react-native";
-import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { WhiteSlope } from "../components/WhiteSlope";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation";
-import { Car } from "../components/car";
-import { Tree } from "../components/Tree";
 import { City } from "../components/City";
+import { Tree } from "../components/Tree";
+import { Car } from "../components/Car";
+import { ButtonPrimary } from "../components/ButtonPrimary";
+import { ButtonSecondary } from "../components/ButtonSecondary";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 const { width, height } = Dimensions.get("window");
-
-// Estado final da Landing (ponto inicial no Login)
 const SLOPE_H = Math.round(height * 0.38);
-
-// Alvo no Login (quão alta fica a área branca depois do slide)
-const TARGET_SLOPE_H = Math.round(height * 0.70);
-
-// Subidas do conteúdo no Login
-const BUILDINGS_LIFT = 170;
-const CAR_LIFT = 170;
-
 const CAR_W = 150;
 const BLEED = 40;
 
+// onde o container de texto começa (igual à Landing)
+const TEXT_START_TOP = 100;
+// para onde queremos levar (topo próximo do statusbar)
+const TEXT_TARGET_TOP = 48;
+// quanto o texto precisa subir
+const TEXT_LIFT = TEXT_START_TOP - TEXT_TARGET_TOP;
+
+// easing suave
+const SOFT_OUT = Easing.bezier(0.16, 1, 0.3, 1);
+
 export const LoginScreen: React.FC<Props> = ({ navigation }) => {
-  // --- Área branca em slide: começa mostrando SLOPE_H e revela até TARGET_SLOPE_H
-  const whiteTY = useSharedValue(TARGET_SLOPE_H - SLOPE_H);
+  // animações já existentes
+  const slopeTY = useSharedValue(SLOPE_H);
+  const buildingsTY = useSharedValue(SLOPE_H * 0.5 + 60);
+  const carTX = useSharedValue(-CAR_W - 32);
 
-  // Prédios / Carro sobem
-  const buildingsTY = useSharedValue(0);
-  const carTY = useSharedValue(0);
-
-  // Botões (stagger: btn1 entra, depois btn2)
-  const btn1TY = useSharedValue(16);
-  const btn1OP = useSharedValue(0);
-  const btn1SC = useSharedValue(0.98);
-
-  const btn2TY = useSharedValue(16);
-  const btn2OP = useSharedValue(0);
-  const btn2SC = useSharedValue(0.98);
+  // textos: começam do ponto final da Landing (0) e sobem para o topo (-TEXT_LIFT)
+  const headingTY = useSharedValue(0);
+  const headingOP = useSharedValue(1);
+  const subTY = useSharedValue(0);
+  const subOP = useSharedValue(1);
 
   useEffect(() => {
-    // 1) Área branca: slide de baixo para cima
-    whiteTY.value = withTiming(0, {
-      duration: 1500,
-      easing: Easing.out(Easing.cubic),
-    });
+    // área branca / prédios / carro (como antes)
+    slopeTY.value = withTiming(0, { duration: 650, easing: SOFT_OUT });
+    buildingsTY.value = withDelay(200, withTiming(0, { duration: 700, easing: SOFT_OUT }));
+    carTX.value = withDelay(300, withTiming(0, { duration: 900, easing: SOFT_OUT }));
 
-    // 2) Prédios
-    buildingsTY.value = withDelay(
-      100,
-      withTiming(-BUILDINGS_LIFT, {
-        duration: 1650,
-        easing: Easing.out(Easing.cubic),
-      })
+    // textos sobem para o topo (heading primeiro, sub depois)
+    headingTY.value = withDelay(
+      120,
+      withTiming(-TEXT_LIFT, { duration: 700, easing: SOFT_OUT })
     );
+    headingOP.value = 1; // mantém visível (sem fade)
 
-    // 3) Carro
-    carTY.value = withDelay(
-      100,
-      withTiming(-CAR_LIFT, {
-        duration: 1650,
-        easing: Easing.out(Easing.cubic),
-      })
+    subTY.value = withDelay(
+      280, // entra após o heading
+      withTiming(-TEXT_LIFT, { duration: 700, easing: SOFT_OUT })
     );
+    subOP.value = 1;
 
-    // 4) Stagger de botões
-    const BASE = 700;     // começa depois da transição principal
-    const GAP = 140;      // atraso entre os botões
+    // se houver navegação para outro step, faça depois que as animações terminarem
+    // const t = setTimeout(() => navigation.replace("LoginForm"), 1400);
+    // return () => clearTimeout(t);
+  }, [slopeTY, buildingsTY, carTX, headingTY, subTY, headingOP, subOP]);
 
-    // Botão 1
-    btn1TY.value = withDelay(
-      BASE,
-      withTiming(0, { duration: 420, easing: Easing.out(Easing.cubic) })
-    );
-    btn1OP.value = withDelay(BASE, withTiming(1, { duration: 380 }));
-    btn1SC.value = withDelay(
-      BASE,
-      withTiming(1, { duration: 420, easing: Easing.out(Easing.cubic) })
-    );
-
-    // Botão 2 (entra depois)
-    btn2TY.value = withDelay(
-      BASE + GAP,
-      withTiming(0, { duration: 420, easing: Easing.out(Easing.cubic) })
-    );
-    btn2OP.value = withDelay(BASE + GAP, withTiming(1, { duration: 380 }));
-    btn2SC.value = withDelay(
-      BASE + GAP,
-      withTiming(1, { duration: 420, easing: Easing.out(Easing.cubic) })
-    );
-  }, [whiteTY, buildingsTY, carTY, btn1TY, btn1OP, btn1SC, btn2TY, btn2OP, btn2SC]);
-
-  // animated styles
-  const whiteSlideStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: whiteTY.value }],
-  }));
-
+  // estilos animados
+  const slopeStyle = useAnimatedStyle(() => ({ transform: [{ translateY: slopeTY.value }] }));
   const buildingsStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: buildingsTY.value }, { scale: 1.1 }, { translateX: -16 }],
   }));
+  const carStyle = useAnimatedStyle(() => ({ transform: [{ translateX: carTX.value }] }));
 
-  const carStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: carTY.value }],
+  const headingStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: headingTY.value }],
+    opacity: headingOP.value,
   }));
-
-  const btn1Style = useAnimatedStyle(() => ({
-    transform: [{ translateY: btn1TY.value }, { scale: btn1SC.value }],
-    opacity: btn1OP.value,
-  }));
-
-  const btn2Style = useAnimatedStyle(() => ({
-    transform: [{ translateY: btn2TY.value }, { scale: btn2SC.value }],
-    opacity: btn2OP.value,
+  const subStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: subTY.value }],
+    opacity: subOP.value,
   }));
 
   return (
     <View style={styles.container}>
       <View style={styles.background} />
 
-      {/* prédios (sobem) */}
+      {/* textos de boas-vindas: começam onde terminaram na Landing e sobem */}
+      <View style={styles.welcomeTextContainer}>
+        <Animated.Text style={[styles.welcomeTextHeading, headingStyle]}>
+          Bem-vindo!
+        </Animated.Text>
+        <Animated.Text style={[styles.welcomeTextSubheading, subStyle]}>
+          Vamos viajar juntos
+        </Animated.Text>
+      </View>
+
+      {/* prédios */}
       <Animated.View style={[styles.buildingsWrap, buildingsStyle]}>
-        <City style={StyleSheet.absoluteFill} />
+        <City />
       </Animated.View>
 
+      {/* árvore */}
       <Animated.View style={[styles.treeWrap, buildingsStyle]}>
         <Tree />
       </Animated.View>
 
-      {/* carro (sobe) */}
+      {/* área branca inclinada */}
+      <Animated.View style={[styles.whiteWrap, slopeStyle]} pointerEvents="none">
+        <WhiteSlope color="#fff" stretch slope={5} anchor="top" />
+      </Animated.View>
+
+      {/* carro */}
       <Animated.View style={[styles.carWrap, carStyle]}>
         <Car />
       </Animated.View>
 
-      {/* ===== Área branca com TOPO INCLINADO em SLIDE ===== */}
-      <View style={styles.whiteViewport} pointerEvents="none">
-        <Animated.View style={[styles.whiteSlide, whiteSlideStyle]}>
-          {/* WhiteSlope pinta o branco e define a inclinação do topo */}
-          <WhiteSlope color="#fff" stretch slope={5} anchor="top" />
-        </Animated.View>
-      </View>
-
       {/* CTAs (stagger) */}
       <View style={styles.ctaWrap}>
-        <Animated.View style={[styles.btnWrap, btn1Style]}>
-          <Pressable
-            style={({ pressed }) => [styles.btn, styles.btnPrimary, pressed && styles.pressed]}
-            onPress={() => navigation.navigate("LoginForm")}
-          >
-            <Text style={[styles.btnText, styles.btnTextDark]}>Entrar</Text>
-          </Pressable>
+        <Animated.View style={[styles.btnWrap]}>
+          <ButtonPrimary text="Entrar" onPress={() => navigation.replace("LoginForm")} />
         </Animated.View>
 
-        <Animated.View style={[styles.btnWrap, btn2Style]}>
-          <Pressable
-            style={({ pressed }) => [styles.btn, styles.btnDark, pressed && styles.pressed]}
-            onPress={() => {}}
-          >
-            <Text style={[styles.btnText, styles.btnTextLight]}>Criar conta</Text>
-          </Pressable>
+        <Animated.View style={[styles.btnWrap]}>
+          <ButtonSecondary text="Criar conta" onPress={() => navigation.replace("LoginForm")} />
         </Animated.View>
       </View>
     </View>
@@ -179,68 +138,18 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F6DC00", justifyContent: "flex-end", alignItems: "stretch" },
   background: { ...StyleSheet.absoluteFillObject, backgroundColor: "#F6DC00" },
 
-  // viewport fixo com a ALTURA FINAL da área branca
-  whiteViewport: {
-    position: "absolute",
-    bottom: 0,
-    left: -BLEED,
-    right: -BLEED,
-    height: 300, // ou TARGET_SLOPE_H se preferir diretamente
-    overflow: "hidden",
-    zIndex: 5,
-  },
+  // textos
+  welcomeTextContainer: { position: "absolute", top: TEXT_START_TOP, left: 20, zIndex: 10 },
+  welcomeTextHeading: { fontSize: 32, color: "#333", fontWeight: "700" },
+  welcomeTextSubheading: { fontSize: 16, color: "#333" },
 
-  // conteúdo que desliza (sem background)
-  whiteSlide: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: TARGET_SLOPE_H,
-  },
+  // lottie/white slope
+  whiteWrap: { position: "absolute", bottom: 0, left: -BLEED, right: -BLEED, height: SLOPE_H, overflow: "hidden", zIndex: 5 },
+  buildingsWrap: { width, height: height * 0.5, position: "absolute", bottom: 100, transform: [{ scale: 1.2 }], zIndex: 1 },
+  carWrap: { position: "absolute", bottom: 60, left: -15, width: CAR_W, height: 150, zIndex: 10 },
+  treeWrap: { position: "absolute", bottom: 30, right: -150, height: 300, width: 300, zIndex: 1 },
 
-  buildingsWrap: {
-    width,
-    height: height * 0.5,
-    position: "absolute",
-    bottom: 85,
-    transform: [{ scale: 1.2 }],
-    zIndex: 1,
-  },
-
-  treeWrap: { position: "absolute", bottom: 20, right: -150, height: 300, width: 300, zIndex: 1 },
-
-  carWrap: {
-    position: "absolute",
-    bottom: 40,
-    left: -15,
-    width: CAR_W,
-    height: 150,
-    zIndex: 10,
-  },
-
-  // ===== CTAs =====
-  ctaWrap: {
-    position: "absolute",
-    left: 24,
-    right: 24,
-    bottom: 60,
-    gap: 14,
-    zIndex: 20,
-  },
-  btnWrap: {
-    // wrapper animável por botão
-  },
-  btn: {
-    height: 48,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  btnPrimary: { backgroundColor: "#F6DC00" },
-  btnDark: { backgroundColor: "#111" },
-  btnText: { fontSize: 12 },
-  btnTextDark: { color: "#050607" },
-  btnTextLight: { color: "#F6DC00" },
-  pressed: { opacity: 0.85 },
+  // CTAs
+  ctaWrap: { position: "absolute", left: 24, right: 24, bottom: 60, gap: 14, zIndex: 20 },
+  btnWrap: {},
 });
