@@ -1,23 +1,49 @@
-import { Dimensions } from "react-native";
+import React from "react";
+import { Dimensions, StyleProp, ViewStyle } from "react-native";
 import Svg, { Path } from "react-native-svg";
 
-const { width } = Dimensions.get("window");
+const { width: SCREEN_W } = Dimensions.get("window");
 
-export const WhiteSlope = () => {
-  const h = 177;
-  const bleed = 40;
+type Props = {
+  color?: string;              // cor da faixa
+  bleed?: number;              // sobra lateral para cobrir bordas
+  height?: number;             // altura do “cap” quando não-esticado
+  slope?: number;              // inclinação (diferença entre topo esq e topo dir)
+  anchor?: "top" | "bottom";   // onde ancorar dentro do container
+  stretch?: boolean;           // se true, estica no eixo Y (ocupa 100% da altura do container)
+  style?: StyleProp<ViewStyle>;
+};
+
+export const WhiteSlope: React.FC<Props> = ({
+  color = "#fff",
+  bleed = 40,
+  height = 177,
+  slope = 30,
+  anchor = "bottom",
+  stretch = false,
+  style,
+}) => {
+  const W = SCREEN_W + bleed * 2;
+  const VP_H = stretch ? 100 : height;
+
+  // Borda inclinada no topo do path
+  const d = `M0,${slope} L${W},0 L${W},${VP_H} L0,${VP_H} Z`;
+
+  const svgStyle: any = [
+    { position: "absolute", left: -bleed },
+    anchor === "bottom" ? { bottom: 0 } : { top: 0 },
+    style,
+  ];
+
   return (
     <Svg
-      style={{ position: 'absolute', bottom: 0, left: -bleed }}
-      width={width + bleed * 2}
-      height={h}
-      viewBox={`0 0 ${width + bleed * 2} ${h}`}
+      style={svgStyle}
+      width={W}
+      height={stretch ? ("100%" as any) : height}
+      viewBox={`0 0 ${W} ${VP_H}`}
+      preserveAspectRatio={stretch ? "none" : "xMidYMid slice"}
     >
-      {/* Ajuste os pontos para o ângulo desejado */}
-      <Path
-        d={`M0,30 L${width + bleed * 2},0 L${width + bleed * 2},${h} L0,${h} Z`}
-        fill="#F5F5F5"
-      />
+      <Path d={d} fill={color} />
     </Svg>
   );
 };
