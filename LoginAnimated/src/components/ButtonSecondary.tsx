@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     btnDark: { backgroundColor: "#111" },
-    btnText: { fontSize: 12 },
+    btnText: { fontSize: 14 },
     btnTextLight: { color: "#F6DC00" },
     pressed: { opacity: 0.85 },
 });
