@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { View, StyleSheet, Dimensions, Pressable, Text } from "react-native";
 import Animated, {
   useSharedValue,
@@ -29,6 +29,28 @@ const CAR_LIFT = 170;
 
 const CAR_W = 150;
 const BLEED = 40;
+
+const City = ({style}: any) => {
+  const cityRef = useRef<LottieView>(null);
+
+  useEffect(() => {
+    cityRef.current?.play(); // começa do início
+    const t = setTimeout(() => {
+      cityRef.current?.pause(); // pausa no ponto atual (≈ N segundos depois)
+    }, 4500); // 4.5s
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <LottieView
+      ref={cityRef}
+      source={require("../../assets/buildings.json")}
+      autoPlay={true}
+      loop={false}
+      style={style}
+    />
+  );
+};
 
 export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   // --- Área branca em slide: começa mostrando SLOPE_H e revela até TARGET_SLOPE_H
@@ -128,12 +150,13 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
       {/* prédios (sobem) */}
       <Animated.View style={[styles.buildingsWrap, buildingsStyle]}>
-        <LottieView
+        <City style={StyleSheet.absoluteFill} />
+        {/* <LottieView
           source={require("../../assets/buildings.json")}
           autoPlay
           loop
           style={StyleSheet.absoluteFill}
-        />
+        /> */}
       </Animated.View>
 
       {/* carro (sobe) */}
