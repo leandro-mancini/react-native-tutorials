@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: -BLEED,
     right: -BLEED,
-    height: 345, // ou TARGET_SLOPE_H se preferir diretamente
+    height: 300, // ou TARGET_SLOPE_H se preferir diretamente
     overflow: "hidden",
     zIndex: 5,
   },
@@ -206,14 +206,14 @@ const styles = StyleSheet.create({
     width,
     height: height * 0.5,
     position: "absolute",
-    bottom: 130,
+    bottom: 85,
     transform: [{ scale: 1.2 }],
     zIndex: 1,
   },
 
   carWrap: {
     position: "absolute",
-    bottom: 80,
+    bottom: 40,
     left: -15,
     width: CAR_W,
     height: 150,
