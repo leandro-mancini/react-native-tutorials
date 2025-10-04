@@ -15,21 +15,9 @@ Este guia mostra, passo a passo, como montar a interface do app LoginAnimated: i
 - [Códigos completos](#códigos-completos)
 - [Referências](#referências)
 
-## Demos (GIFs)
+## Demo
 
-Coloque GIFs em `docs/` para ilustrar as transições:
-
-- Landing: ![Landing](./docs/landing.gif)
-- CTAs (LoginScreen): ![CTAs](./docs/login-ctas.gif)
-- Formulário (LoginForm): ![Login Form](./docs/login-form.gif)
-
-Dica rápida (opcional): grave a tela do simulador e gere GIFs. Ex.: grave com QuickTime e converta com ffmpeg.
-
-```bash
-# converter um .mov gravado do simulador para .gif
-ffmpeg -i input.mov -vf "fps=30,scale=540:-1:flags=lanczos" -loop 0 output.gif
-```
-
+https://github.com/user-attachments/assets/2ba6433e-568e-4be2-b087-349c7470eb85
 
 ## Pré‑requisitos
 
