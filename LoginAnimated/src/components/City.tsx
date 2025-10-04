@@ -16,7 +16,7 @@ export function City({styles}: any) {
   return (
     <LottieView
       ref={cityRef}
-      source={require("../../assets/buildings.json")}
+      source={require("../../assets/lotties/buildings.json")}
       autoPlay={true}
       loop={false}
       style={[StyleSheet.absoluteFill, styles]}

@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native";
 export function Tree() {
   return (
     <LottieView
-        source={require("../../assets/tree.json")}
+        source={require("../../assets/lotties/tree.json")}
         autoPlay
         loop={false}
         style={StyleSheet.absoluteFill}

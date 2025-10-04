@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native";
 export function Car() {
     return (
         <LottieView
-            source={require("../../assets/car.json")}
+            source={require("../../assets/lotties/car.json")}
             autoPlay
             loop
             style={StyleSheet.absoluteFill}

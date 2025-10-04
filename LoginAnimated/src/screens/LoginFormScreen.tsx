@@ -191,7 +191,7 @@ export const LoginFormScreen: React.FC<Props> = () => {
 
         <Animated.View style={[styles.dividerWrap, s5]}>
           <View style={styles.divider} />
-          <Text style={{ color: "#bbb", marginHorizontal: 10 }}>ou</Text>
+          <Text style={{ color: "#bbb", marginHorizontal: 10, fontFamily: "Montserrat-Regular" }}>ou</Text>
           <View style={styles.divider} />
         </Animated.View>
 
@@ -221,9 +221,9 @@ const styles = StyleSheet.create({
   // Form
   form: { position: "absolute", left: 24, right: 24, bottom: 24, zIndex: 5, display: 'flex', flexDirection: 'column', height: 380 },
   inputRow: { height: 46, flexDirection: "row", alignItems: "center", gap: 10, },
-  input: { flex: 1, fontSize: 16, color: "#111" },
+  input: { flex: 1, fontSize: 16, color: "#111", fontFamily: "Montserrat-Regular" },
   underline: { height: 1, backgroundColor: "#111" },
-  forgot: { color: "#666" },
+  forgot: { color: "#666", fontFamily: "Montserrat-Regular" },
   dividerWrap: { marginVertical: 18, flexDirection: "row", alignItems: "center", justifyContent: "center", },
   divider: { flex: 1, height: 1, backgroundColor: "#E6E6E6" },
 });

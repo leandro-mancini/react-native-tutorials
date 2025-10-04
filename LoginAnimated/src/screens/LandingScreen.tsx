@@ -126,8 +126,8 @@ const styles = StyleSheet.create({
 
   // textos
   welcomeTextContainer: { position: "absolute", top: 100, left: 20, zIndex: 10 },
-  welcomeTextHeading: { fontSize: 32, color: "#333", fontWeight: "700" },
-  welcomeTextSubheading: { fontSize: 16, color: "#333" },
+  welcomeTextHeading: { fontSize: 32, color: "#333", fontFamily: "Inter-Regular" },
+  welcomeTextSubheading: { fontSize: 16, color: "#333", fontFamily: "Inter-Regular" },
 
   // lottie/white slope
   whiteWrap: { position: "absolute", bottom: 0, left: -BLEED, right: -BLEED, height: SLOPE_H, overflow: "hidden", zIndex: 5 },
