@@ -1,13 +1,20 @@
-import { Pressable, PressableProps, StyleSheet, Text } from "react-native";
+import { StyleSheet, Text } from "react-native";
+import Ripple from "react-native-material-ripple";
 
-export function ButtonSecondary({ onPress, text }: PressableProps & { text: string }) {
+interface ButtonProps {
+  text: string;
+  onPress: () => void;
+}
+
+export function ButtonSecondary({ onPress, text }: ButtonProps) {
   return (
-    <Pressable
-        style={({ pressed }) => [styles.btn, styles.btnDark, pressed && styles.pressed]}
-        onPress={onPress}
-        >
-        <Text style={[styles.btnText, styles.btnTextLight]}>{text}</Text>
-    </Pressable>
+    <Ripple
+      rippleContainerBorderRadius={8}
+      style={[styles.btn, styles.btnDark]}
+      onPress={onPress}
+    >
+      <Text style={[styles.btnText, styles.btnTextLight]}>{text}</Text>
+    </Ripple>
   );
 }
 
@@ -21,5 +28,4 @@ const styles = StyleSheet.create({
     btnDark: { backgroundColor: "#111" },
     btnText: { fontSize: 14, fontFamily: "Inter-Regular" },
     btnTextLight: { color: "#F6DC00" },
-    pressed: { opacity: 0.85 },
 });

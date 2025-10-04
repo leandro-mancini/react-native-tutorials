@@ -60,7 +60,7 @@ export const LandingScreen: React.FC<Props> = ({ navigation }) => {
     // timeout opcional para navegar
     const t = setTimeout(() => {
       navigation.replace("Login");
-    }, 4500);
+    }, 4000);
     return () => clearTimeout(t);
   }, [navigation, slopeTY, buildingsTY, carTX, headingTX, headingOP, subTX, subOP]);
 
