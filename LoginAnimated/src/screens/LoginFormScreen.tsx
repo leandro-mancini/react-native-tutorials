@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Dimensions, Text, Pressable, TextInput } from "react-native";
 import Animated, {
   useSharedValue,
@@ -16,6 +16,8 @@ import { Tree } from "../components/Tree";
 import { Car } from "../components/Car";
 import { ButtonPrimary } from "../components/ButtonPrimary";
 import { ButtonSecondary } from "../components/ButtonSecondary";
+import { Lock, Mail } from "lucide-react-native";
+import { ButtonToggle } from "../components/ButtonToggle";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
@@ -52,6 +54,9 @@ export const LoginFormScreen: React.FC<Props> = () => {
   const f4TY = useSharedValue(16), f4OP = useSharedValue(0); // login button
   const f5TY = useSharedValue(16), f5OP = useSharedValue(0); // divider
   const f6TY = useSharedValue(16), f6OP = useSharedValue(0); // signup button
+  
+  // controle de visibilidade da senha
+  const [passwordVisible, setPasswordVisible] = useState(false);
   
 
   useEffect(() => {
@@ -152,7 +157,7 @@ export const LoginFormScreen: React.FC<Props> = () => {
         <View style={{ flex: 1 }}>
             <Animated.View style={s1}>
                 <View style={styles.inputRow}>
-                    <Text style={styles.icon}>✉️</Text>
+                    <Mail size={18} />
                     <TextInput
                       placeholder="Email"
                       placeholderTextColor="#777"
@@ -160,16 +165,15 @@ export const LoginFormScreen: React.FC<Props> = () => {
                       keyboardType="email-address"
                       autoCapitalize="none"
                     />
-                    <Text style={styles.suffix}>✓</Text>
                 </View>
-                <View style={styles.underlineYellow} />
+                <View style={styles.underline} />
             </Animated.View>
 
             <Animated.View style={[{ marginTop: 18 }, s2]}>
                 <View style={styles.inputRow}>
-                    <Text style={styles.icon}>🔒</Text>
-                    <TextInput placeholder="Password" secureTextEntry placeholderTextColor="#777" style={styles.input} />
-                    <Text style={styles.suffix}>👁️</Text>
+                    <Lock size={18} />
+                    <TextInput placeholder="Senha" secureTextEntry={!passwordVisible} placeholderTextColor="#777" style={styles.input} />
+                    <ButtonToggle onPress={() => setPasswordVisible((v) => !v)} />
                 </View>
                 <View style={styles.underline} />
             </Animated.View>
@@ -217,12 +221,9 @@ const styles = StyleSheet.create({
   // Form
   form: { position: "absolute", left: 24, right: 24, bottom: 24, zIndex: 5, display: 'flex', flexDirection: 'column', height: 380 },
   inputRow: { height: 46, flexDirection: "row", alignItems: "center", gap: 10, },
-  icon: { width: 22, textAlign: "center", fontSize: 16 },
   input: { flex: 1, fontSize: 16, color: "#111" },
-  suffix: { width: 22, textAlign: "center", fontSize: 16, color: "#111" },
-  underlineYellow: { height: 2, backgroundColor: "#FFD700" },
   underline: { height: 1, backgroundColor: "#111" },
-  forgot: { color: "#FFD700" },
+  forgot: { color: "#666" },
   dividerWrap: { marginVertical: 18, flexDirection: "row", alignItems: "center", justifyContent: "center", },
   divider: { flex: 1, height: 1, backgroundColor: "#E6E6E6" },
 });
