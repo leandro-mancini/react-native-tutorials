@@ -143,11 +143,11 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
       {/* CTAs (stagger bottom→top + fade) */}
       <View style={styles.ctaWrap}>
         <Animated.View style={[styles.btnWrap, btn1Style]}>
-          <ButtonPrimary text="Entrar" onPress={() => navigation.replace("LoginForm")} />
+          <ButtonPrimary text="Entrar" onPress={() => navigation.push("LoginForm")} />
         </Animated.View>
 
         <Animated.View style={[styles.btnWrap, btn2Style]}>
-          <ButtonSecondary text="Criar conta" onPress={() => navigation.replace("LoginForm")} />
+          <ButtonSecondary text="Criar conta" onPress={() => navigation.push("LoginForm")} />
         </Animated.View>
       </View>
     </View>
