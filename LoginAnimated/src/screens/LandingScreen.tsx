@@ -29,7 +29,10 @@ const SOFT_OUT = Easing.bezier(0.16, 1, 0.3, 1);
 export const LandingScreen: React.FC<Props> = ({ navigation }) => {
   // animações existentes
   const slopeTY = useSharedValue(SLOPE_H);
+  
   const buildingsTY = useSharedValue(SLOPE_H * 0.5 + 60);
+  const buildingsOP = useSharedValue(0);
+
   const carTX = useSharedValue(-CAR_W - 32);
 
   // textos
@@ -41,7 +44,10 @@ export const LandingScreen: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     // área branca / prédios / carro
     slopeTY.value = withTiming(0, { duration: 650, easing: SOFT_OUT });
+    
     buildingsTY.value = withDelay(200, withTiming(0, { duration: 700, easing: SOFT_OUT }));
+    buildingsOP.value = withDelay(100, withTiming(1, { duration: 1000, easing: SOFT_OUT }));
+
     carTX.value = withDelay(300, withTiming(0, { duration: 900, easing: SOFT_OUT }));
 
     // textos
@@ -70,6 +76,7 @@ export const LandingScreen: React.FC<Props> = ({ navigation }) => {
   }));
   const buildingsStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: buildingsTY.value }, { scale: 1.1 }, { translateX: -16 }],
+    opacity: buildingsOP.value,
   }));
   const carStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: carTX.value }],
