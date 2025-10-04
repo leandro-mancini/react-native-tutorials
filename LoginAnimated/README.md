@@ -1,6 +1,6 @@
-# LoginAnimated — Tutorial passo a passo para criar a interface de login animada (React Native)
+# Tutorial passo a passo para criar a interface de login animada (React Native)
 
-Este guia em formato de blog mostra, passo a passo, como montar a interface do app LoginAnimated: instalar bibliotecas, configurar o projeto, criar os componentes base, montar as telas e ajustar as animações.
+Este guia mostra, passo a passo, como montar a interface do app LoginAnimated: instalar bibliotecas, configurar o projeto, criar os componentes base, montar as telas e ajustar as animações.
 
 ## Sumário
 
