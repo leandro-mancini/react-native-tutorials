@@ -36,7 +36,7 @@ const SOFT_OUT = Easing.bezier(.87, 0.02, 0.28, 1);
 
 export const LoginFormScreen: React.FC<Props> = () => {
   // fundo/elementos
-  const slopeTY = useSharedValue(280);
+  const slopeTY = useSharedValue(180);
   const buildingsTY = useSharedValue(0);
   const treeTY = useSharedValue(0);
   const carTY = useSharedValue(0);
@@ -62,9 +62,9 @@ export const LoginFormScreen: React.FC<Props> = () => {
   useEffect(() => {
     // base
     slopeTY.value = withTiming(0, { duration: 650, easing: SOFT_OUT });
-    buildingsTY.value = withDelay(100, withTiming(-310, { duration: 700, easing: SOFT_OUT }));
-    treeTY.value = withDelay(200, withTiming(-310, { duration: 700, easing: SOFT_OUT }));
-    carTY.value = withDelay(0, withTiming(-275, { duration: 900, easing: SOFT_OUT }));
+    buildingsTY.value = withDelay(100, withTiming(-235, { duration: 700, easing: SOFT_OUT }));
+    treeTY.value = withDelay(200, withTiming(-215, { duration: 700, easing: SOFT_OUT }));
+    carTY.value = withDelay(0, withTiming(-190, { duration: 900, easing: SOFT_OUT }));
 
     // textos
     headingTX.value = withDelay(120, withTiming(EXIT_DX, { duration: 520, easing: SOFT_OUT }));
@@ -95,10 +95,10 @@ export const LoginFormScreen: React.FC<Props> = () => {
   // animated styles
   const slopeStyle = useAnimatedStyle(() => ({ transform: [{ translateY: slopeTY.value }] }));
   const buildingsStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: buildingsTY.value }, { scale: 1 }, { translateX: -30 }],
+    transform: [{ translateY: buildingsTY.value }, { scale: 1.1 }, { translateX: -16 }],
   }));
   const treeStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: treeTY.value - 135 }, { scale: 1.1 }, { translateX: -30 }],
+    transform: [{ translateY: treeTY.value - 135 }, { scale: 1.1 }, { translateX: -16 }],
   }));
   const carStyle = useAnimatedStyle(() => ({ transform: [{ translateY: carTY.value }] }));
 
@@ -144,7 +144,7 @@ export const LoginFormScreen: React.FC<Props> = () => {
 
       {/* área branca inclinada */}
       <Animated.View style={[styles.whiteWrap, slopeStyle]} pointerEvents="none">
-        <WhiteSlope color="#FFF" height={588} slope={30} anchor="bottom" />
+        <WhiteSlope color="#FFF" height={500} slope={30} anchor="bottom" />
       </Animated.View>
 
       {/* carro */}
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   welcomeTextSubheading: { fontSize: 16, color: "#333" },
 
   // lottie/white slope
-  whiteWrap: { position: "absolute", bottom: 0, left: -BLEED, right: -BLEED, height: 588, overflow: "hidden", zIndex: 5 },
+  whiteWrap: { position: "absolute", bottom: 0, left: -BLEED, right: -BLEED, height: 500, overflow: "hidden", zIndex: 5 },
   buildingsWrap: { width, height: height * 0.5, position: "absolute", bottom: 215, transform: [{ scale: 1.2 }], zIndex: 1 },
   carWrap: { position: "absolute", bottom: 215, left: -15, width: CAR_W, height: 150, zIndex: 10 },
   treeWrap: { position: "absolute", bottom: 30, right: -150, height: 300, width: 300, zIndex: 1 },
