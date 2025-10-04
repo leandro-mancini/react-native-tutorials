@@ -994,9 +994,9 @@ const styles = StyleSheet.create({
 
 ## Referências
 
-- React Native
-- React Navigation
-- Reanimated + Worklets
-- Lottie React Native
-- Lucide React Native
-- React Native SVG
+- [React Native](https://reactnative.dev/)
+- [React Navigation](https://reactnavigation.org/)
+- [Reanimated + Worklets](https://docs.swmansion.com/react-native-reanimated/)
+- [Lottie React Native](https://lottiefiles.com/)
+- [Lucide React Native](https://lucide.dev/guide/packages/lucide-react-native)
+- [React Native SVG](https://docs.expo.dev/versions/latest/sdk/svg/)
