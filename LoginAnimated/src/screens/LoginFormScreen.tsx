@@ -64,7 +64,7 @@ export const LoginFormScreen: React.FC<Props> = () => {
     slopeTY.value = withTiming(0, { duration: 650, easing: SOFT_OUT });
     buildingsTY.value = withDelay(100, withTiming(-235, { duration: 700, easing: SOFT_OUT }));
     treeTY.value = withDelay(200, withTiming(-215, { duration: 700, easing: SOFT_OUT }));
-    carTY.value = withDelay(0, withTiming(-190, { duration: 900, easing: SOFT_OUT }));
+    carTY.value = withDelay(0, withTiming(-190, { duration: 750, easing: SOFT_OUT }));
 
     // textos
     headingTX.value = withDelay(120, withTiming(EXIT_DX, { duration: 520, easing: SOFT_OUT }));
