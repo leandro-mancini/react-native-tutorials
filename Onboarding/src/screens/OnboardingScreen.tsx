@@ -21,7 +21,8 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   SharedValue,
-  useAnimatedProps
+  useAnimatedProps,
+  useDerivedValue
 } from 'react-native-reanimated';
 import { ChevronRight } from 'lucide-react-native';
 import Svg, { Circle } from 'react-native-svg';
@@ -29,6 +30,89 @@ import Svg, { Circle } from 'react-native-svg';
 const { width, height } = Dimensions.get('window');
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+const AnimatedText = Animated.createAnimatedComponent(Text);
+
+type SlideItemProps = {
+  item: Slide;
+  index: number;
+  x: SharedValue<number>;
+  width: number;
+};
+
+// 2) componente que pode usar hooks normalmente
+const SlideItem = React.memo(({ item, index, x, width }: SlideItemProps) => {
+  const rel = useDerivedValue(() => (index * width - x.value) / width, [index]);
+
+  const TITLE_DIST = 70;   // deslocamento X do título
+  const SUB_DIST   = 70;   // deslocamento X do subtítulo
+  const STEP_DELAY = 0.5; // atraso fracionado (0..1)
+
+  const titleStyleAnim = useAnimatedStyle(() => {
+    const r = rel.value;                          // -1..0..1
+    const dir = r > 0 ? 1 : (r < 0 ? -1 : 0);     // de onde o slide entra
+    // exposição 0..1 (1 quando o slide está central)
+    let exposure = 1 - Math.abs(r);
+    if (exposure < 0) exposure = 0;
+    if (exposure > 1) exposure = 1;
+
+    // curva (ease-out simples)
+    const e = exposure * exposure;
+
+    // delay condicional: se entra pela ESQUERDA (dir<0), title atrasa
+    let eTitle = e;
+    if (dir < 0) {
+      eTitle = (e - STEP_DELAY) / (1 - STEP_DELAY);
+      if (eTitle < 0) eTitle = 0;
+      if (eTitle > 1) eTitle = 1;
+    }
+
+    const tx = dir * (1 - eTitle) * TITLE_DIST;
+    // const op = interpolate(eTitle, [0, 0.2, 1], [0, 0.9, 1], Extrapolation.CLAMP);
+
+    return { transform: [{ translateX: tx }] };
+  });
+
+  const subtitleStyleAnim = useAnimatedStyle(() => {
+    const r = rel.value;
+    const dir = r > 0 ? 1 : (r < 0 ? -1 : 0);
+
+    let exposure = 1 - Math.abs(r);
+    if (exposure < 0) exposure = 0;
+    if (exposure > 1) exposure = 1;
+
+    const e = exposure * exposure;
+
+    // delay condicional: se entra pela DIREITA (dir>0), subtitle atrasa
+    let eSub = e;
+    if (dir > 0) {
+      eSub = (e - STEP_DELAY) / (1 - STEP_DELAY);
+      if (eSub < 0) eSub = 0;
+      if (eSub > 1) eSub = 1;
+    }
+
+    const tx = dir * (1 - eSub) * SUB_DIST;
+    // const op = interpolate(eSub, [0, 0.15, 1], [0, 0.9, 1], Extrapolation.CLAMP);
+
+    return { transform: [{ translateX: tx }] };
+  });
+
+  return (
+    <View style={[styles.slide, { width }]}>
+      <View style={[styles.illustrationBox, item.lottieBoxStyle]}>
+        <LottieView
+          source={item.lottie}
+          autoPlay
+          loop
+          style={[{ width: 800, height: 800, alignSelf: 'center' }, item.lottieStyle]}
+        />
+      </View>
+      <View style={styles.header}>
+        <AnimatedText style={[styles.title, titleStyleAnim]}>{item.title}</AnimatedText>
+        <AnimatedText style={[styles.subtitle, subtitleStyleAnim]}>{item.subtitle}</AnimatedText>
+      </View>
+    </View>
+  );
+});
 
 type Slide = {
   key: string;
@@ -43,34 +127,24 @@ type Slide = {
 const SLIDES: Slide[] = [
   {
     key: 'a',
-    title: "Seu primeiro carro, sem dor de cabeça",
-    subtitle: 'Assine em minutos e dirija hoje mesmo,simples e 100% digital.',
-    bg: '#F5C768',
+    title: "Expresse sua criatividade",
+    subtitle: 'Expresse sua criatividade usando nosso aplicativo e usando nossos serviços premium',
+    bg: '#EA94FF',
     lottie: require('../../assets/lottie/step1.json'),
-    lottieBoxStyle: {
-        transform: [{ translateY: 100 }]
-    }
   },
   {
     key: 'b',
-    title: '+1000 carros pela cidade',
-    subtitle: 'Encontre um carro disponível a poucos minutos de você.',
-    bg: '#00B18F',
-    lottie: require('../../assets/lottie/step2.json'),
+    title: 'Compre com facilidade',
+    subtitle: 'Nossa interface de usuário do aplicativo tornará sua experiência de compra tranquila e sem anúncios.',
+    bg: '#B795FF',
+    lottie: require('../../assets/lottie/step1.json'),
   },
   {
     key: 'c',
-    title: "Estacionamento, manutenção e combustível? Por nossa conta",
-    subtitle: 'Você dirige; nós cuidamos das despesas.',
-    bg: '#F0B18E',
-    lottie: require('../../assets/lottie/step3.json'),
-  },
-  {
-    key: 'd',
-    title: 'Escolha o seu',
-    subtitle: '29 modelos: do compacto ao esportivo',
-    bg: '#A7C2FF',
-    lottie: require('../../assets/lottie/step4.json'),
+    title: "Comunique-se com facilidade",
+    subtitle: 'Comunique-se usando nosso aplicativo para entrar em contato com outras pessoas em todo o mundo.',
+    bg: '#FFBBBB',
+    lottie: require('../../assets/lottie/step1.json'),
   },
 ];
 
@@ -100,27 +174,9 @@ export default function OnboardingScreen({ navigation }: any) {
     };
   });
 
-  const renderItem = ({ item }: { item: Slide }) => {
-    return (
-        <View style={[styles.slide, { width }]}>
-        {/* HEADER: textos no topo */}
-        <View style={styles.header}>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.subtitle}>{item.subtitle}</Text>
-        </View>
-
-        {/* ILUSTRAÇÃO: Lottie grande no meio/baixo */}
-        <View style={[styles.illustrationBox, item.lottieBoxStyle]}>
-            <LottieView
-            source={item.lottie}
-            autoPlay
-            loop
-            style={[{ width: 800, height: 800, alignSelf: 'center' }, item.lottieStyle]}
-            />
-        </View>
-        </View>
-    );
-    };
+  const renderItem = ({ item, index }: { item: Slide; index: number }) => (
+    <SlideItem item={item} index={index} x={x} width={width} />
+  );
 
   const keyExtractor = (s: Slide) => s.key;
 
@@ -287,29 +343,25 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   header: {
-    paddingTop: 80,
+    paddingTop: 0,
     paddingHorizontal: 24,
-    gap: 8,
+    gap: 0,
   },
   title: {
-    fontSize: 28,
-    lineHeight: 32,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    fontFamily: 'Inter-Regular',
+    fontSize: 40,
+    color: '#000',
+    fontFamily: 'Poppins-ExtraBold',
   },
   subtitle: {
-    fontSize: 18,
-    lineHeight: 24,
-    color: 'rgba(255,255,255,0.90)',
-    fontFamily: 'Inter-Regular',
+    fontSize: 16,
+    color: '#3C3C3C',
+    fontFamily: 'Poppins-Medium',
   },
   illustrationBox: {
     flex: 1,
-    overflow: 'hidden',
+    // overflow: 'hidden',
     display: 'flex',
     flexDirection: 'row',
-    // alignItems: 'center',
     justifyContent: 'center',
   },
   footerRow: {

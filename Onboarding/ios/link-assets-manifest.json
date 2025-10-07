@@ -2,12 +2,12 @@
   "migIndex": 1,
   "data": [
     {
-      "path": "assets/fonts/Inter-Regular.ttf",
-      "sha1": "bd1976c1f019853ab6143ef1246e25aa66fd990e"
+      "path": "assets/fonts/Poppins-ExtraBold.ttf",
+      "sha1": "4b5c0750f073abd576413a0898d3b95adaf199c8"
     },
     {
-      "path": "assets/fonts/Montserrat-Regular.ttf",
-      "sha1": "ec13ef1f2c99f8780d6f2eb3f9f27ef89f30161b"
+      "path": "assets/fonts/Poppins-Medium.ttf",
+      "sha1": "283f21b44efbdbf276ba802be2d949a36bbc4233"
     }
   ]
 }
