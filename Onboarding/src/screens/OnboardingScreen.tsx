@@ -8,9 +8,10 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 
-import { SlideItem } from '../components/onboarding/SlideItem';
 import { Footer } from '../components/onboarding/Footer';
 import { SLIDES } from '../constants/onboardingSlides';
+import type { Slide, CommonSlideProps } from '../components/onboarding/types';
+import { SlideItem } from '../components/onboarding/SlideItem';
 
 const { width } = Dimensions.get('window');
 
@@ -19,26 +20,22 @@ export default function OnboardingScreen({ navigation }: any) {
   const x = useSharedValue(0);
 
   const onScroll = useAnimatedScrollHandler({
-    onScroll: (e) => {
-      x.value = e.contentOffset.x;
-    },
+    onScroll: (e) => { x.value = e.contentOffset.x; },
   });
 
   const bgStyle = useAnimatedStyle(() => {
     const i = x.value / width;
     const colors = SLIDES.map((s) => s.bg);
     return {
-      backgroundColor: interpolateColor(
-        i,
-        SLIDES.map((_, idx) => idx),
-        colors
-      ),
+      backgroundColor: interpolateColor(i, SLIDES.map((_, idx) => idx), colors),
     };
   });
 
-  const renderItem = ({ item, index }: any) => (
-    <SlideItem item={item} index={index} x={x} width={width} />
-  );
+  const renderItem = ({ item, index }: { item: Slide; index: number }) => {
+    const props: CommonSlideProps = { item, index, x, width };
+    const Comp = item.render ?? SlideItem;  // fallback
+    return <Comp {...props} />;
+  };
 
   return (
     <Animated.View style={[styles.container, bgStyle]}>
@@ -62,15 +59,11 @@ export default function OnboardingScreen({ navigation }: any) {
           pagerRef={pagerRef}
           total={SLIDES.length}
           width={width}
-          onFinish={() => {
-            /* navegar para Home */
-          }}
+          onFinish={() => {/* navega pra Home */}}
         />
       </SafeAreaView>
     </Animated.View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-});
+const styles = StyleSheet.create({ container: { flex: 1 } });
