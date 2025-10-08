@@ -1,6 +1,9 @@
-import React from 'react';
+// OnboardingScreen.tsx
+import React, { useMemo } from 'react';
 import { Dimensions, SafeAreaView, StatusBar, StyleSheet } from 'react-native';
 import Animated, {
+  Extrapolation,
+  interpolate,
   interpolateColor,
   useAnimatedRef,
   useAnimatedScrollHandler,
@@ -10,15 +13,104 @@ import Animated, {
 
 import { Footer } from '../components/onboarding/Footer';
 import { SLIDES } from '../constants/onboardingSlides';
-import type { Slide, CommonSlideProps } from '../components/onboarding/types';
 import { SlideItem } from '../components/onboarding/SlideItem';
+import type { Slide, CommonSlideProps } from '../components/onboarding/types';
 
 import Figure1Step1 from '../../assets/svg/figure1-step1.svg';
 import Figure2Step1 from '../../assets/svg/figure2-step1.svg';
 import Figure3Step1 from '../../assets/svg/figure3-step1.svg';
 import Figure4Step3 from '../../assets/svg/figure4-step3.svg';
 
+const AF1 = Animated.createAnimatedComponent(Figure1Step1 as any);
+const AF2 = Animated.createAnimatedComponent(Figure2Step1 as any);
+const AF3 = Animated.createAnimatedComponent(Figure3Step1 as any);
+const AF4 = Animated.createAnimatedComponent(Figure4Step3 as any);
+
 const { width } = Dimensions.get('window');
+const STEPS = SLIDES.length;
+
+type Pose = {
+  top?: number;
+  left?: number;  // use left OU right
+  right?: number;
+  scale?: number;
+  rotate?: number; // em graus
+};
+type FigSpec = {
+  key: string;
+  Component: any;
+  size: { width: number; height: number };
+  color: string;
+  // poses por step (0..STEPS-1)
+  poses: Pose[];
+};
+
+// 🔧 CONFIGURÁVEL POR STEP
+const FIGS: FigSpec[] = [
+  {
+    key: 'f1',
+    Component: AF1,
+    size: { width: 111, height: 175 },
+    color: '#F4C9FF',
+    poses: [
+      // step 0 (valores atuais)
+      { top: 90, left: -50, scale: 1 },
+      // step 1
+      { top: 110, left: -20, scale: 1 },
+      // step 2
+      { top: 85, left: -70, scale: 1 },
+    ],
+  },
+  {
+    key: 'f2',
+    Component: AF2,
+    size: { width: 213.29, height: 93.1 },
+    color: '#DF61FF',
+    poses: [
+      { top: -40, left: 0, scale: 1 },
+      { top: -20, left: 12, scale: 1 },
+      { top: -35, left: -8, scale: 1 },
+    ],
+  },
+  {
+    key: 'f3',
+    Component: AF3,
+    size: { width: 70.49, height: 150.37 },
+    color: '#C180F4',
+    poses: [
+      { top: 20, right: 0, scale: 1.4 },
+      { top: 8, right: -10, scale: 1.35 },
+      { top: 16, right: 8, scale: 1.4 },
+    ],
+  },
+  {
+    key: 'f4',
+    Component: AF4,
+    size: { width: 310, height: 286 },
+    color: '#FF7171',
+    poses: [
+      // aparece desde o step 0 já fora da tela, entra no step 2
+      { top: 200, right: -165, scale: 0.6 },
+      { top: 210, right: -150, scale: 0.6 },
+      { top: 220, right: -140, scale: 0.6 },
+    ],
+  },
+];
+
+// util: carrega valor do step, herdando do anterior se faltar
+function toSeries(poses: Pose[], prop: keyof Pose, steps: number): number[] | null {
+  const out: (number | undefined)[] = new Array(steps).fill(undefined);
+  let last: number | undefined = undefined;
+  for (let i = 0; i < steps; i++) {
+    const v = poses[i]?.[prop];
+    if (typeof v === 'number') last = v;
+    out[i] = last;
+  }
+  // se nenhum step definiu esse prop, não interpola
+  const any = out.some((v) => typeof v === 'number');
+  if (!any) return null;
+  return out.map((v) => (typeof v === 'number' ? v : 0));
+}
 
 export default function OnboardingScreen({ navigation }: any) {
   const pagerRef = useAnimatedRef<Animated.FlatList<any>>();
@@ -28,17 +120,42 @@ export default function OnboardingScreen({ navigation }: any) {
     onScroll: (e) => { x.value = e.contentOffset.x; },
   });
 
+  const indices = useMemo(() => SLIDES.map((_, i) => i), []);
   const bgStyle = useAnimatedStyle(() => {
     const i = x.value / width;
     const colors = SLIDES.map((s) => s.bg);
     return {
-      backgroundColor: interpolateColor(i, SLIDES.map((_, idx) => idx), colors),
+      backgroundColor: interpolateColor(i, indices, colors),
     };
   });
 
+  // cria style animado por figura a partir das séries por step
+  const makePoseStyle = (fig: FigSpec) => {
+    const sTop = toSeries(fig.poses, 'top', STEPS);
+    const sLeft = toSeries(fig.poses, 'left', STEPS);
+    const sRight = toSeries(fig.poses, 'right', STEPS);
+    const sScale = toSeries(fig.poses, 'scale', STEPS) ?? new Array(STEPS).fill(1);
+    const sRot = toSeries(fig.poses, 'rotate', STEPS) ?? new Array(STEPS).fill(0);
+
+    return useAnimatedStyle(() => {
+      const i = x.value / width;
+      const style: any = { position: 'absolute' };
+
+      if (sTop)   style.top   = interpolate(i, indices, sTop,   Extrapolation.CLAMP);
+      if (sLeft)  style.left  = interpolate(i, indices, sLeft,  Extrapolation.CLAMP);
+      if (sRight) style.right = interpolate(i, indices, sRight, Extrapolation.CLAMP);
+
+      const scale  = interpolate(i, indices, sScale, Extrapolation.CLAMP);
+      const rotate = interpolate(i, indices, sRot,   Extrapolation.CLAMP);
+
+      style.transform = [{ scale }, { rotate: `${rotate}deg` }];
+      return style;
+    });
+  };
+
   const renderItem = ({ item, index }: { item: Slide; index: number }) => {
     const props: CommonSlideProps = { item, index, x, width };
-    const Comp = item.render ?? SlideItem;  // fallback
+    const Comp = item.render ?? SlideItem;
     return <Comp {...props} />;
   };
 
@@ -46,10 +163,21 @@ export default function OnboardingScreen({ navigation }: any) {
     <Animated.View style={[styles.container, bgStyle]}>
       <StatusBar barStyle="dark-content" />
       <SafeAreaView style={{ flex: 1, position: 'relative' }}>
-        <Figure1Step1 width={111} height={175} color="#F4C9FF" style={{ position: 'absolute', top: 90, left: -50 }} />
-        <Figure2Step1 width={213.29} height={93.1} color="#DF61FF" style={{ position: 'absolute', top: -40, left: 0 }} />
-        <Figure3Step1 width={70.49} height={150.37} color="#C180F4" style={{ position: 'absolute', top: 20, right: 0, transform: [{ scale: 1.4 }] }} />
-        <Figure4Step3 width={310} height={286} color="#FF7171" style={{ position: 'absolute', top: 200, right: -165, transform: [{"scale":0.6}] }} />
+        {FIGS.map((f) => {
+          const Comp = f.Component;
+          const styleAnim = makePoseStyle(f);
+          return (
+            <Comp
+              key={f.key}
+              width={f.size.width}
+              height={f.size.height}
+              color={f.color}
+              pointerEvents="none"
+              style={styleAnim}
+            />
+          );
+        })}
+
         <Animated.FlatList
           ref={pagerRef}
           data={SLIDES}
@@ -68,11 +196,13 @@ export default function OnboardingScreen({ navigation }: any) {
           pagerRef={pagerRef}
           total={SLIDES.length}
           width={width}
-          onFinish={() => {/* navega pra Home */}}
+          onFinish={() => { /* navegar para Home */ }}
         />
       </SafeAreaView>
     </Animated.View>
   );
 }
 
-const styles = StyleSheet.create({ container: { flex: 1 } });
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+});
