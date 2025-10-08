@@ -13,7 +13,9 @@ export const SlideHero = (p: CommonSlideProps) => {
   const { item } = p;
   return (
     <BaseSlide {...p}>
-      <Step1Svg width={428} height={448} />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'flex-end', flexDirection: 'row' }}>
+        <Step1Svg width={428} height={448} />
+      </View>
     </BaseSlide>
   );
 };
@@ -123,5 +125,5 @@ const styles = StyleSheet.create({
   header: { paddingHorizontal: 24 },
   title: { fontSize: 40, color: '#000', fontFamily: 'Poppins-ExtraBold' },
   subtitle: { fontSize: 16, color: '#3C3C3C', fontFamily: 'Poppins-Medium' },
-  illustrationBox: { flex: 1, flexDirection: 'row', justifyContent: 'center' },
+  illustrationBox: { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-end' },
 });
