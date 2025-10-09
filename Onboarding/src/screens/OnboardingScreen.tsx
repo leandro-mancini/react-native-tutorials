@@ -68,7 +68,7 @@ const FIGS: FigSpec[] = [
     color: '#DF61FF',
     poses: [
       { top: -30, left: -20, scale: 1 },
-      { top: -20, left: -20, scale: 1, rotate: -60 },
+      { top: 0, left: 0, scale: 1.2, rotate: -60 },
       { top: -35, left: -90, scale: 1.6, rotate: 10},
     ],
   },
