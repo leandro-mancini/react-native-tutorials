@@ -56,9 +56,9 @@ const FIGS: FigSpec[] = [
       // step 0 (valores atuais)
       { top: 90, left: -50, scale: 1 },
       // step 1
-      { top: 110, left: -20, scale: 1 },
+      { top: 110, left: -80, scale: 1, rotate: 50, },
       // step 2
-      { top: 85, left: -70, scale: 1 },
+      { top: 300, left: -50, scale: 1, rotate: 160, },
     ],
   },
   {
@@ -67,9 +67,9 @@ const FIGS: FigSpec[] = [
     size: { width: 213.29, height: 93.1 },
     color: '#DF61FF',
     poses: [
-      { top: -40, left: 0, scale: 1 },
-      { top: -20, left: 12, scale: 1 },
-      { top: -35, left: -8, scale: 1 },
+      { top: -30, left: -20, scale: 1 },
+      { top: -20, left: -20, scale: 1, rotate: -60 },
+      { top: -35, left: -90, scale: 1.6, rotate: 10},
     ],
   },
   {
@@ -79,8 +79,8 @@ const FIGS: FigSpec[] = [
     color: '#C180F4',
     poses: [
       { top: 20, right: 0, scale: 1.4 },
-      { top: 8, right: -10, scale: 1.35 },
-      { top: 16, right: 8, scale: 1.4 },
+      { top: 30, right: 0, scale: 1.8, rotate: -160 },
+      { top: 30, right: 20, scale: 2.2, rotate: -290 },
     ],
   },
   {
@@ -90,9 +90,9 @@ const FIGS: FigSpec[] = [
     color: '#FF7171',
     poses: [
       // aparece desde o step 0 já fora da tela, entra no step 2
-      { top: 200, right: -165, scale: 0.6 },
-      { top: 210, right: -150, scale: 0.6 },
-      { top: 220, right: -140, scale: 0.6 },
+      { top: 200, right: -300, scale: 0.6 },
+      { top: 180, right: -195, scale: 0.6, rotate: 40 },
+      { top: 220, right: -170, scale: 0.6, rotate: 5},
     ],
   },
 ];

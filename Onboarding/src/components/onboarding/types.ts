@@ -1,4 +1,3 @@
-import type { StyleProp, ViewStyle } from 'react-native';
 import { SharedValue } from 'react-native-reanimated';
 
 export type Slide = {
@@ -6,9 +5,6 @@ export type Slide = {
   title: string;
   subtitle: string;
   bg: string;
-  lottie: any;
-  lottieStyle?: StyleProp<ViewStyle>;
-  lottieBoxStyle?: StyleProp<ViewStyle>;
   render?: React.ComponentType<CommonSlideProps>;
 };
 

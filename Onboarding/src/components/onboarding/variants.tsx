@@ -7,6 +7,8 @@ import Animated, { useAnimatedStyle, useDerivedValue } from 'react-native-reanim
 const AnimatedText = Animated.createAnimatedComponent(Text);
 
 import Step1Svg from '../../../assets/svg/onboarding_step1.svg';
+import Step2Svg from '../../../assets/svg/onboarding_step2.svg';
+import Step3Svg from '../../../assets/svg/onboarding_step3.svg';
 
 // 1) Reaproveita SlideItem padrão (atalho)
 export const SlideHero = (p: CommonSlideProps) => {
@@ -24,12 +26,11 @@ export const SlideHero = (p: CommonSlideProps) => {
 export const SlideLeftImage = (p: CommonSlideProps) => {
   const { item } = p;
   return (
-    <BaseSlide
-      {...p}
-      lottieBoxStyle={[{ justifyContent: 'flex-end' }, item.lottieBoxStyle]}
-      lottieStyle={[{ alignSelf: 'flex-start', marginLeft: 12, transform: [{ scale: 1.12 }] }, item.lottieStyle]}
-      titleAlign="left"
-    />
+    <BaseSlide {...p}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'flex-end', flexDirection: 'row', transform: [{"translateX":-15},{"translateY":30}] }}>
+        <Step2Svg width={428} height={448} />
+      </View>
+    </BaseSlide>
   );
 };
 
@@ -37,23 +38,20 @@ export const SlideLeftImage = (p: CommonSlideProps) => {
 export const SlideBottomBig = (p: CommonSlideProps) => {
   const { item } = p;
   return (
-    <BaseSlide
-      {...p}
-      lottieBoxStyle={[{ justifyContent: 'flex-end', paddingBottom: 6 }, item.lottieBoxStyle]}
-      lottieStyle={[{ alignSelf: 'center', transform: [{ scale: 1.18 }] }, item.lottieStyle]}
-      titleAlign="center"
-    />
+    <BaseSlide {...p}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'flex-end', flexDirection: 'row', transform: [{"translateY":15}] }}>
+        <Step3Svg width={428} height={448} />
+      </View>
+    </BaseSlide>
   );
 };
 
 /** Base estruturante para variantes simples */
 const BaseSlide = ({
   item, index, x, width,
-  lottieBoxStyle, lottieStyle, titleAlign = 'left',
+  titleAlign = 'left',
   children,
 }: CommonSlideProps & {
-  lottieBoxStyle?: any;
-  lottieStyle?: any;
   titleAlign?: 'left' | 'center';
   children?: React.ReactNode;
 }) => {
@@ -109,7 +107,7 @@ const BaseSlide = ({
 
   return (
     <View style={{ flex: 1, width }}>
-      <View style={[styles.illustrationBox, lottieBoxStyle]}>
+      <View style={[styles.illustrationBox]}>
         {children}
       </View>
 
