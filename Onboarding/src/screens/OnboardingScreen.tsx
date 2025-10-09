@@ -21,10 +21,18 @@ import Figure2Step1 from '../../assets/svg/figure2-step1.svg';
 import Figure3Step1 from '../../assets/svg/figure3-step1.svg';
 import Figure4Step3 from '../../assets/svg/figure4-step3.svg';
 
+import Ball1 from '../../assets/svg/ball1.svg';
+import Ball2 from '../../assets/svg/ball2.svg';
+import Ball3 from '../../assets/svg/ball3.svg';
+
 const AF1 = Animated.createAnimatedComponent(Figure1Step1 as any);
 const AF2 = Animated.createAnimatedComponent(Figure2Step1 as any);
 const AF3 = Animated.createAnimatedComponent(Figure3Step1 as any);
 const AF4 = Animated.createAnimatedComponent(Figure4Step3 as any);
+
+const AB1 = Animated.createAnimatedComponent(Ball1 as any);
+const AB2 = Animated.createAnimatedComponent(Ball2 as any);
+const AB3 = Animated.createAnimatedComponent(Ball3 as any);
 
 const { width } = Dimensions.get('window');
 const STEPS = SLIDES.length;
@@ -35,6 +43,7 @@ type Pose = {
   right?: number;
   scale?: number;
   rotate?: number; // em graus
+  color?: string;
 };
 type FigSpec = {
   key: string;
@@ -95,6 +104,49 @@ const FIGS: FigSpec[] = [
       { top: 220, right: -170, scale: 0.6, rotate: 5},
     ],
   },
+
+  {
+    key: 'b1',
+    Component: AB1,
+    size: { width: 32, height: 32 },
+    color: '#6BB8FF',
+    poses: [
+      // step 0 (valores atuais)
+      { top: 115, left: 77, scale: 0.8 },
+      // step 1
+      { top: 120, left: 220, scale: 1, color: '#ECE9A4' },
+      // step 2
+      { top: 315, left: 30, scale: 1, color: '#FFC966' },
+    ],
+  },
+  {
+    key: 'b2',
+    Component: AB2,
+    size: { width: 18, height: 18 },
+    color: '#FF5CA1',
+    poses: [
+      // step 0 (valores atuais)
+      { top: 220, left: 270, scale: 1 },
+      // step 1
+      { top: 405, left: 60, scale: 1, color: '#FF5CA1' },
+      // step 2
+      { top: 355, left: 250, scale: 1.8, color: '#FC825A' },
+    ],
+  },
+  {
+    key: 'b3',
+    Component: AB3,
+    size: { width: 29, height: 29 },
+    color: '#1E9E9A',
+    poses: [
+      // step 0 (valores atuais)
+      { top: 405, left: 60, scale: 1 },
+      // step 1
+      { top: 185, left: 315, scale: 1 },
+      // step 2
+      { top: 135, left: 77, scale: 1.4 },
+    ],
+  },
 ];
 
 // util: carrega valor do step, herdando do anterior se faltar
@@ -136,6 +188,7 @@ export default function OnboardingScreen({ navigation }: any) {
     const sRight = toSeries(fig.poses, 'right', STEPS);
     const sScale = toSeries(fig.poses, 'scale', STEPS) ?? new Array(STEPS).fill(1);
     const sRot = toSeries(fig.poses, 'rotate', STEPS) ?? new Array(STEPS).fill(0);
+    const sColor = toSeries(fig.poses, 'color', STEPS);
 
     return useAnimatedStyle(() => {
       const i = x.value / width;
@@ -144,6 +197,7 @@ export default function OnboardingScreen({ navigation }: any) {
       if (sTop)   style.top   = interpolate(i, indices, sTop,   Extrapolation.CLAMP);
       if (sLeft)  style.left  = interpolate(i, indices, sLeft,  Extrapolation.CLAMP);
       if (sRight) style.right = interpolate(i, indices, sRight, Extrapolation.CLAMP);
+      if (sColor) style.color = interpolateColor(i, indices, sColor);
 
       const scale  = interpolate(i, indices, sScale, Extrapolation.CLAMP);
       const rotate = interpolate(i, indices, sRot,   Extrapolation.CLAMP);
