@@ -4,16 +4,22 @@ import { SharedValue } from 'react-native-reanimated';
 import { Dot } from './Dot';
 import { NextIconButton } from './NextIconButton';
 
-export function Footer({ x, pagerRef, total, width, onFinish }: {
+export function Footer({ x, pagerRef, total, width, onFinish, onNext }: {
   x: SharedValue<number>;
   pagerRef: React.RefObject<any>;
   total: number;
   width: number;
   onFinish?: () => void;
+  onNext?: () => void;
 }) {
   const getIndex = () => Math.round(x.value / width);
 
   const handleNext = () => {
+    if (onNext) {
+      onNext();                         // usa animação com 800ms
+      return;
+    }
+
     const i = getIndex();
     if (i < total - 1) {
       pagerRef.current?.scrollToIndex?.({ index: i + 1, animated: true });

@@ -1,15 +1,18 @@
-// OnboardingScreen.tsx
 import React, { useMemo } from 'react';
 import { Dimensions, SafeAreaView, StatusBar, StyleSheet } from 'react-native';
 import Animated, {
+  Easing,
   Extrapolation,
   interpolate,
   interpolateColor,
+  scrollTo,
   useAnimatedProps,
   useAnimatedRef,
   useAnimatedScrollHandler,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 
 import { Footer } from '../components/onboarding/Footer';
@@ -38,12 +41,15 @@ const AB3 = Animated.createAnimatedComponent(Ball3 as any);
 const { width } = Dimensions.get('window');
 const STEPS = SLIDES.length;
 
+const TRANSITION_MS = 800;
+const TRANSITION_EASING = Easing.out(Easing.cubic);
+
 type Pose = {
   top?: number;
-  left?: number;  // use left OU right
+  left?: number;
   right?: number;
   scale?: number;
-  rotate?: number; // em graus
+  rotate?: number;
   fill?: string;
 };
 type FigSpec = {
@@ -51,11 +57,9 @@ type FigSpec = {
   Component: any;
   size: { width: number; height: number };
   fill: string;
-  // poses por step (0..STEPS-1)
   poses: Pose[];
 };
 
-// 🔧 CONFIGURÁVEL POR STEP
 const FIGS: FigSpec[] = [
   {
     key: 'f1',
@@ -63,11 +67,8 @@ const FIGS: FigSpec[] = [
     size: { width: 111, height: 175 },
     fill: '#F4C9FF',
     poses: [
-      // step 0 (valores atuais)
       { top: 90, left: -50, scale: 1, fill: '#F4C9FF' },
-      // step 1
       { top: 110, left: -80, scale: 1, rotate: 50, fill: '#5977A5' },
-      // step 2
       { top: 300, left: -50, scale: 1, rotate: 160, fill: '#F24BAF' },
     ],
   },
@@ -99,7 +100,6 @@ const FIGS: FigSpec[] = [
     size: { width: 310, height: 286 },
     fill: '#FF7171',
     poses: [
-      // aparece desde o step 0 já fora da tela, entra no step 2
       { top: 200, right: -300, scale: 0.6 },
       { top: 180, right: -195, scale: 0.6, rotate: 40 },
       { top: 220, right: -170, scale: 0.6, rotate: 5},
@@ -112,11 +112,8 @@ const FIGS: FigSpec[] = [
     size: { width: 32, height: 32 },
     fill: '#6BB8FF',
     poses: [
-      // step 0 (valores atuais)
       { top: 115, left: 77, scale: 0.8 },
-      // step 1
       { top: 120, left: 220, scale: 1, fill: '#ECE9A4' },
-      // step 2
       { top: 315, left: 30, scale: 1, fill: '#FFC966' },
     ],
   },
@@ -126,11 +123,8 @@ const FIGS: FigSpec[] = [
     size: { width: 18, height: 18 },
     fill: '#FF5CA1',
     poses: [
-      // step 0 (valores atuais)
       { top: 220, left: 270, scale: 1 },
-      // step 1
       { top: 405, left: 60, scale: 1, fill: '#FF5CA1' },
-      // step 2
       { top: 355, left: 250, scale: 1.8, fill: '#FC825A' },
     ],
   },
@@ -140,17 +134,13 @@ const FIGS: FigSpec[] = [
     size: { width: 29, height: 29 },
     fill: '#1E9E9A',
     poses: [
-      // step 0 (valores atuais)
       { top: 405, left: 60, scale: 1 },
-      // step 1
       { top: 185, left: 315, scale: 1 },
-      // step 2
       { top: 135, left: 77, scale: 1.4 },
     ],
   },
 ];
 
-// util: carrega valor do step, herdando do anterior se faltar
 function toSeries(poses: Pose[], prop: keyof Pose, steps: number): number[] | null {
   const out: (number | undefined)[] = new Array(steps).fill(undefined);
   let last: number | undefined = undefined;
@@ -159,7 +149,6 @@ function toSeries(poses: Pose[], prop: keyof Pose, steps: number): number[] | nu
     if (typeof v === 'number') last = v;
     out[i] = last;
   }
-  // se nenhum step definiu esse prop, não interpola
   const any = out.some((v) => typeof v === 'number');
   if (!any) return null;
   return out.map((v) => (typeof v === 'number' ? v : 0));
@@ -180,6 +169,15 @@ export default function OnboardingScreen({ navigation }: any) {
   const pagerRef = useAnimatedRef<Animated.FlatList<any>>();
   const x = useSharedValue(0);
 
+  const autoX = useSharedValue(-1);
+
+  useDerivedValue(() => {
+    const v = autoX.value;
+    if (v >= 0) {
+      scrollTo(pagerRef, v, 0, false);
+    }
+  }, []);
+
   const onScroll = useAnimatedScrollHandler({
     onScroll: (e) => { x.value = e.contentOffset.x; },
   });
@@ -193,7 +191,26 @@ export default function OnboardingScreen({ navigation }: any) {
     };
   });
 
-  // cria style animado por figura a partir das séries por step
+  const goNext = () => {
+    const i = Math.round(x.value / width);
+    if (i < STEPS - 1) {
+      const target = (i + 1) * width;
+
+      autoX.value = x.value;
+
+      autoX.value = withTiming(
+        target,
+        { duration: TRANSITION_MS, easing: TRANSITION_EASING },
+        (finished) => { if (finished) autoX.value = -1; }
+      );
+    } else {
+      // último slide
+      // navigation.replace('Home') // se quiser
+    }
+  };
+
+  const onScrollBeginDrag = () => { autoX.value = -1; };
+
   const makePoseStyle = (fig: FigSpec) => {
     const sTop = toSeries(fig.poses, 'top', STEPS);
     const sLeft = toSeries(fig.poses, 'left', STEPS);
@@ -218,11 +235,10 @@ export default function OnboardingScreen({ navigation }: any) {
       return style;
     });
 
-    // 🎨 animação de FILL via props do SVG
     const animatedProps = useAnimatedProps(() => {
       const i = x.value / width;
-      const color = interpolateColor(i, indices, sFill); // séries por step
-      return { color } as any; // <<<<<< ANIME 'color' NO ROOT <Svg>
+      const color = interpolateColor(i, indices, sFill);
+      return { color } as any;
     });
 
     return { styleAnim, animatedProps };
@@ -272,6 +288,7 @@ export default function OnboardingScreen({ navigation }: any) {
           pagerRef={pagerRef}
           total={SLIDES.length}
           width={width}
+          onNext={goNext}
           onFinish={() => { /* navegar para Home */ }}
         />
       </SafeAreaView>
