@@ -5,6 +5,7 @@ import Animated, {
   Extrapolation,
   interpolate,
   interpolateColor,
+  useAnimatedProps,
   useAnimatedRef,
   useAnimatedScrollHandler,
   useAnimatedStyle,
@@ -43,13 +44,13 @@ type Pose = {
   right?: number;
   scale?: number;
   rotate?: number; // em graus
-  color?: string;
+  fill?: string;
 };
 type FigSpec = {
   key: string;
   Component: any;
   size: { width: number; height: number };
-  color: string;
+  fill: string;
   // poses por step (0..STEPS-1)
   poses: Pose[];
 };
@@ -60,43 +61,43 @@ const FIGS: FigSpec[] = [
     key: 'f1',
     Component: AF1,
     size: { width: 111, height: 175 },
-    color: '#F4C9FF',
+    fill: '#F4C9FF',
     poses: [
       // step 0 (valores atuais)
-      { top: 90, left: -50, scale: 1 },
+      { top: 90, left: -50, scale: 1, fill: '#F4C9FF' },
       // step 1
-      { top: 110, left: -80, scale: 1, rotate: 50, },
+      { top: 110, left: -80, scale: 1, rotate: 50, fill: '#5977A5' },
       // step 2
-      { top: 300, left: -50, scale: 1, rotate: 160, },
+      { top: 300, left: -50, scale: 1, rotate: 160, fill: '#F24BAF' },
     ],
   },
   {
     key: 'f2',
     Component: AF2,
     size: { width: 213.29, height: 93.1 },
-    color: '#DF61FF',
+    fill: '#DF61FF',
     poses: [
-      { top: -30, left: -20, scale: 1 },
-      { top: 0, left: 0, scale: 1.2, rotate: -60 },
-      { top: -35, left: -90, scale: 1.6, rotate: 10},
+      { top: -30, left: -20, scale: 1, fill: '#DF61FF' },
+      { top: 0, left: 0, scale: 1.2, rotate: -60, fill: '#B34DCD' },
+      { top: -35, left: -90, scale: 1.6, rotate: 10, fill: '#B34DCD' },
     ],
   },
   {
     key: 'f3',
     Component: AF3,
     size: { width: 70.49, height: 150.37 },
-    color: '#C180F4',
+    fill: '#C180F4',
     poses: [
-      { top: 20, right: 0, scale: 1.4 },
-      { top: 30, right: 0, scale: 1.8, rotate: -160 },
-      { top: 30, right: 20, scale: 2.2, rotate: -290 },
+      { top: 20, right: 0, scale: 1.4, fill: '#C180F4' },
+      { top: 30, right: 0, scale: 1.8, rotate: -160, fill: '#B04BFF' },
+      { top: 30, right: 20, scale: 2.2, rotate: -290, fill: '#B04BFF' },
     ],
   },
   {
     key: 'f4',
     Component: AF4,
     size: { width: 310, height: 286 },
-    color: '#FF7171',
+    fill: '#FF7171',
     poses: [
       // aparece desde o step 0 já fora da tela, entra no step 2
       { top: 200, right: -300, scale: 0.6 },
@@ -109,35 +110,35 @@ const FIGS: FigSpec[] = [
     key: 'b1',
     Component: AB1,
     size: { width: 32, height: 32 },
-    color: '#6BB8FF',
+    fill: '#6BB8FF',
     poses: [
       // step 0 (valores atuais)
       { top: 115, left: 77, scale: 0.8 },
       // step 1
-      { top: 120, left: 220, scale: 1, color: '#ECE9A4' },
+      { top: 120, left: 220, scale: 1, fill: '#ECE9A4' },
       // step 2
-      { top: 315, left: 30, scale: 1, color: '#FFC966' },
+      { top: 315, left: 30, scale: 1, fill: '#FFC966' },
     ],
   },
   {
     key: 'b2',
     Component: AB2,
     size: { width: 18, height: 18 },
-    color: '#FF5CA1',
+    fill: '#FF5CA1',
     poses: [
       // step 0 (valores atuais)
       { top: 220, left: 270, scale: 1 },
       // step 1
-      { top: 405, left: 60, scale: 1, color: '#FF5CA1' },
+      { top: 405, left: 60, scale: 1, fill: '#FF5CA1' },
       // step 2
-      { top: 355, left: 250, scale: 1.8, color: '#FC825A' },
+      { top: 355, left: 250, scale: 1.8, fill: '#FC825A' },
     ],
   },
   {
     key: 'b3',
     Component: AB3,
     size: { width: 29, height: 29 },
-    color: '#1E9E9A',
+    fill: '#1E9E9A',
     poses: [
       // step 0 (valores atuais)
       { top: 405, left: 60, scale: 1 },
@@ -164,6 +165,17 @@ function toSeries(poses: Pose[], prop: keyof Pose, steps: number): number[] | nu
   return out.map((v) => (typeof v === 'number' ? v : 0));
 }
 
+function toColorSeries(poses: Pose[], steps: number, fallback: string): string[] {
+  const out: (string | undefined)[] = new Array(steps).fill(undefined);
+  let last: string | undefined = fallback;
+  for (let i = 0; i < steps; i++) {
+    const v = poses[i]?.fill;
+    if (typeof v === 'string') last = v;
+    out[i] = last;
+  }
+  return out.map((v) => v ?? fallback);
+}
+
 export default function OnboardingScreen({ navigation }: any) {
   const pagerRef = useAnimatedRef<Animated.FlatList<any>>();
   const x = useSharedValue(0);
@@ -188,23 +200,32 @@ export default function OnboardingScreen({ navigation }: any) {
     const sRight = toSeries(fig.poses, 'right', STEPS);
     const sScale = toSeries(fig.poses, 'scale', STEPS) ?? new Array(STEPS).fill(1);
     const sRot = toSeries(fig.poses, 'rotate', STEPS) ?? new Array(STEPS).fill(0);
-    const sColor = toSeries(fig.poses, 'color', STEPS);
+    
+    const sFill  = toColorSeries(fig.poses, STEPS, fig.fill);
 
-    return useAnimatedStyle(() => {
+    const styleAnim = useAnimatedStyle(() => {
       const i = x.value / width;
       const style: any = { position: 'absolute' };
 
       if (sTop)   style.top   = interpolate(i, indices, sTop,   Extrapolation.CLAMP);
       if (sLeft)  style.left  = interpolate(i, indices, sLeft,  Extrapolation.CLAMP);
       if (sRight) style.right = interpolate(i, indices, sRight, Extrapolation.CLAMP);
-      if (sColor) style.color = interpolateColor(i, indices, sColor);
 
       const scale  = interpolate(i, indices, sScale, Extrapolation.CLAMP);
       const rotate = interpolate(i, indices, sRot,   Extrapolation.CLAMP);
-
       style.transform = [{ scale }, { rotate: `${rotate}deg` }];
+
       return style;
     });
+
+    // 🎨 animação de FILL via props do SVG
+    const animatedProps = useAnimatedProps(() => {
+      const i = x.value / width;
+      const color = interpolateColor(i, indices, sFill); // séries por step
+      return { color } as any; // <<<<<< ANIME 'color' NO ROOT <Svg>
+    });
+
+    return { styleAnim, animatedProps };
   };
 
   const renderItem = ({ item, index }: { item: Slide; index: number }) => {
@@ -219,15 +240,16 @@ export default function OnboardingScreen({ navigation }: any) {
       <SafeAreaView style={{ flex: 1, position: 'relative' }}>
         {FIGS.map((f) => {
           const Comp = f.Component;
-          const styleAnim = makePoseStyle(f);
+          const { styleAnim, animatedProps } = makePoseStyle(f);
           return (
             <Comp
               key={f.key}
               width={f.size.width}
               height={f.size.height}
-              color={f.color}
+              color={f.fill}
               pointerEvents="none"
               style={styleAnim}
+              animatedProps={animatedProps}
             />
           );
         })}
