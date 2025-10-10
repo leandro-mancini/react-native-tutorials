@@ -2,6 +2,8 @@
 
 Este guia mostra, passo a passo, como montar a interface do app LoginAnimated: instalar bibliotecas, configurar o projeto, criar os componentes base, montar as telas e ajustar as animações.
 
+<img width="1096" height="777" alt="from-splash-to-login-a-lively-and-consistent-flow-in-react-native" src="https://github.com/user-attachments/assets/8545e2dd-8ea2-4edf-8b9e-adb82332ac3f" />
+
 ## Sumário
 
 - [Pré‑requisitos](#pré‑requisitos)
