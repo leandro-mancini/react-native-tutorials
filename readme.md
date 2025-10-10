@@ -28,6 +28,12 @@ Cada aplicação neste repositório aborda um cenário específico e demonstra c
 <img width="1815" height="1091" alt="Frame 1" src="https://github.com/user-attachments/assets/c3898a5b-ac64-4b19-babd-665e9d8eaa86" />
 </a>
 
+### 🔹 **5. Dark/Light Mode Animated**
+
+<a href="./DarkLightAnimated">
+<img width="1404" height="1080" alt="toggle swith" src="https://github.com/user-attachments/assets/85d0bd9b-6745-49bf-8112-15ef836a43a7" />
+</a>
+
 
 ## 🛠️ Como Utilizar
 Cada aplicação neste repositório serve como referência para implementação de funcionalidades no React Native.
