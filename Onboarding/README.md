@@ -1,97 +1,273 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Tutorial passo a passo para criar a interface de onboarding animada (React Native)
 
-# Getting Started
+Este guia mostra, passo a passo, como montar a interface do app Onboarding: instalar bibliotecas, configurar o projeto, criar os componentes base, montar os slides e ajustar as animações.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Sumário
 
-## Step 1: Start Metro
+- [Pré‑requisitos](#pré‑requisitos)
+- [Passo 1 — Instalar dependências](#passo-1--instalar-dependências)
+- [Passo 2 — Configurar Babel e entrada do app](#passo-2--configurar-babel-e-entrada-do-app)
+- [Passo 3 — Configurar Metro para SVG](#passo-3--configurar-metro-para-svg)
+- [Passo 4 — Adicionar assets (SVG e fontes)](#passo-4--adicionar-assets-svg-e-fontes)
+- [Passo 5 — Estruturar slides e componentes](#passo-5--estruturar-slides-e-componentes)
+- [Como executar](#como-executar)
+- [Solução de problemas](#solução-de-problemas)
+- [Estrutura final de arquivos (referência)](#estrutura-final-de-arquivos-referência)
+- [Códigos completos](#códigos-completos)
+- [Referências](#referências)
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Demo
 
-To start the Metro dev server, run the following command from the root of your React Native project:
 
-```sh
-# Using npm
-npm start
 
-# OR using Yarn
-yarn start
+## Pré‑requisitos
+
+- Node 20+, Java 17 (Android), Xcode + CocoaPods (iOS), Watchman (macOS)
+- React Native CLI (ou use o projeto deste repositório)
+
+## Passo 1 — Instalar dependências
+
+No diretório do app:
+
+```bash
+npm i react-native-gesture-handler react-native-reanimated \
+  react-native-safe-area-context react-native-svg \
+  lucide-react-native react-native-linear-gradient \
+  @react-native-community/blur react-native-worklets
 ```
 
-## Step 2: Build and run your app
+iOS (CocoaPods):
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+```bash
+cd ios && pod install && cd ..
+```
 
-### Android
+Observação: este template usa SVGs como componentes (via `react-native-svg` + `react-native-svg-transformer`).
 
-```sh
-# Using npm
+## Passo 2 — Configurar Babel e entrada do app
+
+Arquivo `babel.config.js` (habilita Worklets/Reanimated):
+
+```js
+module.exports = {
+  presets: ['module:@react-native/babel-preset'],
+  plugins: ['react-native-worklets/plugin'],
+};
+```
+
+Arquivo `index.js` (recomenda-se importar no topo):
+
+```js
+import 'react-native-gesture-handler';
+import 'react-native-reanimated';
+```
+
+No `App.tsx`, envolva com `GestureHandlerRootView` (já feito no projeto) e renderize a tela de onboarding.
+
+## Passo 3 — Configurar Metro para SVG
+
+Permite importar `.svg` como componentes React Native:
+
+```js
+// metro.config.js
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+
+const defaultConfig = getDefaultConfig(__dirname);
+const { assetExts, sourceExts } = defaultConfig.resolver;
+
+const config = {
+  transformer: {
+    babelTransformerPath: require.resolve('react-native-svg-transformer'),
+  },
+  resolver: {
+    assetExts: assetExts.filter(ext => ext !== 'svg'),
+    sourceExts: [...sourceExts, 'svg'],
+  },
+};
+
+module.exports = mergeConfig(defaultConfig, config);
+```
+
+## Passo 4 — Adicionar assets (SVG e fontes)
+
+- Coloque os SVGs em `assets/svg/` (ex.: `figure1-step1.svg`, `ball1.svg`, etc.).
+- Adicione fontes em `assets/fonts/` (ex.: `Poppins-Medium.ttf`, `Poppins-ExtraBold.ttf`).
+- Garanta o mapeamento em `react-native.config.js`:
+
+```js
+module.exports = { assets: ['./assets/fonts'] };
+```
+
+- Linkar assets (uma vez):
+
+```bash
+npx react-native-asset
+```
+
+## Passo 5 — Estruturar slides e componentes
+
+A tela principal (`src/screens/OnboardingScreen.tsx`) usa:
+
+- FlatList paginada com `pagingEnabled` + `react-native-reanimated` para interpolar cores e posições.
+- Um conjunto de figuras/bolas SVG animadas com poses por etapa (arrays de `top/left/right/scale/rotate/fill`).
+- Rodapé (`Footer`) com dots e botão “Próximo/Concluir”.
+
+Definição dos slides em `src/constants/onboardingSlides.ts`:
+
+```ts
+import { Slide } from '../components/onboarding/types';
+import { SlideHero, SlideLeftImage, SlideBottomBig } from '../components/onboarding/variants';
+
+export const SLIDES: Slide[] = [
+  {
+    key: 'a',
+    title: 'Expresse sua criatividade',
+    subtitle: 'Expresse sua criatividade usando nosso aplicativo e usando nossos serviços premium',
+    bg: '#EA94FF',
+    render: SlideHero,
+  },
+  {
+    key: 'b',
+    title: 'Compre com facilidade',
+    subtitle: 'Nossa interface de usuário do aplicativo tornará sua experiência de compra tranquila e sem anúncios.',
+    bg: '#B795FF',
+    render: SlideLeftImage,
+  },
+  {
+    key: 'c',
+    title: 'Comunique-se com facilidade',
+    subtitle: 'Comunique-se usando nosso aplicativo para entrar em contato com outras pessoas em todo o mundo.',
+    bg: '#FFBBBB',
+    render: SlideBottomBig,
+  },
+];
+```
+
+Os componentes de slide ficam em `src/components/onboarding/` (`SlideItem`, `variants.tsx`, `Footer`, `Dot`, etc.).
+
+## Como executar
+
+```bash
+npm install
+cd ios && pod install && cd ..
+npx react-native-asset
+npm run start
+npm run ios      # ou
 npm run android
-
-# OR using Yarn
-yarn android
 ```
 
-### iOS
+## Solução de problemas
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+- Reanimated/Worklets: confirme o plugin no `babel.config.js` e a importação em `index.js`.
+- Metro/SVG: se “unable to resolve svg”, confira o `metro.config.js` e limpe o cache:
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+```bash
+npm start -- --reset-cache
 ```
 
-Then, and every time you update your native dependencies, run:
+- iOS Pods: após alterar libs nativas:
 
-```sh
-bundle exec pod install
+```bash
+cd ios && pod install
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+- Fontes: rode `npx react-native-asset` e reinstale o app se não aplicar.
 
-```sh
-# Using npm
-npm run ios
+## Estrutura final de arquivos (referência)
 
-# OR using Yarn
-yarn ios
+```
+Onboarding/
+  App.tsx
+  index.js
+  babel.config.js
+  metro.config.js
+  react-native.config.js
+  assets/
+    fonts/ (Poppins-Medium.ttf, Poppins-ExtraBold.ttf)
+    svg/   (figure1-step1.svg, figure2-step1.svg, figure3-step1.svg, figure4-step3.svg, ball1.svg, ball2.svg, ball3.svg)
+  src/
+    screens/
+      OnboardingScreen.tsx
+    components/
+      onboarding/
+        Footer.tsx
+        Dot.tsx
+        NextIconButton.tsx
+        SlideItem.tsx
+        variants.tsx
+      Step1.tsx
+    constants/
+      onboardingSlides.ts
+    types/
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## Códigos completos
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+### App.tsx
 
-## Step 3: Modify your app
+```tsx
+import React from 'react';
+import { StatusBar, StyleSheet } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import OnboardingScreen from './src/screens/OnboardingScreen';
 
-Now that you have successfully run the app, let's make changes!
+export default function App() {
+  return (
+    <GestureHandlerRootView style={styles.root}>
+      <StatusBar barStyle="light-content" />
+      <OnboardingScreen />
+    </GestureHandlerRootView>
+  );
+}
+const styles = StyleSheet.create({ root: { flex: 1, backgroundColor: '#000' } });
+```
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+### index.js (entrada)
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+```js
+import 'react-native-gesture-handler';
+import 'react-native-reanimated';
+import { AppRegistry } from 'react-native';
+import App from './App';
+import { name as appName } from './app.json';
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+AppRegistry.registerComponent(appName, () => App);
+```
 
-## Congratulations! :tada:
+### metro.config.js (SVG transformer)
 
-You've successfully run and modified your React Native App. :partying_face:
+```js
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const defaultConfig = getDefaultConfig(__dirname);
+const { assetExts, sourceExts } = defaultConfig.resolver;
 
-### Now what?
+const config = {
+  transformer: { babelTransformerPath: require.resolve('react-native-svg-transformer') },
+  resolver: { assetExts: assetExts.filter((ext) => ext !== 'svg'), sourceExts: [...sourceExts, 'svg'] },
+};
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+module.exports = mergeConfig(defaultConfig, config);
+```
 
-# Troubleshooting
+### src/constants/onboardingSlides.ts (exemplo)
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+```ts
+import { Slide } from '../components/onboarding/types';
+import { SlideHero, SlideLeftImage, SlideBottomBig } from '../components/onboarding/variants';
 
-# Learn More
+export const SLIDES: Slide[] = [
+  { key: 'a', title: 'Expresse sua criatividade', subtitle: '...', bg: '#EA94FF', render: SlideHero },
+  { key: 'b', title: 'Compre com facilidade',     subtitle: '...', bg: '#B795FF', render: SlideLeftImage },
+  { key: 'c', title: 'Comunique-se com facilidade', subtitle: '...', bg: '#FFBBBB', render: SlideBottomBig },
+];
+```
 
-To learn more about React Native, take a look at the following resources:
+> Consulte o código completo das telas e componentes no diretório `src/` deste projeto.
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+## Referências
+
+- React Native: https://reactnative.dev/
+- Reanimated + Worklets: https://docs.swmansion.com/react-native-reanimated/
+- React Native SVG: https://docs.expo.dev/versions/latest/sdk/svg/
+- react-native-svg-transformer: https://github.com/kristerkari/react-native-svg-transformer
+- react-native-gesture-handler: https://docs.swmansion.com/react-native-gesture-handler/
