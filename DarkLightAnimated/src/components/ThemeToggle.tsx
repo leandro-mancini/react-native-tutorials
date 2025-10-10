@@ -12,14 +12,13 @@ import Animated, {
 import { tokens } from '../theme/tokens';
 
 type Props = {
-  progress: SharedValue<number>;       // 0 = off(light) | 1 = on(dark)
+  progress: SharedValue<number>;
   onToggle(): void;
   width?: number;
   height?: number;
 };
 
 export const ThemeToggle = memo(({ progress, onToggle, width = 180, height = 100 }: Props) => {
-  // dimensões derivadas
   const R = height / 2;
   const PADDING = Math.max(6, Math.round(height * 0.125));
   const KNOB = height - PADDING * 2;
@@ -27,17 +26,15 @@ export const ThemeToggle = memo(({ progress, onToggle, width = 180, height = 100
 
   const pressed = useSharedValue(0);
 
-  // trilho: cinza → azul
   const trackStyle = useAnimatedStyle(() => {
     const bg = interpolateColor(
       progress.value,
       [0, 1],
-      ['#D6D6D6', tokens.dark.accent] // azul do layout
+      ['#D6D6D6', tokens.dark.accent]
     );
     return { backgroundColor: bg };
   });
 
-  // knob: anel no OFF, sem anel no ON; bounce no press
   const knobStyle = useAnimatedStyle(() => {
     const x = interpolate(
       progress.value,
@@ -53,7 +50,6 @@ export const ThemeToggle = memo(({ progress, onToggle, width = 180, height = 100
     };
   });
 
-  // dot interno: visível só no OFF e desaparece rápido até 15% da animação
   const innerDotStyle = useAnimatedStyle(() => {
     const opacity = interpolate(progress.value, [0, 0.15], [1, 0], Extrapolation.CLAMP);
     return { opacity };
@@ -69,7 +65,6 @@ export const ThemeToggle = memo(({ progress, onToggle, width = 180, height = 100
       style={{ alignSelf: 'center' }}
     >
       <Animated.View style={[styles.track, { width, height, borderRadius: R }, trackStyle]}>
-        {/* knob */}
         <Animated.View
           style={[
             styles.knob,
@@ -84,7 +79,6 @@ export const ThemeToggle = memo(({ progress, onToggle, width = 180, height = 100
             knobStyle,
           ]}
         >
-          {/* inner dot (apenas no OFF) */}
           <Animated.View
             style={[
               {

@@ -5,7 +5,7 @@ export const tokens = {
     card: '#F7F7F7',
     track: '#D9D9D9',
     knob: '#FFFFFF',
-    accent: '#3B82F6', // azul do toggle no dark
+    accent: '#3B82F6',
   },
   dark: {
     bg: '#0E0E0E',

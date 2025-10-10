@@ -3,7 +3,6 @@ import { StyleSheet, View } from 'react-native';
 import Animated, {
   Extrapolation,
   interpolate,
-  interpolateColor,
   useAnimatedProps,
   useAnimatedStyle,
   SharedValue,
@@ -37,17 +36,14 @@ export const SunMoon = memo(({
       interpolate(progress.value, [0, 1], [angleStartDeg, angleEndDeg])
     );
 
-    // eixo girando
     const axisStyle = useAnimatedStyle(() => ({
       transform: [{ rotate: `${axisAngle.value}deg` }],
     }));
 
-    // contra-rotação para manter o Lottie "em pé"
     const uprightStyle = useAnimatedStyle(() => ({
       transform: [{ rotate: `${-axisAngle.value}deg` }],
     }));
 
-    // carriers (posição no aro) + fade em 50%
     const sunCarrier = useAnimatedStyle(() => ({
       transform: [{ translateY: -R }],
       opacity: interpolate(progress.value, [0, 0.5], [1, 0], Extrapolation.CLAMP),
@@ -58,7 +54,6 @@ export const SunMoon = memo(({
       opacity: interpolate(progress.value, [0.5, 1], [0, 1], Extrapolation.CLAMP),
     }));
 
-    // progresso do Lottie sincronizado com o corte em 50%
     const sunAnimatedProps = useAnimatedProps(() => ({
       progress: interpolate(progress.value, [0, 0.5], [1, 0], Extrapolation.CLAMP),
     }));
@@ -68,15 +63,12 @@ export const SunMoon = memo(({
 
     return (
       <View style={[styles.wrap, { width: size, height: size }]}>
-        {/* opcional: aro */}
         <View pointerEvents="none" style={[
           StyleSheet.absoluteFill,
           { borderRadius: HALF }
         ]} />
 
-        {/* eixo que gira */}
         <Animated.View style={[StyleSheet.absoluteFill, styles.center, axisStyle]}>
-          {/* sol no topo */}
           <Animated.View style={[styles.center, sunCarrier, { position: 'absolute' }]} pointerEvents="none">
             <Animated.View style={[uprightStyle, { width: iconSize, height: iconSize }]}>
               <AnimatedLottie
@@ -90,7 +82,6 @@ export const SunMoon = memo(({
             </Animated.View>
           </Animated.View>
 
-          {/* lua embaixo */}
           <Animated.View style={[styles.center, moonCarrier, { position: 'absolute' }]} pointerEvents="none">
             <Animated.View style={[uprightStyle, { width: iconSize, height: iconSize }]}>
               <AnimatedLottie
