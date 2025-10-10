@@ -82,8 +82,8 @@ export const SunMoon = memo(({
               <AnimatedLottie
                 source={require('../../assets/lottie/sun.json')}
                 animatedProps={sunAnimatedProps}
-                autoPlay={false}
-                loop={false}
+                autoPlay={true}
+                loop={true}
                 resizeMode="contain"
                 style={{ width: '100%', height: '100%' }}
               />
@@ -96,8 +96,8 @@ export const SunMoon = memo(({
               <AnimatedLottie
                 source={require('../../assets/lottie/moon.json')}
                 animatedProps={moonAnimatedProps}
-                autoPlay={false}
-                loop={false}
+                autoPlay={true}
+                loop={true}
                 resizeMode="contain"
                 style={{ width: '100%', height: '100%' }}
               />
