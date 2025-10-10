@@ -2,6 +2,8 @@
 
 Trocar entre tema claro e escuro é comum — mas aqui vamos além: você vai construir uma experiência animada, transições suaves de cores e ícones de Sol/Lua com Lottie. Ao final, você terá uma tela polida, fluida e instrutiva para aplicar em qualquer app.
 
+<img width="1404" height="1080" alt="toggle swith" src="https://github.com/user-attachments/assets/85d0bd9b-6745-49bf-8112-15ef836a43a7" />
+
 ## Sumário
 
 - [Demo](#demo)
