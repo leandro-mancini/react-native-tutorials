@@ -24,11 +24,11 @@ const ModeScreen = memo(() => {
   return (
     <Animated.View style={[styles.fill, bgStyle, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
-        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <AxisDial progress={progress} size={260} ringThickness={12} />
-        <View style={{ position: 'absolute' }}>
-            <SunMoon progress={progress} angleStartDeg={0} angleEndDeg={180} />
-        </View>
+        <View style={{ alignItems: 'center', justifyContent: 'center', transform: [{ translateY: 100 }] }}>
+          <AxisDial progress={progress} size={260} ringThickness={12} />
+          <View style={{ position: 'absolute' }}>
+              <SunMoon progress={progress} angleStartDeg={0} angleEndDeg={180} />
+          </View>
         </View>
         <Animated.Text style={[styles.title, textStyle]}>
           {mode === 'light' ? 'Light Mode' : 'Dark Mode'}
@@ -44,5 +44,5 @@ export default ModeScreen;
 const styles = StyleSheet.create({
   fill: { flex: 1 },
   safe: { flex: 1, paddingHorizontal: 24, justifyContent: 'center', gap: 28 },
-  title: { fontSize: 28, fontWeight: '700', textAlign: 'center' },
+  title: { fontSize: 30, fontFamily: 'Montserrat-Regular', textAlign: 'center' },
 });
