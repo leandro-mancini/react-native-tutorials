@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Pressable, StyleSheet, View, AccessibilityProps } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 import Animated, {
   Extrapolation,
   interpolate,
@@ -7,7 +7,6 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  withTiming,
   SharedValue,
 } from 'react-native-reanimated';
 import { tokens } from '../theme/tokens';
@@ -19,7 +18,7 @@ type Props = {
   height?: number;
 };
 
-export const ThemeToggle = memo(({ progress, onToggle, width = 172, height = 64 }: Props) => {
+export const ThemeToggle = memo(({ progress, onToggle, width = 180, height = 100 }: Props) => {
   // dimensões derivadas
   const R = height / 2;
   const PADDING = Math.max(6, Math.round(height * 0.125));
@@ -47,31 +46,16 @@ export const ThemeToggle = memo(({ progress, onToggle, width = 172, height = 64 
       Extrapolation.CLAMP
     );
 
-    const borderW = interpolate(progress.value, [0, 1], [Math.max(2, height * 0.04), 0]);
-    const borderC = interpolateColor(progress.value, [0, 1], ['#E5E5E5', '#FFFFFF']);
     const scale = withSpring(1 + pressed.value * 0.06, { mass: 0.35, stiffness: 280, damping: 20 });
 
     return {
       transform: [{ translateX: x }, { scale }],
-      borderWidth: borderW,
-      borderColor: borderC,
-      // sombra sutil
-      shadowOpacity: withTiming(0.18, { duration: 120 }),
-      shadowRadius: 6,
-      shadowOffset: { width: 0, height: 3 },
-      elevation: 3,
     };
   });
 
   // dot interno: visível só no OFF e desaparece rápido até 15% da animação
   const innerDotStyle = useAnimatedStyle(() => {
     const opacity = interpolate(progress.value, [0, 0.15], [1, 0], Extrapolation.CLAMP);
-    return { opacity };
-  });
-
-  // halo ao pressionar
-  const haloStyle = useAnimatedStyle(() => {
-    const opacity = withTiming(pressed.value ? 0.15 : 0, { duration: 120 });
     return { opacity };
   });
 
@@ -85,20 +69,6 @@ export const ThemeToggle = memo(({ progress, onToggle, width = 172, height = 64 
       style={{ alignSelf: 'center' }}
     >
       <Animated.View style={[styles.track, { width, height, borderRadius: R }, trackStyle]}>
-        {/* halo */}
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            styles.halo,
-            {
-              left: PADDING - 6,
-              width: KNOB + 12,
-              height: KNOB + 12,
-              borderRadius: (KNOB + 12) / 2,
-            },
-            haloStyle,
-          ]}
-        />
         {/* knob */}
         <Animated.View
           style={[
@@ -140,7 +110,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
   },
   halo: {
     position: 'absolute',
