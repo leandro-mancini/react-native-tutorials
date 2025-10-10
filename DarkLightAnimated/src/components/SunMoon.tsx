@@ -7,6 +7,7 @@ import Animated, {
   useAnimatedProps,
   useAnimatedStyle,
   SharedValue,
+  useDerivedValue,
 } from 'react-native-reanimated';
 import LottieView from 'lottie-react-native';
 
@@ -15,9 +16,8 @@ type Props = {
   size?: number;
   ringThickness?: number;
   iconSize?: number;
-  /** ângulos em GRAUS para mapear 0→1 do progress */
-  angleStartDeg?: number; // padrão: -90 (sol no topo)
-  angleEndDeg?: number;   // padrão:  90 (lua embaixo)
+  angleStartDeg?: number;
+  angleEndDeg?: number;
 };
 
 const AnimatedLottie = Animated.createAnimatedComponent(LottieView);
@@ -27,102 +27,81 @@ export const SunMoon = memo(({
   size = 260,
   ringThickness = 14,
   iconSize = 200,
-  angleStartDeg = -90, // 👈 ajuste aqui
-  angleEndDeg   =  90, // 👈 ajuste aqui
+  angleStartDeg = -90,
+  angleEndDeg = 90,
 }: Props) => {
     const HALF = size / 2;
-    // raio até a "linha central" do aro (fica perfeito na borda)
     const R = HALF - ringThickness / 2;
 
-    // O frame rotaciona i.e. “eixo” girando
-    // ajuste o range de rotação para a sensação desejada (p.ex. -90deg → 90deg)
+    const axisAngle = useDerivedValue(() =>
+      interpolate(progress.value, [0, 1], [angleStartDeg, angleEndDeg])
+    );
+
+    // eixo girando
     const axisStyle = useAnimatedStyle(() => ({
-        transform: [
-        {
-            rotate: `${interpolate(
-            progress.value,
-            [0, 1],
-            [angleStartDeg, angleEndDeg]  // 👈 usa os ângulos configuráveis
-            )}deg`,
-        },
-        ],
+      transform: [{ rotate: `${axisAngle.value}deg` }],
     }));
 
-    // O Sol fica no topo do eixo (translateY negativo)
+    // contra-rotação para manter o Lottie "em pé"
+    const uprightStyle = useAnimatedStyle(() => ({
+      transform: [{ rotate: `${-axisAngle.value}deg` }],
+    }));
+
+    // carriers (posição no aro) + fade em 50%
     const sunCarrier = useAnimatedStyle(() => ({
       transform: [{ translateY: -R }],
       opacity: interpolate(progress.value, [0, 0.5], [1, 0], Extrapolation.CLAMP),
     }));
 
-    // A Lua fica na base do eixo (translateY positivo)
     const moonCarrier = useAnimatedStyle(() => ({
       transform: [{ translateY: R }],
       opacity: interpolate(progress.value, [0.5, 1], [0, 1], Extrapolation.CLAMP),
     }));
 
-    // Progresso do Lottie no UI thread
+    // progresso do Lottie sincronizado com o corte em 50%
     const sunAnimatedProps = useAnimatedProps(() => ({
-      // 1 → 0 entre 0..0.5
       progress: interpolate(progress.value, [0, 0.5], [1, 0], Extrapolation.CLAMP),
     }));
     const moonAnimatedProps = useAnimatedProps(() => ({
-      // 0 → 1 entre 0.5..1
       progress: interpolate(progress.value, [0.5, 1], [0, 1], Extrapolation.CLAMP),
     }));
 
     return (
       <View style={[styles.wrap, { width: size, height: size }]}>
-        {/* ARO opcional (só visual). Se já tem um componente de aro separado, remova este bloco */}
-        <View
-          pointerEvents="none"
-          style={[
-            StyleSheet.absoluteFill,
-            // {
-            //   borderRadius: HALF,
-            //   borderWidth: ringThickness,
-            //   borderColor: 'rgba(255,255,255,0.28)',
-            // },
-          ]}
-        />
+        {/* opcional: aro */}
+        <View pointerEvents="none" style={[
+          StyleSheet.absoluteFill,
+          { borderRadius: HALF }
+        ]} />
 
-        {/* FRAME que rotaciona todo o eixo */}
+        {/* eixo que gira */}
         <Animated.View style={[StyleSheet.absoluteFill, styles.center, axisStyle]}>
-          {/* SUN no topo do eixo */}
-          <Animated.View
-            style={[
-              styles.center,
-              sunCarrier,
-              { width: iconSize, height: iconSize, position: 'absolute' },
-            ]}
-            pointerEvents="none"
-          >
-            <AnimatedLottie
-              source={require('../../assets/lottie/sun.json')}
-              animatedProps={sunAnimatedProps}
-              autoPlay={false}
-              loop={false}
-              resizeMode="contain"
-              style={{ width: '100%', height: '100%' }}
-            />
+          {/* sol no topo */}
+          <Animated.View style={[styles.center, sunCarrier, { position: 'absolute' }]} pointerEvents="none">
+            <Animated.View style={[uprightStyle, { width: iconSize, height: iconSize }]}>
+              <AnimatedLottie
+                source={require('../../assets/lottie/sun.json')}
+                animatedProps={sunAnimatedProps}
+                autoPlay={false}
+                loop={false}
+                resizeMode="contain"
+                style={{ width: '100%', height: '100%' }}
+              />
+            </Animated.View>
           </Animated.View>
 
-          {/* MOON na base do eixo */}
-          <Animated.View
-            style={[
-              styles.center,
-              moonCarrier,
-              { width: iconSize, height: iconSize, position: 'absolute' },
-            ]}
-            pointerEvents="none"
-          >
-            <AnimatedLottie
-              source={require('../../assets/lottie/moon.json')}
-              animatedProps={moonAnimatedProps}
-              autoPlay={false}
-              loop={false}
-              resizeMode="contain"
-              style={{ width: '100%', height: '100%' }}
-            />
+          {/* lua embaixo */}
+          <Animated.View style={[styles.center, moonCarrier, { position: 'absolute' }]} pointerEvents="none">
+            <Animated.View style={[uprightStyle, { width: iconSize, height: iconSize }]}>
+              <AnimatedLottie
+                source={require('../../assets/lottie/moon.json')}
+                animatedProps={moonAnimatedProps}
+                autoPlay={false}
+                loop={false}
+                resizeMode="contain"
+                style={{ width: '100%', height: '100%' }}
+              />
+            </Animated.View>
           </Animated.View>
         </Animated.View>
       </View>
