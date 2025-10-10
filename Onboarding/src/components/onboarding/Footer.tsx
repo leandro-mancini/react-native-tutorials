@@ -16,7 +16,7 @@ export function Footer({ x, pagerRef, total, width, onFinish, onNext }: {
 
   const handleNext = () => {
     if (onNext) {
-      onNext();                         // usa animação com 800ms
+      onNext();
       return;
     }
 

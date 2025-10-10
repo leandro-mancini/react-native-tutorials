@@ -10,7 +10,6 @@ import Step1Svg from '../../../assets/svg/onboarding_step1.svg';
 import Step2Svg from '../../../assets/svg/onboarding_step2.svg';
 import Step3Svg from '../../../assets/svg/onboarding_step3.svg';
 
-// 1) Reaproveita SlideItem padrão (atalho)
 export const SlideHero = (p: CommonSlideProps) => {
   const { item } = p;
   return (
@@ -22,7 +21,6 @@ export const SlideHero = (p: CommonSlideProps) => {
   );
 };
 
-// 2) Lottie maior, encostado à esquerda
 export const SlideLeftImage = (p: CommonSlideProps) => {
   const { item } = p;
   return (
@@ -34,7 +32,6 @@ export const SlideLeftImage = (p: CommonSlideProps) => {
   );
 };
 
-// 3) Lottie mais baixo e maior
 export const SlideBottomBig = (p: CommonSlideProps) => {
   const { item } = p;
   return (
@@ -72,7 +69,7 @@ const BaseSlide = ({
     const e = exposure * exposure;
 
     let eTitle = e;
-    // vindo da direita -> entra primeiro o title (msm regra do SlideItem)
+    
     if (dir < 0) {
       eTitle = (e - STEP_DELAY) / (1 - STEP_DELAY);
       if (eTitle < 0) eTitle = 0;
@@ -94,7 +91,7 @@ const BaseSlide = ({
     const e = exposure * exposure;
 
     let eSub = e;
-    // vindo da esquerda -> entra primeiro o subtitle (msm regra do SlideItem)
+    
     if (dir > 0) {
       eSub = (e - STEP_DELAY) / (1 - STEP_DELAY);
       if (eSub < 0) eSub = 0;
