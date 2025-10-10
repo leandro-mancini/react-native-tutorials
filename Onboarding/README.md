@@ -20,6 +20,10 @@ Este guia mostra, passo a passo, como montar a interface do app Onboarding: inst
 
 
 
+https://github.com/user-attachments/assets/cf3f66eb-c5d2-45a4-807c-966f43286255
+
+
+
 ## Pré‑requisitos
 
 - Node 20+, Java 17 (Android), Xcode + CocoaPods (iOS), Watchman (macOS)
