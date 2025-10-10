@@ -2,6 +2,8 @@
 
 Este guia mostra, passo a passo, como montar a interface do app Onboarding: instalar bibliotecas, configurar o projeto, criar os componentes base, montar os slides e ajustar as animações.
 
+<img width="1815" height="1091" alt="Frame 1" src="https://github.com/user-attachments/assets/c3898a5b-ac64-4b19-babd-665e9d8eaa86" />
+
 ## Sumário
 
 - [Pré‑requisitos](#pré‑requisitos)
