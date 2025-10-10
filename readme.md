@@ -16,6 +16,12 @@ Cada aplicação neste repositório aborda um cenário específico e demonstra c
 
 [![Healtec](./Healtec/cover.png)](./Healtec)
 
+### 🔹 **3. Login Animated**
+
+<a href="./LoginAnimated">
+<img width="1096" height="777" alt="from-splash-to-login-a-lively-and-consistent-flow-in-react-native" src="https://github.com/user-attachments/assets/8545e2dd-8ea2-4edf-8b9e-adb82332ac3f" />
+</a>
+
 
 ## 🛠️ Como Utilizar
 Cada aplicação neste repositório serve como referência para implementação de funcionalidades no React Native.
