@@ -51,7 +51,7 @@
 	<false/>
 	<key>UIAppFonts</key>
 	<array>
-		<string>RobotoFlex.ttf</string>
+		<string>Montserrat-Medium.ttf</string>
 	</array>
 </dict>
 </plist>

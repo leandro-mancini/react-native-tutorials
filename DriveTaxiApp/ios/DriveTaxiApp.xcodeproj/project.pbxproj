@@ -11,7 +11,7 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		279B71CFD0D64F3F8EFDE03A /* RobotoFlex.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 21F035E33AF24EE29B7FF921 /* RobotoFlex.ttf */; };
+		50D3AF5334274358A512A0BB /* Montserrat-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE2439AA53B8479BA73F4847 /* Montserrat-Medium.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,7 +25,7 @@
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = DriveTaxiApp/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = DriveTaxiApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		21F035E33AF24EE29B7FF921 /* RobotoFlex.ttf */ = {isa = PBXFileReference; name = "RobotoFlex.ttf"; path = "../assets/fonts/RobotoFlex.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		DE2439AA53B8479BA73F4847 /* Montserrat-Medium.ttf */ = {isa = PBXFileReference; name = "Montserrat-Medium.ttf"; path = "../assets/fonts/Montserrat-Medium.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,7 +103,7 @@
 		D315BDB8EC7A4EC6A47E1554 /* Resources */ = {
 			isa = "PBXGroup";
 			children = (
-				21F035E33AF24EE29B7FF921 /* RobotoFlex.ttf */,
+				DE2439AA53B8479BA73F4847 /* Montserrat-Medium.ttf */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -171,7 +171,7 @@
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
-				279B71CFD0D64F3F8EFDE03A /* RobotoFlex.ttf in Resources */,
+				50D3AF5334274358A512A0BB /* Montserrat-Medium.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

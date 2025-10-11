@@ -123,10 +123,10 @@ const styles = StyleSheet.create({
   title: {
     color: '#fff',
     fontSize: 32,
-    fontFamily: 'RobotoFlex',
+    fontFamily: 'Montserrat-Medium',
     textAlign: 'center'
   },
-  subtitle: { color: '#BEBEBE', fontSize: 16, textAlign: 'center' },
+  subtitle: { color: '#BEBEBE', fontSize: 16, textAlign: 'center', fontFamily: 'Montserrat-Medium' },
 
   carWrap: {
     flex: 1,
@@ -170,21 +170,21 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   cta: {
-    height: 64,
-    borderRadius: 28,
+    height: 56,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
   ctaText: {
-    color: '#111',
-    fontSize: 18,
-    fontWeight: '800',
-    letterSpacing: 0.2,
+    color: '#151513',
+    fontSize: 16,
+    fontFamily: 'Montserrat-Medium',
   },
   link: {
     textAlign: 'center',
-    color: '#BEBEBE',
+    color: '#FFFFFF',
     marginBottom: 24,
     fontSize: 16,
+    fontFamily: 'Montserrat-Medium',
   },
 });
