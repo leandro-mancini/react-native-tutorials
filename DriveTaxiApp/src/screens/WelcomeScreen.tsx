@@ -44,7 +44,7 @@ export function WelcomeScreen({ navigation }: Props) {
 
   // --- shared values
   const carTranslateY = useSharedValue(height * 0.6);
-    const beamOpacity = useSharedValue(0);
+  const beamOpacity = useSharedValue(0);
   const titleOpacity = useSharedValue(0);
   const titleTranslateY = useSharedValue(12);
   const subtitleOpacity = useSharedValue(0);
@@ -56,33 +56,35 @@ export function WelcomeScreen({ navigation }: Props) {
     // título
     titleOpacity.value = withDelay(
       80,
-      withTiming(1, { duration: 520, easing: Easing.out(Easing.quad) })
+      withTiming(1, { duration: 520, easing: Easing.out(Easing.quad) }),
     );
     titleTranslateY.value = withDelay(
       80,
-      withTiming(0, { duration: 520, easing: Easing.out(Easing.quad) })
+      withTiming(0, { duration: 520, easing: Easing.out(Easing.quad) }),
     );
     subtitleOpacity.value = withDelay(
       220,
-      withTiming(1, { duration: 420, easing: Easing.out(Easing.quad) })
+      withTiming(1, { duration: 420, easing: Easing.out(Easing.quad) }),
     );
 
     beamOpacity.value = withDelay(
-    120,
-    withTiming(1, { duration: 420, easing: Easing.out(Easing.quad) })
+      120,
+      withTiming(1, { duration: 420, easing: Easing.out(Easing.quad) }),
     );
 
     // carro sobe para a posição final
-    carTranslateY.value = withTiming(
-      0,
-      { duration: 700, easing: Easing.out(Easing.cubic) },
-    );
+    carTranslateY.value = withTiming(140, {
+      duration: 700,
+      easing: Easing.out(Easing.cubic),
+    });
   }, [carTranslateY, subtitleOpacity, titleOpacity, titleTranslateY]);
+
+  const BEAM_SHIFT = -100;
 
   const beamStyle = useAnimatedStyle(() => ({
     opacity: beamOpacity.value,
-    transform: [{ translateY: carTranslateY.value }], // 👈 acompanha o carro
-    }));
+    transform: [{ translateY: carTranslateY.value + BEAM_SHIFT }], // 👈 acompanha o carro
+  }));
 
   // --- animated styles
   const carStyle = useAnimatedStyle(() => ({
@@ -100,7 +102,7 @@ export function WelcomeScreen({ navigation }: Props) {
 
   // --- handlers
   const goNext = useCallback(() => {
-    navigation.replace('SignUp');
+    // navigation.replace('Home');
   }, [navigation]);
 
   const handlePrimaryPress = useCallback(() => {
@@ -111,15 +113,15 @@ export function WelcomeScreen({ navigation }: Props) {
     carTranslateY.value = withTiming(
       -(height / 2 + carTargetHeight), // sobe além do topo
       { duration: 600, easing: Easing.in(Easing.cubic) },
-      (finished) => {
+      finished => {
         if (finished) runOnJS(goNext)();
-      }
+      },
     );
 
     beamOpacity.value = withTiming(0, { duration: 300 });
 
     // título e subtítulo desvanecem levemente
-    titleOpacity.value = withTiming(0.4, { duration: 300 });
+    titleOpacity.value = withTiming(0.0, { duration: 300 });
     subtitleOpacity.value = withTiming(0.0, { duration: 280 });
   }, [
     carTranslateY,
@@ -137,7 +139,7 @@ export function WelcomeScreen({ navigation }: Props) {
       w: Math.min(width * 0.86, 520),
       h: Math.min(height * 0.62, 520),
     }),
-    [height, width]
+    [height, width],
   );
 
   return (
@@ -149,23 +151,23 @@ export function WelcomeScreen({ navigation }: Props) {
       />
       <View style={styles.container}>
         <Animated.View
-            style={[
-                beamStyle,
-                {
-                position: 'absolute',
-                top: Math.max(24, height * 0.06),
-                zIndex: 0,               // atrás
-                pointerEvents: 'none' as any,
-                },
-            ]}
-            >
-            <Beam
-                width={Math.min(width * 0.86, 520)}
-                height={Math.min(height * 0.62, 520)}
-                color="#F2C44A"
-                intensity={0.6}
-                style={{ transform: [{ rotate: '180deg' }] }}
-            />
+          style={[
+            beamStyle,
+            {
+              position: 'absolute',
+              top: Math.max(24, height * 0.06),
+              zIndex: 0, // atrás
+              pointerEvents: 'none' as any,
+            },
+          ]}
+        >
+          <Beam
+            width={Math.min(width * 0.86, 520)}
+            height={Math.min(height * 0.62, 520)}
+            color="#F2C44A"
+            intensity={0.6}
+            style={{ transform: [{ rotate: '180deg' }] }}
+          />
         </Animated.View>
 
         {/* títulos */}
@@ -200,7 +202,7 @@ export function WelcomeScreen({ navigation }: Props) {
           style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
         >
           <LinearGradient
-            colors={['#FFD977', '#F2C44A']}
+            colors={['rgba(255,220,113,0.7)', '#E9BC32']}
             start={{ x: 0.1, y: 0.0 }}
             end={{ x: 0.9, y: 1.0 }}
             style={[
@@ -257,7 +259,7 @@ const styles = StyleSheet.create({
   primaryBtn: {
     marginTop: 'auto',
     marginBottom: 16,
-    paddingVertical: 18,
+    height: 56,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',

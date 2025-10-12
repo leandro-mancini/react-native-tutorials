@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-export function NextScreen() {
+export function HomeScreen() {
   return (
     <View style={styles.c}>
-      <Text style={styles.t}>Próxima tela 🚀</Text>
+      <Text style={styles.t}>Tela Inicial 🚀</Text>
     </View>
   );
 }
