@@ -51,6 +51,10 @@ export function WelcomeScreen({ navigation }: Props) {
 
   const [isAnimatingOut, setAnimatingOut] = useState(false);
 
+  const btnsOpacity = useSharedValue(0);
+  const primaryBtnTY = useSharedValue(16);
+  const secondaryBtnTY = useSharedValue(24);
+
   // --- on mount animations
   useEffect(() => {
     // título
@@ -77,6 +81,19 @@ export function WelcomeScreen({ navigation }: Props) {
       duration: 700,
       easing: Easing.out(Easing.cubic),
     });
+
+    btnsOpacity.value = withDelay(
+      260,
+      withTiming(1, { duration: 380, easing: Easing.out(Easing.quad) }),
+    );
+    primaryBtnTY.value = withDelay(
+      260,
+      withTiming(0, { duration: 380, easing: Easing.out(Easing.quad) }),
+    );
+    secondaryBtnTY.value = withDelay(
+      300,
+      withTiming(0, { duration: 380, easing: Easing.out(Easing.quad) }),
+    );
   }, [carTranslateY, subtitleOpacity, titleOpacity, titleTranslateY]);
 
   const BEAM_SHIFT = -100;
@@ -100,9 +117,19 @@ export function WelcomeScreen({ navigation }: Props) {
     opacity: subtitleOpacity.value,
   }));
 
+  const primaryBtnStyle = useAnimatedStyle(() => ({
+    opacity: btnsOpacity.value,
+    transform: [{ translateY: primaryBtnTY.value }],
+  }));
+
+  const secondaryBtnStyle = useAnimatedStyle(() => ({
+    opacity: btnsOpacity.value,
+    transform: [{ translateY: secondaryBtnTY.value }],
+  }));
+
   // --- handlers
   const goNext = useCallback(() => {
-    // navigation.replace('Home');
+    navigation.replace('Home');
   }, [navigation]);
 
   const handlePrimaryPress = useCallback(() => {
@@ -123,6 +150,19 @@ export function WelcomeScreen({ navigation }: Props) {
     // título e subtítulo desvanecem levemente
     titleOpacity.value = withTiming(0.0, { duration: 300 });
     subtitleOpacity.value = withTiming(0.0, { duration: 280 });
+
+    btnsOpacity.value = withTiming(0, {
+      duration: 220,
+      easing: Easing.in(Easing.quad),
+    });
+    primaryBtnTY.value = withTiming(22, {
+      duration: 220,
+      easing: Easing.in(Easing.quad),
+    });
+    secondaryBtnTY.value = withDelay(
+      40,
+      withTiming(30, { duration: 220, easing: Easing.in(Easing.quad) }),
+    );
   }, [
     carTranslateY,
     carTargetHeight,
@@ -196,32 +236,36 @@ export function WelcomeScreen({ navigation }: Props) {
         </Animated.View>
 
         {/* CTA principal */}
-        <Pressable
-          onPress={handlePrimaryPress}
-          disabled={isAnimatingOut}
-          style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
-        >
-          <LinearGradient
-            colors={['rgba(255,220,113,0.7)', '#E9BC32']}
-            start={{ x: 0.1, y: 0.0 }}
-            end={{ x: 0.9, y: 1.0 }}
-            style={[
-              styles.primaryBtn,
-              { width: Math.min(beamSize.w + 80, width - 32) },
-            ]}
+        <Animated.View style={primaryBtnStyle}>
+          <Pressable
+            onPress={handlePrimaryPress}
+            disabled={isAnimatingOut}
+            style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
           >
-            <Text style={styles.primaryText}>Inscrição aberta</Text>
-          </LinearGradient>
-        </Pressable>
+            <LinearGradient
+              colors={['rgba(255,220,113,0.7)', '#E9BC32']}
+              start={{ x: 0.1, y: 0.0 }}
+              end={{ x: 0.9, y: 1.0 }}
+              style={[
+                styles.primaryBtn,
+                { width: Math.min(beamSize.w + 80, width - 32) },
+              ]}
+            >
+              <Text style={styles.primaryText}>Inscrição aberta</Text>
+            </LinearGradient>
+          </Pressable>
+        </Animated.View>
 
         {/* CTA secundário */}
-        <Pressable
-          onPress={() => navigation.navigate('SignUp')}
-          disabled={isAnimatingOut}
-          style={styles.secondaryBtn}
-        >
-          <Text style={styles.secondaryText}>Criar nova conta</Text>
-        </Pressable>
+        <Animated.View style={secondaryBtnStyle}>
+          <Pressable
+            onPress={() => navigation.navigate('SignUp')}
+            disabled={isAnimatingOut}
+            style={styles.secondaryBtn}
+          >
+            <Text style={styles.secondaryText}>Criar nova conta</Text>
+          </Pressable>
+        </Animated.View>
       </View>
     </SafeAreaView>
   );
