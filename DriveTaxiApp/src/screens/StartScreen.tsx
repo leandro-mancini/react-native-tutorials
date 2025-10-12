@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Dimensions,
   StatusBar,
   Pressable,
+  LayoutChangeEvent,
 } from 'react-native';
 import Animated, {
   Easing,
@@ -14,13 +15,15 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
+  withRepeat,
   withTiming,
 } from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
+import { Headlights } from '../components/Headlights';
 
-const { height: H } = Dimensions.get('window');
+const { height: H, width: W } = Dimensions.get('window');
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Start'>;
 
@@ -34,6 +37,19 @@ export function StartScreen({ navigation }: Props) {
 
   // guarda estado pra impedir duplo toque
   const navigatingRef = useRef(false);
+
+  const [wrapFrame, setWrapFrame] = React.useState<{x:number;y:number;w:number;h:number}|null>(null);
+    const [carFrame,  setCarFrame]  = React.useState<{x:number;y:number;w:number;h:number}|null>(null);
+
+  const onWrapLayout = (e: LayoutChangeEvent) => {
+    const { x, y, width, height } = e.nativeEvent.layout;
+    setWrapFrame({ x, y, w: width, h: height }); // posição do carWrap na tela
+    };
+
+    const onCarLayout = (e: LayoutChangeEvent) => {
+    const { x, y, width, height } = e.nativeEvent.layout;
+    setCarFrame({ x, y, w: width, h: height });  // posição do Image dentro do carWrap
+    };
 
   React.useEffect(() => {
     const finalY = 140;
@@ -85,16 +101,32 @@ export function StartScreen({ navigation }: Props) {
       </View>
 
       {/* Carro */}
-      <Animated.View style={[styles.carWrap, carStyle]} pointerEvents="none">
+      <Animated.View style={[styles.carWrap, carStyle]} onLayout={onWrapLayout}>
+        {/* Faróis: só renderiza quando sabemos as medidas do carro */}
+        {wrapFrame && carFrame && (
+            <Headlights
+                // posições convertidas para o espaço da TELA
+                originY={
+                wrapFrame.y + (carFrame.y + carFrame.h * 0.36) // ~linha do para-choque
+                }
+                cxLeft ={ wrapFrame.x + (carFrame.x + carFrame.w * 0.36) } // farol esquerdo
+                cxRight={ wrapFrame.x + (carFrame.x + carFrame.w * 0.64) } // farol direito
+
+                // alcance do feixe para cima até quase encostar no topo da tela
+                beamHeight={ (wrapFrame.y + (carFrame.y + carFrame.h * 0.36)) - 12 }
+
+                // abertura no topo do feixe em função da largura do dispositivo
+                bottomWidth={ Dimensions.get('window').width * 0.94 }
+            />
+        )}
+
         <Image
-          source={require('../../assets/images/car.png')}
-          style={styles.car}
-          resizeMode="contain"
+            source={require('../../assets/images/car.png')}
+            style={styles.car}
+            resizeMode="contain"
+            onLayout={onCarLayout}
         />
-        {/* faróis – pequenos detalhes de “vida” */}
-        <View style={styles.lightsLeft} />
-        <View style={styles.lightsRight} />
-      </Animated.View>
+        </Animated.View>
 
       {/* CTA */}
       <Animated.View style={[styles.ctaShadow, buttonStyle]}>
@@ -139,28 +171,34 @@ const styles = StyleSheet.create({
     height: '100%',
   },
 
-  // “cones” de luz laterais bem discretos
-  lightsLeft: {
+  beamLeft: {
     position: 'absolute',
-    left: 40,
-    bottom: 100,
-    width: 80,
-    height: 380,
-    backgroundColor: '#75642730',
+    // ponto de origem logo abaixo do carro — ajuste fino se necessário
+    top: H * 0.28,
+    left: -W * 0.02,
+    width: W * 0.50,   // base larga
+    height: H * 0.85,  // vai até o rodapé
     borderTopLeftRadius: 60,
     borderTopRightRadius: 60,
-    transform: [{ rotate: '-10deg' }],
+    transform: [
+      { rotate: '-8deg' },
+      { skewX: '-8deg' }, // dá o "afinamento" no topo
+      { translateY: 0 },
+    ],
   },
-  lightsRight: {
+  beamRight: {
     position: 'absolute',
-    right: 40,
-    bottom: 100,
-    width: 80,
-    height: 380,
-    backgroundColor: '#75642730',
+    top: H * 0.28,
+    right: -W * 0.02,
+    width: W * 0.50,
+    height: H * 0.85,
     borderTopLeftRadius: 60,
     borderTopRightRadius: 60,
-    transform: [{ rotate: '10deg' }],
+    transform: [
+      { rotate: '8deg' },
+      { skewX: '8deg' },
+      { translateY: 0 },
+    ],
   },
 
   ctaShadow: {

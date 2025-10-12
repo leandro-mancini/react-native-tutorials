@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StartScreen } from './src/screens/StartScreen';
 import { NextScreen } from './src/screens/NextScreen';
+import { WelcomeScreen } from './src/screens/WelcomeScreen';
 
 export type RootStackParamList = {
-  Start: undefined;
+  Welcome: undefined;
   Next: undefined;
 };
 
@@ -15,7 +15,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Start" component={StartScreen} />
+        <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Next" component={NextScreen} />
       </Stack.Navigator>
     </NavigationContainer>
