@@ -53,7 +53,5 @@
 	<array>
 		<string>Montserrat-Medium.ttf</string>
 	</array>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Precisamos da sua localização para encontrar veículos próximos.</string>
 </dict>
 </plist>
