@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { StyleSheet, View } from "react-native";
+import CarSvg from '../../assets/images/car.svg';
 import MapView, {
   PROVIDER_GOOGLE,
   Marker,
@@ -9,6 +10,8 @@ import MapView, {
   UserLocationChangeEvent,
 } from "react-native-maps";
 import { GOOGLE_PLACES_API_KEY } from "../config/keys";
+
+// Ícone do carro será desenhado via SVG (sem dependência de assets)
 
 export type MapDestination = {
   latitude: number;
@@ -28,6 +31,7 @@ type Car = LatLng & { id: string; rotation: number };
 type Props = {
   destination?: MapDestination | null;
   onRouteInfo?: (info: RouteInfo | undefined) => void;
+  carSize?: { width: number; height: number };
 };
 
 const INITIAL_REGION: Region = {
@@ -37,7 +41,7 @@ const INITIAL_REGION: Region = {
   longitudeDelta: 0.05,
 };
 
-const CAR_ICON = require("../../assets/images/car.png");
+const DEFAULT_CAR_SIZE = { width: 34, height: 18 };
 
 function decodePolyline(encoded: string): LatLng[] {
   // Decodificador padrão de polylines Google
@@ -74,7 +78,7 @@ function decodePolyline(encoded: string): LatLng[] {
   return coordinates;
 }
 
-export function Map({ destination, onRouteInfo }: Props) {
+export function Map({ destination, onRouteInfo, carSize }: Props) {
   const mapRef = useRef<MapView | null>(null);
   const [region, setRegion] = useState<Region>(INITIAL_REGION);
   const [userLoc, setUserLoc] = useState<LatLng | null>(null);
@@ -82,6 +86,30 @@ export function Map({ destination, onRouteInfo }: Props) {
   const [routeCoords, setRouteCoords] = useState<LatLng[] | null>(null);
   const [firstFix, setFirstFix] = useState(false);
   const moveTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const markerSize = carSize ?? DEFAULT_CAR_SIZE;
+  const [tracks, setTracks] = useState(true);
+  const [tracksMap, setTracksMap] = useState<Record<string, boolean>>({});
+
+  // Escala baseada no zoom: latitudeDelta menor = mais perto = ícone maior
+  const zoomScale = useMemo(() => {
+    const d = region.latitudeDelta || INITIAL_REGION.latitudeDelta;
+    const minD = 0.005; // muito perto
+    const maxD = 0.5;   // bem afastado
+    const clamped = Math.max(minD, Math.min(maxD, d));
+    const t = (clamped - minD) / (maxD - minD); // 0..1
+    return 1.4 - t * (1.4 - 0.6); // 0.6x (longe) → 1.4x (perto)
+  }, [region.latitudeDelta]);
+
+  const currentSize = useMemo(() => ({
+    width: markerSize.width * zoomScale,
+    height: markerSize.height * zoomScale,
+  }), [markerSize.height, markerSize.width, zoomScale]);
+
+  // Após a primeira renderização, desligamos o tracking global (fallback)
+  useEffect(() => {
+    const t = setTimeout(() => setTracks(false), 800);
+    return () => clearTimeout(t);
+  }, []);
 
   const handleReady = () => console.log("[Map] onMapReady");
 
@@ -201,12 +229,20 @@ export function Map({ destination, onRouteInfo }: Props) {
           <Marker
             key={car.id}
             coordinate={{ latitude: car.latitude, longitude: car.longitude }}
-            image={CAR_ICON}
             anchor={{ x: 0.5, y: 0.5 }}
             rotation={car.rotation}
             flat
-          />
-        ))}
+            tracksViewChanges={tracksMap[car.id] !== false}
+          >
+            <View
+              collapsable={false}
+              onLayout={() => setTracksMap(prev => ({ ...prev, [car.id]: false }))}
+              style={{ transform: [{ rotate: `${car.rotation}deg` }] }}
+            >
+              <CarSvg width={119} height={102} />
+            </View>
+           </Marker>
+         ))}
 
         {/* rota */}
         {routeCoords && (

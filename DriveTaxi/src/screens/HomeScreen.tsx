@@ -38,6 +38,7 @@ export function HomeScreen({ route, navigation }: Props) {
             title: destination.description,
           } : undefined}
           onRouteInfo={(info) => setRouteInfo(info ? { distanceText: info.distanceText, durationText: info.durationText } : undefined)}
+          carSize={{ width: 34, height: 18 }}
         />
       </View>
 
