@@ -16,8 +16,14 @@ import {
   Coffee,
   Car,
 } from 'lucide-react-native';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../navigation/types';
 
-export function HomeScreen() {
+type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+
+export function HomeScreen({ route, navigation }: Props) {
+  const destination = route.params?.destination;
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Mapa de fundo */}
@@ -42,10 +48,12 @@ export function HomeScreen() {
       {/* Área inferior com busca e cards */}
       <View style={styles.bottomPanel}>
         {/* Barra de busca */}
-        <Pressable style={styles.searchBar} onPress={() => {}}>
+        <Pressable style={styles.searchBar} onPress={() => navigation.navigate('Search')}>
           <View style={styles.searchLeft}>
             <Navigation size={18} color="#1C1C1C" />
-            <Text style={styles.searchText}>Where to?</Text>
+            <Text style={styles.searchText} numberOfLines={1}>
+              {destination?.description ?? 'Where to?'}
+            </Text>
           </View>
           <View style={styles.searchRight}>
             <Clock size={16} color="#6B6B6B" />
