@@ -123,6 +123,22 @@ export function Map({ destination, onRouteInfo, carSize }: Props) {
     setUserLoc(curr);
     if (!firstFix) {
       setFirstFix(true);
+      // Move a câmera para a localização atual ao abrir a Home (mais próximo)
+      const initialDelta = 0.01;
+      try {
+        mapRef.current?.animateToRegion(
+          {
+            latitude: curr.latitude,
+            longitude: curr.longitude,
+            latitudeDelta: initialDelta,
+            longitudeDelta: initialDelta,
+          },
+          800,
+        );
+        lastLatDeltaRef.current = initialDelta;
+        setLatDelta(initialDelta);
+      } catch {}
+
       // Gera carros ao redor do primeiro fix (~100–300m)
       const newCars: Car[] = Array.from({ length: 5 }).map((_, i) => {
         const dLat = Math.random() * 0.003 - 0.0015;

@@ -22,7 +22,7 @@ import Animated, {
 import LinearGradient from 'react-native-linear-gradient';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Beam } from '../components/Beam';
-import { RootStackParamList } from '../../App';
+import { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
 

@@ -70,12 +70,12 @@ export function HomeScreen({ route, navigation }: Props) {
           <View style={styles.searchLeft}>
             <Navigation size={18} color="#1C1C1C" />
             <Text style={styles.searchText} numberOfLines={1}>
-              {destination?.description ?? 'Where to?'}
+              {destination?.description ?? 'Para onde?'}
             </Text>
           </View>
           <View style={styles.searchRight}>
             <Clock size={16} color="#6B6B6B" />
-            <Text style={styles.searchWhen}>Now</Text>
+            <Text style={styles.searchWhen}>Agora</Text>
             <ChevronDown size={16} color="#6B6B6B" />
           </View>
         </Pressable>
@@ -91,14 +91,14 @@ export function HomeScreen({ route, navigation }: Props) {
         <View style={styles.cardsRow}>
           <Pressable style={[styles.card, styles.cardPrimary]} onPress={() => {}}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.cardPrimaryTitle}>Angelina{"\n"}Paris Cafe</Text>
+              <Text style={styles.cardPrimaryTitle}>Coffee{"\n"}Lab</Text>
               <Text style={styles.cardPrimaryTime}>13 min</Text>
             </View>
             <Coffee color="#B58200" size={44} />
           </Pressable>
 
           <Pressable style={[styles.card, styles.cardSecondary]} onPress={() => {}}>
-            <Text style={styles.cardSecondaryTitle}>UGC Cine{"\n"}Cite Halles</Text>
+            <Text style={styles.cardSecondaryTitle}>Beco{"\n"}do Batman</Text>
             <Text style={styles.cardSecondaryTime}>20 min</Text>
             <View style={styles.cardSecondaryIconWrap}>
               <Car color="#F0C53D" size={30} />
