@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Platform, ActivityIndicator } from "react-native";
 import CarSvg from '../../assets/images/car.svg';
 import MapView, {
   PROVIDER_GOOGLE,
@@ -80,7 +80,8 @@ function decodePolyline(encoded: string): LatLng[] {
 
 export function Map({ destination, onRouteInfo, carSize }: Props) {
   const mapRef = useRef<MapView | null>(null);
-  const [region, setRegion] = useState<Region>(INITIAL_REGION);
+  // Guardamos apenas o zoom (latitudeDelta) para reduzir re-renders que podem afetar tiles
+  const [latDelta, setLatDelta] = useState<number>(INITIAL_REGION.latitudeDelta);
   const [userLoc, setUserLoc] = useState<LatLng | null>(null);
   const [cars, setCars] = useState<Car[]>([]);
   const [routeCoords, setRouteCoords] = useState<LatLng[] | null>(null);
@@ -89,16 +90,18 @@ export function Map({ destination, onRouteInfo, carSize }: Props) {
   const markerSize = carSize ?? DEFAULT_CAR_SIZE;
   const [tracks, setTracks] = useState(true);
   const [tracksMap, setTracksMap] = useState<Record<string, boolean>>({});
+  const lastLatDeltaRef = useRef<number>(INITIAL_REGION.latitudeDelta);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   // Escala baseada no zoom: latitudeDelta menor = mais perto = ícone maior
   const zoomScale = useMemo(() => {
-    const d = region.latitudeDelta || INITIAL_REGION.latitudeDelta;
+    const d = latDelta || INITIAL_REGION.latitudeDelta;
     const minD = 0.005; // muito perto
     const maxD = 0.5;   // bem afastado
     const clamped = Math.max(minD, Math.min(maxD, d));
     const t = (clamped - minD) / (maxD - minD); // 0..1
     return 1.4 - t * (1.4 - 0.6); // 0.6x (longe) → 1.4x (perto)
-  }, [region.latitudeDelta]);
+  }, [latDelta]);
 
   const currentSize = useMemo(() => ({
     width: markerSize.width * zoomScale,
@@ -120,7 +123,6 @@ export function Map({ destination, onRouteInfo, carSize }: Props) {
     setUserLoc(curr);
     if (!firstFix) {
       setFirstFix(true);
-      setRegion(prev => ({ ...prev, latitude: curr.latitude, longitude: curr.longitude }));
       // Gera carros ao redor do primeiro fix (~100–300m)
       const newCars: Car[] = Array.from({ length: 5 }).map((_, i) => {
         const dLat = Math.random() * 0.003 - 0.0015;
@@ -133,6 +135,14 @@ export function Map({ destination, onRouteInfo, carSize }: Props) {
         };
       });
       setCars(newCars);
+    }
+  };
+  
+  const handleRegionChangeComplete = (r: Region) => {
+    // Throttle: só atualiza se a variação de zoom for perceptível
+    if (Math.abs(r.latitudeDelta - lastLatDeltaRef.current) > 0.0008) {
+      lastLatDeltaRef.current = r.latitudeDelta;
+      setLatDelta(r.latitudeDelta);
     }
   };
 
@@ -208,13 +218,15 @@ export function Map({ destination, onRouteInfo, carSize }: Props) {
       <MapView
         ref={(ref) => { mapRef.current = ref; }}
         testID="map-view"
-        provider={PROVIDER_GOOGLE}
+        {...(Platform.OS === 'android' ? { provider: PROVIDER_GOOGLE } : {})}
         style={styles.map}
         onMapReady={handleReady}
-        onRegionChangeComplete={setRegion}
+        onMapLoaded={() => setMapLoaded(true)}
+        onRegionChangeComplete={handleRegionChangeComplete}
         showsUserLocation
         onUserLocationChange={onUserLocationChange}
         initialRegion={INITIAL_REGION}
+        zoomControlEnabled={Platform.OS === 'android'}
       >
         {/* destino */}
         {destination && (
@@ -255,6 +267,13 @@ export function Map({ destination, onRouteInfo, carSize }: Props) {
           />
         )}
       </MapView>
+
+      {/* Overlay de loading próprio (evita NPE do loadingEnabled) */}
+      {!mapLoaded && (
+        <View style={styles.loadingOverlay} pointerEvents="none">
+          <ActivityIndicator color="#F0C53D" />
+        </View>
+      )}
     </View>
   );
 }
@@ -262,4 +281,10 @@ export function Map({ destination, onRouteInfo, carSize }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   map: { flex: 1 },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+  },
 });
