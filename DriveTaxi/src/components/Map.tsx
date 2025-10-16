@@ -1,23 +1,224 @@
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { StyleSheet, View } from "react-native";
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, {
+  PROVIDER_GOOGLE,
+  Marker,
+  Polyline,
+  Region,
+  LatLng,
+  UserLocationChangeEvent,
+} from "react-native-maps";
+import { GOOGLE_PLACES_API_KEY } from "../config/keys";
 
-export function Map() {
+export type MapDestination = {
+  latitude: number;
+  longitude: number;
+  title?: string;
+};
+
+type RouteInfo = {
+  distanceText: string;
+  durationText: string;
+  meters: number;
+  seconds: number;
+};
+
+type Car = LatLng & { id: string; rotation: number };
+
+type Props = {
+  destination?: MapDestination | null;
+  onRouteInfo?: (info: RouteInfo | undefined) => void;
+};
+
+const INITIAL_REGION: Region = {
+  latitude: -23.55052,
+  longitude: -46.633308,
+  latitudeDelta: 0.05,
+  longitudeDelta: 0.05,
+};
+
+const CAR_ICON = require("../../assets/images/car.png");
+
+function decodePolyline(encoded: string): LatLng[] {
+  // Decodificador padrão de polylines Google
+  let index = 0;
+  const len = encoded.length;
+  let lat = 0;
+  let lng = 0;
+  const coordinates: LatLng[] = [];
+
+  while (index < len) {
+    let b: number;
+    let shift = 0;
+    let result = 0;
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    const dlat = (result & 1) ? ~(result >> 1) : result >> 1;
+    lat += dlat;
+
+    shift = 0;
+    result = 0;
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    const dlng = (result & 1) ? ~(result >> 1) : result >> 1;
+    lng += dlng;
+
+    coordinates.push({ latitude: lat / 1e5, longitude: lng / 1e5 });
+  }
+  return coordinates;
+}
+
+export function Map({ destination, onRouteInfo }: Props) {
+  const mapRef = useRef<MapView | null>(null);
+  const [region, setRegion] = useState<Region>(INITIAL_REGION);
+  const [userLoc, setUserLoc] = useState<LatLng | null>(null);
+  const [cars, setCars] = useState<Car[]>([]);
+  const [routeCoords, setRouteCoords] = useState<LatLng[] | null>(null);
+  const [firstFix, setFirstFix] = useState(false);
+  const moveTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const handleReady = () => console.log("[Map] onMapReady");
+
+  const onUserLocationChange = (e: UserLocationChangeEvent) => {
+    const c = e.nativeEvent.coordinate;
+    if (!c) return;
+    const curr = { latitude: c.latitude, longitude: c.longitude };
+    setUserLoc(curr);
+    if (!firstFix) {
+      setFirstFix(true);
+      setRegion(prev => ({ ...prev, latitude: curr.latitude, longitude: curr.longitude }));
+      // Gera carros ao redor do primeiro fix (~100–300m)
+      const newCars: Car[] = Array.from({ length: 5 }).map((_, i) => {
+        const dLat = Math.random() * 0.003 - 0.0015;
+        const dLng = Math.random() * 0.003 - 0.0015;
+        return {
+          id: `car-${i}`,
+          latitude: curr.latitude + dLat,
+          longitude: curr.longitude + dLng,
+          rotation: Math.floor(Math.random() * 360),
+        };
+      });
+      setCars(newCars);
+    }
+  };
+
+  const fetchDirections = useCallback(async (origin: LatLng, dest: LatLng) => {
+    try {
+      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${dest.latitude},${dest.longitude}&mode=driving&key=${GOOGLE_PLACES_API_KEY}`;
+      const res = await fetch(url);
+      const json = await res.json();
+      const route = json.routes?.[0];
+      const leg = route?.legs?.[0];
+      const points = route?.overview_polyline?.points;
+      if (leg && onRouteInfo) {
+        onRouteInfo({
+          distanceText: leg.distance?.text ?? '',
+          durationText: leg.duration?.text ?? '',
+          meters: leg.distance?.value ?? 0,
+          seconds: leg.duration?.value ?? 0,
+        });
+      }
+      if (points) {
+        const coords = decodePolyline(points);
+        setRouteCoords(coords);
+        if (mapRef.current && coords.length > 1) {
+          mapRef.current.fitToCoordinates(coords, {
+            edgePadding: { top: 80, bottom: 340, left: 60, right: 60 },
+            animated: true,
+          });
+        }
+      } else {
+        setRouteCoords([origin, dest]);
+      }
+    } catch (e) {
+      console.warn("[Map] directions error", e);
+      setRouteCoords([origin, dest]);
+    }
+  }, [onRouteInfo]);
+
+  // quando destino muda e já temos userLoc, busca rota
+  useEffect(() => {
+    if (destination && userLoc) {
+      fetchDirections(userLoc, {
+        latitude: destination.latitude,
+        longitude: destination.longitude,
+      });
+    } else {
+      setRouteCoords(null);
+      onRouteInfo?.(undefined);
+    }
+  }, [destination, userLoc, fetchDirections, onRouteInfo]);
+
+  // animação simples dos carros (vagueando)
+  useEffect(() => {
+    if (cars.length === 0) return;
+    if (moveTimer.current) clearInterval(moveTimer.current);
+    moveTimer.current = setInterval(() => {
+      setCars(prev => prev.map(car => {
+        const dLat = (Math.random() - 0.5) * 0.0006; // ~60m
+        const dLng = (Math.random() - 0.5) * 0.0006;
+        const newLat = car.latitude + dLat;
+        const newLng = car.longitude + dLng;
+        const rotation = (Math.atan2(dLng, dLat) * 180) / Math.PI;
+        return { ...car, latitude: newLat, longitude: newLng, rotation };
+      }));
+    }, 1800);
+    return () => {
+      if (moveTimer.current) clearInterval(moveTimer.current);
+      moveTimer.current = null;
+    };
+  }, [cars.length]);
 
   return (
     <View style={styles.container}>
       <MapView
+        ref={(ref) => { mapRef.current = ref; }}
         testID="map-view"
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         onMapReady={handleReady}
-        initialRegion={{
-          latitude: -23.55052,
-          longitude: -46.633308,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        }}
-      />
+        onRegionChangeComplete={setRegion}
+        showsUserLocation
+        onUserLocationChange={onUserLocationChange}
+        initialRegion={INITIAL_REGION}
+      >
+        {/* destino */}
+        {destination && (
+          <Marker
+            coordinate={{ latitude: destination.latitude, longitude: destination.longitude }}
+            title={destination.title || 'Destino'}
+          />
+        )}
+
+        {/* carros próximos */}
+        {cars.map(car => (
+          <Marker
+            key={car.id}
+            coordinate={{ latitude: car.latitude, longitude: car.longitude }}
+            image={CAR_ICON}
+            anchor={{ x: 0.5, y: 0.5 }}
+            rotation={car.rotation}
+            flat
+          />
+        ))}
+
+        {/* rota */}
+        {routeCoords && (
+          <Polyline
+            coordinates={routeCoords}
+            strokeColor="#1C1C1C"
+            strokeWidth={5}
+            lineCap="round"
+            lineJoin="round"
+          />
+        )}
+      </MapView>
     </View>
   );
 }
