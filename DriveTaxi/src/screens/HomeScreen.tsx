@@ -11,14 +11,19 @@ import { Map } from '../components/Map';
 import {
   Menu,
   Navigation,
-  Clock,
+//   Clock,
   ChevronDown,
   Coffee,
   Car,
+  Icon,
 } from 'lucide-react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
 import { useLocationPermission } from '../hooks/useLocationPermission';
+
+import ClockIcon from '../../assets/svg/clock.svg';
+import LocationIcon from '../../assets/svg/location.svg';
+import MenuIcon from '../../assets/svg/menu.svg';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -30,7 +35,7 @@ export function HomeScreen({ route, navigation }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       {/* Mapa de fundo */}
-      <View style={StyleSheet.absoluteFill}>
+      <View style={[StyleSheet.absoluteFill, { paddingBottom: 200}]}>
         <Map
           destination={destination?.location ? {
             latitude: destination.location.latitude,
@@ -59,7 +64,8 @@ export function HomeScreen({ route, navigation }: Props) {
       {/* Botão de menu */}
       <View style={styles.header}>
         <Pressable style={styles.menuButton} onPress={() => {}}>
-          <Menu color="#1C1C1C" size={22} />
+            <MenuIcon />
+          {/* <Menu color="#1C1C1C" size={22} /> */}
         </Pressable>
       </View>
 
@@ -68,13 +74,13 @@ export function HomeScreen({ route, navigation }: Props) {
         {/* Barra de busca */}
         <Pressable style={styles.searchBar} onPress={() => navigation.navigate('Search')}>
           <View style={styles.searchLeft}>
-            <Navigation size={18} color="#1C1C1C" />
+            <LocationIcon />
             <Text style={styles.searchText} numberOfLines={1}>
               {destination?.description ?? 'Para onde?'}
             </Text>
           </View>
           <View style={styles.searchRight}>
-            <Clock size={16} color="#6B6B6B" />
+            <ClockIcon />
             <Text style={styles.searchWhen}>Agora</Text>
             <ChevronDown size={16} color="#6B6B6B" />
           </View>
@@ -90,18 +96,18 @@ export function HomeScreen({ route, navigation }: Props) {
         {/* Cards de destino */}
         <View style={styles.cardsRow}>
           <Pressable style={[styles.card, styles.cardPrimary]} onPress={() => {}}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.cardPrimaryTitle}>Coffee{"\n"}Lab</Text>
-              <Text style={styles.cardPrimaryTime}>13 min</Text>
+            <Text style={styles.cardPrimaryTitle}>Angelina{"\n"}Paris Cafe</Text>
+            <Text style={styles.cardPrimaryTime}>13 min</Text>
+            <View style={styles.cardPrimaryIconWrap}>
+              <Coffee color="#929292" size={30} />
             </View>
-            <Coffee color="#B58200" size={44} />
           </Pressable>
 
           <Pressable style={[styles.card, styles.cardSecondary]} onPress={() => {}}>
             <Text style={styles.cardSecondaryTitle}>Beco{"\n"}do Batman</Text>
             <Text style={styles.cardSecondaryTime}>20 min</Text>
             <View style={styles.cardSecondaryIconWrap}>
-              <Car color="#F0C53D" size={30} />
+              <Car color="#929292" size={30} />
             </View>
           </Pressable>
         </View>
@@ -117,13 +123,12 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 260,
+    height: 460,
   },
   header: {
     position: 'absolute',
-    top: 8,
-    left: 16,
-    right: 16,
+    top: 48,
+    left: 24,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -131,13 +136,13 @@ const styles = StyleSheet.create({
   menuButton: {
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: 200,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
     // sombra
     shadowColor: '#000',
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.20,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
     elevation: 3,
@@ -149,30 +154,32 @@ const styles = StyleSheet.create({
     bottom: 18,
   },
   searchBar: {
-    height: 64,
-    borderRadius: 24,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 18,
+    height: 56,
+    borderRadius: 200,
+    backgroundColor: 'transparent',
+    paddingLeft: 24,
+    paddingRight: 4,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E9E9E9',
+    borderColor: '#DADADA',
   },
-  searchLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  searchLeft: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   searchText: {
-    color: '#1C1C1C',
-    fontSize: 20,
+    color: '#151513',
+    fontSize: 16,
     fontFamily: 'Montserrat-Medium',
   },
   searchRight: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    height: 48,
     backgroundColor: '#F3F3F3',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 16,
+    borderRadius: 200,
   },
   searchWhen: { color: '#6B6B6B', fontSize: 14, fontFamily: 'Montserrat-Medium' },
   routeInfo: {
@@ -189,51 +196,63 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-Medium',
   },
   cardsRow: {
-    marginTop: 16,
+    marginTop: 24,
     flexDirection: 'row',
-    gap: 12,
+    gap: 16,
   },
   card: {
     flex: 1,
-    borderRadius: 22,
-    padding: 16,
+    borderRadius: 16,
+    padding: 24,
+    paddingBottom: 48,
   },
   cardPrimary: {
-    backgroundColor: '#FFD977',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    backgroundColor: '#FFDC71',
+    borderWidth: 1,
+    borderColor: '#FFDC71',
+    position: 'relative',
   },
   cardPrimaryTitle: {
     color: '#1C1C1C',
-    fontSize: 22,
-    lineHeight: 26,
-    fontFamily: 'Montserrat-Medium',
+    fontSize: 16,
+    lineHeight: 24,
+    fontFamily: 'Montserrat-SemiBold',
   },
   cardPrimaryTime: {
-    marginTop: 12,
-    color: '#1C1C1C',
-    fontSize: 18,
+    marginTop: 10,
+    color: '#151513',
+    fontSize: 16,
     fontFamily: 'Montserrat-Medium',
+  },
+  cardPrimaryIconWrap: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    margin: 24,
   },
   cardSecondary: {
     backgroundColor: '#FFFFFF',
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E8E8E8',
+    borderColor: '#DADADA',
   },
   cardSecondaryTitle: {
     color: '#1C1C1C',
-    fontSize: 20,
+    fontSize: 16,
     lineHeight: 24,
-    fontFamily: 'Montserrat-Medium',
+    fontFamily: 'Montserrat-SemiBold',
   },
   cardSecondaryTime: {
     marginTop: 10,
-    color: '#8A8A8A',
+    color: '#929292',
     fontSize: 16,
     fontFamily: 'Montserrat-Medium',
   },
-  cardSecondaryIconWrap: { marginTop: 16, alignSelf: 'flex-start' },
+  cardSecondaryIconWrap: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    margin: 24
+  },
   permissionToast: {
     position: 'absolute',
     top: 80,
