@@ -243,6 +243,7 @@ export function Map({ destination, onRouteInfo, carSize }: Props) {
         onUserLocationChange={onUserLocationChange}
         initialRegion={INITIAL_REGION}
         zoomControlEnabled={Platform.OS === 'android'}
+        showsMyLocationButton={false}
       >
         {/* destino */}
         {destination && (
