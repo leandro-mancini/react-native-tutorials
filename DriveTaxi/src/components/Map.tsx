@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { StyleSheet, View, Platform, ActivityIndicator } from "react-native";
 import CarSvg from '../../assets/images/car.svg';
+import PinSvg from '../../assets/svg/pin.svg';
 import MapView, {
   PROVIDER_GOOGLE,
   Marker,
@@ -92,6 +93,7 @@ export function Map({ destination, onRouteInfo, carSize }: Props) {
   const [tracksMap, setTracksMap] = useState<Record<string, boolean>>({});
   const lastLatDeltaRef = useRef<number>(INITIAL_REGION.latitudeDelta);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [showNativeUserDot, setShowNativeUserDot] = useState(true);
 
   // Escala baseada no zoom: latitudeDelta menor = mais perto = ícone maior
   const zoomScale = useMemo(() => {
@@ -151,6 +153,9 @@ export function Map({ destination, onRouteInfo, carSize }: Props) {
         };
       });
       setCars(newCars);
+
+      // Após o primeiro fix, ocultamos o dot nativo e usamos nosso marcador customizado
+      setShowNativeUserDot(false);
     }
   };
   
@@ -239,10 +244,10 @@ export function Map({ destination, onRouteInfo, carSize }: Props) {
         onMapReady={handleReady}
         onMapLoaded={() => setMapLoaded(true)}
         onRegionChangeComplete={handleRegionChangeComplete}
-        showsUserLocation
+        showsUserLocation={showNativeUserDot}
         onUserLocationChange={onUserLocationChange}
         initialRegion={INITIAL_REGION}
-        zoomControlEnabled={Platform.OS === 'android'}
+        zoomControlEnabled={false}
         showsMyLocationButton={false}
       >
         {/* destino */}
@@ -251,6 +256,17 @@ export function Map({ destination, onRouteInfo, carSize }: Props) {
             coordinate={{ latitude: destination.latitude, longitude: destination.longitude }}
             title={destination.title || 'Destino'}
           />
+        )}
+
+        {/* localização do usuário (marcador customizado) */}
+        {userLoc && (
+          <Marker
+            coordinate={userLoc}
+            anchor={{ x: 0.5, y: 1 }}
+            tracksViewChanges={false}
+          >
+            <PinSvg width={48} height={48} />
+          </Marker>
         )}
 
         {/* carros próximos */}

@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     borderColor: '#DADADA',
   },
   searchLeft: { flexDirection: 'row', alignItems: 'center', gap: 16 },
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
   },
   cardSecondary: {
     backgroundColor: '#FFFFFF',
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     borderColor: '#DADADA',
   },
   cardSecondaryTitle: {
