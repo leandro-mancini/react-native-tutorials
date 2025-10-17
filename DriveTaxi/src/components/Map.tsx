@@ -18,6 +18,7 @@ export type MapDestination = {
   latitude: number;
   longitude: number;
   title?: string;
+  placeId?: string; // novo: permite usar place_id na rota
 };
 
 type RouteInfo = {
@@ -167,24 +168,64 @@ export function Map({ destination, onRouteInfo, carSize }: Props) {
     }
   };
 
-  const fetchDirections = useCallback(async (origin: LatLng, dest: LatLng) => {
+  const formatDistance = (meters?: number) => {
+    if (!meters && meters !== 0) return '';
+    if (meters >= 1000) return `${(meters / 1000).toFixed(1)} km`;
+    return `${meters} m`;
+  };
+  const formatDuration = (duration?: string) => {
+    if (!duration) return '';
+    // Routes API retorna no formato "1234s"
+    const seconds = parseInt(duration.replace('s', ''), 10) || 0;
+    if (seconds < 3600) return `${Math.round(seconds / 60)} min`;
+    const h = Math.floor(seconds / 3600);
+    const m = Math.round((seconds % 3600) / 60);
+    return `${h} h ${m} min`;
+  };
+
+  const fetchDirections = useCallback(async (origin: LatLng, dest: MapDestination) => {
     try {
-      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${dest.latitude},${dest.longitude}&mode=driving&key=${GOOGLE_PLACES_API_KEY}`;
-      const res = await fetch(url);
+      const body: any = {
+        origin: { location: { latLng: { latitude: origin.latitude, longitude: origin.longitude } } },
+        destination: dest.placeId
+          ? { placeId: dest.placeId }
+          : { location: { latLng: { latitude: dest.latitude, longitude: dest.longitude } } },
+        travelMode: 'DRIVE',
+        routingPreference: 'TRAFFIC_AWARE',
+        computeAlternativeRoutes: false,
+        polylineQuality: 'HIGH_QUALITY',
+        polylineEncoding: 'ENCODED_POLYLINE',
+      };
+      const res = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY,
+          'X-Goog-FieldMask': 'routes.distanceMeters,routes.duration,routes.polyline.encodedPolyline,routes.legs',
+        },
+        body: JSON.stringify(body),
+      });
       const json = await res.json();
       const route = json.routes?.[0];
-      const leg = route?.legs?.[0];
-      const points = route?.overview_polyline?.points;
-      if (leg && onRouteInfo) {
-        onRouteInfo({
-          distanceText: leg.distance?.text ?? '',
-          durationText: leg.duration?.text ?? '',
-          meters: leg.distance?.value ?? 0,
-          seconds: leg.duration?.value ?? 0,
-        });
+      if (!route) {
+        console.warn('[Map] routes api empty', json); 
+        setRouteCoords(null);
+        onRouteInfo?.(undefined);
+        return;
       }
-      if (points) {
-        const coords = decodePolyline(points);
+      const encoded: string | undefined = route.polyline?.encodedPolyline;
+      const meters: number | undefined = route.distanceMeters ?? route.legs?.[0]?.distanceMeters;
+      const duration: string | undefined = route.duration ?? route.legs?.[0]?.duration;
+
+      onRouteInfo?.({
+        distanceText: formatDistance(meters),
+        durationText: formatDuration(duration),
+        meters: meters ?? 0,
+        seconds: duration ? parseInt(duration.replace('s', ''), 10) || 0 : 0,
+      });
+
+      if (encoded) {
+        const coords = decodePolyline(encoded);
         setRouteCoords(coords);
         if (mapRef.current && coords.length > 1) {
           mapRef.current.fitToCoordinates(coords, {
@@ -193,21 +234,19 @@ export function Map({ destination, onRouteInfo, carSize }: Props) {
           });
         }
       } else {
-        setRouteCoords([origin, dest]);
+        setRouteCoords(null);
       }
     } catch (e) {
-      console.warn("[Map] directions error", e);
-      setRouteCoords([origin, dest]);
+      console.warn('[Map] routes api error', e);
+      setRouteCoords(null);
+      onRouteInfo?.(undefined);
     }
   }, [onRouteInfo]);
 
   // quando destino muda e já temos userLoc, busca rota
   useEffect(() => {
     if (destination && userLoc) {
-      fetchDirections(userLoc, {
-        latitude: destination.latitude,
-        longitude: destination.longitude,
-      });
+      fetchDirections(userLoc, destination);
     } else {
       setRouteCoords(null);
       onRouteInfo?.(undefined);

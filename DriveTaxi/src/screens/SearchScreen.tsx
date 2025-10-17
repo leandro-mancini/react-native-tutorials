@@ -55,6 +55,7 @@ export default function SearchScreen({ navigation }: Props) {
       }
   >(null);
   const [selectedRide, setSelectedRide] = useState<RideOption | null>(null);
+  const [routeInfo, setRouteInfo] = useState<{ distanceText: string; durationText: string } | undefined>();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchPredictions = useCallback(async (text: string) => {
@@ -145,8 +146,10 @@ export default function SearchScreen({ navigation }: Props) {
                 latitude: selectedDestination.location.latitude,
                 longitude: selectedDestination.location.longitude,
                 title: selectedDestination.description,
+                placeId: selectedDestination.placeId,
               }
             : undefined}
+          onRouteInfo={(info) => setRouteInfo(info ? { distanceText: info.distanceText, durationText: info.durationText } : undefined)}
           carSize={{ width: 34, height: 18 }}
         />
       </View>
@@ -164,6 +167,13 @@ export default function SearchScreen({ navigation }: Props) {
           <ArrowLeft color="#1C1C1C" size={22} />
         </Pressable>
       </View>
+
+      {/* Chip de informações da rota */}
+      {selectedDestination && routeInfo && (
+        <View style={styles.routeInfo}>
+          <Text style={styles.routeInfoText}>{routeInfo.durationText} • {routeInfo.distanceText}</Text>
+        </View>
+      )}
 
       {/* Bottom Sheet */}
       <View style={styles.bottomSheet}>
@@ -297,6 +307,21 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
     elevation: 3,
+  },
+  // Chip da rota
+  routeInfo: {
+    position: 'absolute',
+    left: 16,
+    bottom: 380,
+    backgroundColor: '#151513',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  routeInfoText: {
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: 'Montserrat-Medium',
   },
   bottomSheet: {
     position: 'absolute',
