@@ -12,12 +12,11 @@ Crie uma tela de bloqueio estilo Android com padrão 3×3: arraste e conecte pon
 - [Arquitetura do lock](#arquitetura-do-lock)
 - [Implementação passo a passo](#implementação-passo-a-passo)
   - [Navegação e fluxo](#1-navegação-e-fluxo)
-  - [Grid 3×3 e regras do padrão](#2-grid-3×3-e-regras-do-padrão)
-  - [Arrasto com PanResponder](#3-arrasto-com-panresponder)
-  - [Desenho com SVG (Polyline e Circles)](#4-desenho-com-svg-polyline-e-circles)
-  - [Feedback visual e animações](#5-feedback-visual-e-animações)
-  - [Callbacks e navegação](#6-callbacks-e-navegação)
-  - [Parametrização e estilos](#7-parametrização-e-estilos)
+  - [Utilitários de grid e regras](#2-utilitários-de-grid-e-regras)
+  - [Hook de estado, gestos e animações](#3-hook-de-estado-gestos-e-animações)
+  - [Canvas SVG (Polyline e círculos)](#4-canvas-svg-polyline-e-círculos)
+  - [Callbacks e navegação](#5-callbacks-e-navegação)
+  - [Parametrização e estilos](#6-parametrização-e-estilos)
 - [Como executar](#como-executar)
 - [Estrutura de pastas (referência)](#estrutura-de-pastas-referência)
 - [Solução de problemas](#solução-de-problemas)
@@ -57,13 +56,13 @@ cd ios && pod install && cd ..
 
 ## Arquitetura do lock
 
-O fluxo é movido por gestos (Pan) e desenho com SVG:
-- Grid 3×3 com centros pré‑computados.
-- Seleção por proximidade durante o arrasto (raio de acerto para suavizar a UX).
-- Regras: permite adjacentes e “saltos” de 2 casas, inserindo o ponto intermediário automaticamente quando aplicável (ex.: 0→2 insere 1).
-- `Polyline` desenha o caminho em tempo real; cada ponto ativa um anel com animação.
-- Estados de status: `idle`, `ok`, `fail` mudam a cor do traço e disparam feedback (vibração/anim.
-- Ao sucesso, roda uma sequência de escala/opacidade e então navega para o `Dashboard`.
+A implementação foi organizada em camadas para manutenção e reuso:
+- `utils` — matemática/geom. do grid (centros, vizinhança, ponto intermediário), constantes e helpers de feedback.
+- `hooks` — orquestra estado, gestos (PanResponder), linha viva, progress por ponto e animações de sucesso.
+- `components` — canvas SVG que somente desenha, desacoplado da lógica.
+- `screen` — compõe tudo e expõe props simples (`registeredPattern`, `onSuccess`, `onFail`).
+
+Benefícios: responsabilidades claras, testes mais fáceis, e possibilidade de reuso do hook/canvas em outras telas ou temas.
 
 ## Implementação passo a passo
 
@@ -107,17 +106,37 @@ function LockWrapper({ navigation }: any) {
 }
 ```
 
-### 2) Grid 3×3 e regras do padrão
+### 2) Utilitários de grid e regras
 
-Arquivo: `src/PatternUnlockScreen.tsx`
+Arquivo: `src/pattern/utils/geometry.ts`
 
-- Centros são calculados com base em `BOX_SIZE` e `PADDING`.
-- Aceita adjacentes e saltos de duas casas (reta/diagonal), inserindo o ponto intermediário.
-
-Trecho que injeta o ponto intermediário num salto:
+Constantes e centros do grid:
 
 ```ts
-function intermediateIndex(a: number, b: number): number | null {
+export const BOX_SIZE = 300;
+export const PADDING = 48;
+export const DOT_R = 12;
+export const MOVE_HIT_R = 24;
+export const GRID_INDEXES = [...Array(9).keys()];
+
+export type Point = { x: number; y: number };
+
+export function centersForGrid(): Point[] {
+  const area = BOX_SIZE - PADDING * 2;
+  const step = area / 2;
+  const base = PADDING;
+  const pts: Point[] = [];
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
+    pts.push({ x: base + c * step, y: base + r * step });
+  }
+  return pts;
+}
+```
+
+Detecção de ponto intermediário (saltos em linha/coluna/diagonal):
+
+```ts
+export function intermediateIndex(a: number, b: number): number | null {
   const A = idxToRC(a), B = idxToRC(b);
   const dr = B.r - A.r, dc = B.c - A.c;
   const isStraightTwo =
@@ -130,61 +149,65 @@ function intermediateIndex(a: number, b: number): number | null {
 }
 ```
 
-### 3) Arrasto com PanResponder
+Seleção por proximidade durante o arrasto:
 
-- `PanResponder` controla início/movimento/fim do gesto.
-- Atualiza um ponto “vivo” para o cursor e realiza o snap para o ponto mais próximo dentro do raio.
+```ts
+export function nearestIndexWithin(p: Point, centers: Point[], radius: number): number | null {
+  let idx: number | null = null, best = Number.MAX_VALUE;
+  centers.forEach((c, i) => {
+    const d = Math.hypot(p.x - c.x, p.y - c.y);
+    if (d < best) { best = d; idx = i; }
+  });
+  return best <= radius ? idx : null;
+}
+```
+
+### 3) Hook de estado, gestos e animações
+
+Arquivo: `src/pattern/hooks/usePatternLock.ts`
+
+PanResponder (trecho principal):
 
 ```ts
 const pan = useRef(
   PanResponder.create({
     onStartShouldSetPanResponder: () => true,
-    onPanResponderGrant: (e) => {
+    onMoveShouldSetPanResponder: () => true,
+
+    onPanResponderGrant: (e: GestureResponderEvent) => {
       reset();
       const p = { x: e.nativeEvent.locationX, y: e.nativeEvent.locationY };
-      livePoint.current = p;
+      livePoint.current = p; setLivePointState(p);
       const firstIdx = nearestIndexAny(p, centers);
       pathRef.current = [firstIdx];
       _setSelected([firstIdx]);
     },
-    onPanResponderMove: (e) => {
+
+    onPanResponderMove: (e: GestureResponderEvent) => {
       const p = { x: e.nativeEvent.locationX, y: e.nativeEvent.locationY };
-      livePoint.current = p;
-      setSelectedSync(prev => { /* seleciona novos pontos respeitando regras */ return prev; });
+      livePoint.current = p; scheduleCursorUpdate();
+
+      setSelectedSync(prev => {
+        const last = prev[prev.length - 1];
+        const idx = nearestIndexWithin(p, centers, MOVE_HIT_R);
+        if (idx == null || prev.includes(idx)) return prev;
+        if (!isAdjacentOrTwoSteps(last, idx)) return prev;
+
+        const next = [...prev];
+        const mid = intermediateIndex(last, idx);
+        if (mid != null && !next.includes(mid)) next.push(mid);
+        next.push(idx);
+        return next;
+      });
     },
+
     onPanResponderRelease: () => finish(),
+    onPanResponderTerminate: () => finish(),
   })
 ).current;
 ```
 
-### 4) Desenho com SVG (Polyline e Circles)
-
-- `Polyline` traça o caminho com cor que muda por status.
-- Cada dot tem círculo com anel e preenchimento animado.
-
-```tsx
-<Svg width={BOX_SIZE} height={BOX_SIZE}>
-  {linePoints.length > 1 && (
-    <Polyline
-      points={linePoints.map(p => `${p.x},${p.y}`).join(' ')}
-      fill="none"
-      stroke={strokeColor}
-      strokeWidth={4}
-    />
-  )}
-  {GRID_INDEXES.map((i) => (
-    <>
-      <AnimatedCircle cx={c.x} cy={c.y} r={rAnimated} fill="#FFF" fillOpacity={fillOpacity} />
-      <Circle cx={c.x} cy={c.y} r={DOT_R} stroke="white" strokeWidth={3} fill="transparent" />
-    </>
-  ))}
-</Svg>
-```
-
-### 5) Feedback visual e animações
-
-- Pontos “pulso” ao serem ativados (`Animated.spring`).
-- Sucesso toca uma sequência e então navega:
+Sequência de animação de sucesso:
 
 ```ts
 Animated.sequence([
@@ -193,14 +216,69 @@ Animated.sequence([
     Animated.timing(haloScale,  { toValue: 1.15, duration: 140, useNativeDriver: true }),
   ]),
   Animated.parallel([
-    Animated.timing(frameScale, { toValue: 0.82, duration: 260, useNativeDriver: true }),
+    Animated.timing(frameScale, { toValue: 0.82, duration: 260, easing: Easing.out(Easing.quad), useNativeDriver: true }),
     Animated.timing(frameOpacity, { toValue: 0, duration: 260, useNativeDriver: true }),
-    Animated.timing(haloScale,  { toValue: 1.6, duration: 260, useNativeDriver: true }),
+    Animated.timing(haloScale,    { toValue: 1.6, duration: 260, useNativeDriver: true }),
   ]),
-]).start(() => onSuccess?.());
+]).start(({ finished }) => finished && onSuccess?.());
 ```
 
-### 6) Callbacks e navegação
+### 4) Canvas SVG (Polyline e círculos)
+
+Arquivo: `src/pattern/components/PatternCanvas.tsx`
+
+Trecho de desenho:
+
+```tsx
+<Svg width={width} height={height}>
+  {linePoints.length > 1 && (
+    <Polyline
+      points={linePoints.map(p => `${p.x},${p.y}`).join(' ')}
+      fill="none"
+      stroke={strokeColor}
+      strokeOpacity={0.9}
+      strokeWidth={4}
+      strokeLinejoin="miter"
+      strokeLinecap="butt"
+    />
+  )}
+  {GRID_INDEXES.map((i) => {
+    const c = centers[i];
+    const rAnimated = dotProgress[i].interpolate({ inputRange: [0, 1], outputRange: [DOT_R, DOT_R * 1.6] });
+    const fillOpacity = dotProgress[i].interpolate({ inputRange: [0, 1], outputRange: [0, 0.22] });
+    return (
+      <React.Fragment key={i}>
+        <AnimatedCircle cx={c.x} cy={c.y} r={rAnimated as any} fill="#FFFFFF" fillOpacity={fillOpacity as any} />
+        <Circle cx={c.x} cy={c.y} r={DOT_R} stroke="white" strokeOpacity={0.95} strokeWidth={3} fill="transparent" />
+      </React.Fragment>
+    );
+  })}
+</Svg>
+```
+
+Uso na tela com `strokeColor` por status:
+
+```tsx
+const strokeColor =
+  status === 'ok' ? '#22C55E' :
+  status === 'fail' ? '#EF4444' :
+  'rgba(255,255,255,0.95)';
+
+<Animated.View style={[styles.phoneFrame, { transform: [{ scale: frameScale }], opacity: frameOpacity }]}>
+  <View style={{ width: BOX_SIZE, height: BOX_SIZE, alignSelf: 'center' }} {...panHandlers}>
+    <PatternCanvas
+      width={BOX_SIZE}
+      height={BOX_SIZE}
+      linePoints={linePoints}
+      centers={centers}
+      strokeColor={strokeColor}
+      dotProgress={dotProgress}
+    />
+  </View>
+</Animated.View>
+```
+
+### 5) Callbacks e navegação
 
 - `registeredPattern`: array de índices esperados (0–8).
 - `onSuccess`: chamado após animação de sucesso (no exemplo, `navigation.replace('Dashboard')`).
@@ -215,12 +293,11 @@ Animated.sequence([
 />
 ```
 
-### 7) Parametrização e estilos
+### 6) Parametrização e estilos
 
-- Ajuste `BOX_SIZE`, `PADDING`, `DOT_R` para tamanhos.
-- Cores do fundo/frame estão em `styles` da tela; altere a paleta azul para o tema do app.
-- `MOVE_HIT_R` suaviza a seleção durante o arrasto (UX mais tolerante).
-- Para acessibilidade: considere sons/háptica extra e contraste de cores.
+- Ajuste `BOX_SIZE`, `PADDING`, `DOT_R`, `MOVE_HIT_R` em `src/pattern/utils/geometry.ts`.
+- Cores do fundo/frame estão em `styles` da tela `PatternUnlockScreen` (paleta azul de exemplo).
+- Para acessibilidade: adicione sons/háptica extra e verifique contraste de cores.
 
 ## Como executar
 
@@ -244,6 +321,14 @@ LockFlow/
   src/
     PatternUnlockScreen.tsx
     DashboardScreen.tsx
+    pattern/
+      components/
+        PatternCanvas.tsx
+      hooks/
+        usePatternLock.ts
+      utils/
+        geometry.ts
+        feedback.ts
 ```
 
 ## Solução de problemas
