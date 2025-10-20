@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,9 @@ import {
   Pressable,
 } from 'react-native';
 import Svg, { Circle, Polyline } from 'react-native-svg';
+
+// Animated version do Circle para animar raio e opacidade do fill
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 type Props = {
   registeredPattern: number[];
@@ -27,7 +30,7 @@ const BOX_SIZE = 300;
 const PADDING = 48;
 
 const DOT_R = 12;
-const MOVE_HIT_R = 28;     // arrasto (estrito)
+const MOVE_HIT_R = 24;     // arrasto (estrito)
 
 function safeVibrate(ms = 60) {
   try { if (Platform.OS === 'android' || Platform.OS === 'ios') Vibration.vibrate(ms); } catch {}
@@ -74,6 +77,12 @@ function nearestIndexWithin(p: Point, centers: Point[], radius: number): number 
   return best <= radius ? idx : null;
 }
 
+// Constrói a string de pontos do polyline a partir dos índices e um ponto vivo opcional
+function buildPointsString(indices: number[], centers: Point[], tail?: Point) {
+  const base = indices.map(i => `${centers[i].x},${centers[i].y}`).join(' ');
+  return tail ? (base ? `${base} ${tail.x},${tail.y}` : `${tail.x},${tail.y}`) : base;
+}
+
 export function PatternUnlockScreen({
   registeredPattern,
   onSuccess,
@@ -88,6 +97,22 @@ export function PatternUnlockScreen({
   const frameScale = useRef(new Animated.Value(1)).current;
   const frameOpacity = useRef(new Animated.Value(1)).current;
   const haloScale = useRef(new Animated.Value(1)).current;
+
+  // --- Posição viva do cursor (para o Polyline) com update via rAF ---
+  const [livePointState, setLivePointState] = useState<Point | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const scheduleCursorUpdate = () => {
+    if (rafRef.current != null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      setLivePointState(livePoint.current);
+    });
+  };
+
+  // --- Animações por ponto (ativação do círculo) ---
+  const dotProgress = useRef([...Array(9)].map(() => new Animated.Value(0))).current;
+  const prevSelectedRef = useRef<number[]>([]);
+  const polyRef = useRef<any>(null);
 
   // sync helpers
   const setSelectedSync = (next: number[] | ((prev: number[]) => number[])) => {
@@ -113,18 +138,64 @@ export function PatternUnlockScreen({
 
   const linePoints: Point[] = [
     ...selected.map(i => centers[i]),
-    ...(livePoint.current ? [livePoint.current] : []),
+    ...(livePointState ? [livePointState] : []),
   ];
 
+  // Mantém o polyline sincronizado quando selected muda
+  useEffect(() => {
+    if (polyRef.current) {
+      const pts = buildPointsString(pathRef.current, centers, livePoint.current || undefined);
+      polyRef.current.setNativeProps({ points: pts });
+    }
+  }, [selected, centers]);
+
   function reset() {
+    // cancelar rAF pendente
+    if (rafRef.current != null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+
     pathRef.current = [];
     _setSelected([]);
     setStatus('idle');
     livePoint.current = null;
+    setLivePointState(null);
     frameScale.setValue(1);
     frameOpacity.setValue(1);
     haloScale.setValue(1);
+    // reset animação dos pontos
+    dotProgress.forEach(v => v.setValue(0));
+    prevSelectedRef.current = [];
+    // zera o polyline
+    if (polyRef.current) {
+      polyRef.current.setNativeProps({ points: '' });
+    }
   }
+
+  useEffect(() => {
+    return () => {
+      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  // Dispara animação quando um novo ponto é selecionado
+  useEffect(() => {
+    const prev = prevSelectedRef.current;
+    const newly = selected.filter(i => !prev.includes(i));
+    newly.forEach(i => {
+      dotProgress[i].stopAnimation?.();
+      dotProgress[i].setValue(0);
+      Animated.spring(dotProgress[i], {
+        toValue: 1,
+        stiffness: 260,
+        damping: 22,
+        mass: 0.5,
+        useNativeDriver: false, // animando props SVG numéricas
+      }).start();
+    });
+    prevSelectedRef.current = selected;
+  }, [selected, dotProgress]);
 
   function commitFinalPoint() {
     const lp = livePoint.current;
@@ -200,14 +271,27 @@ export function PatternUnlockScreen({
         reset();
         const p = { x: e.nativeEvent.locationX, y: e.nativeEvent.locationY };
         livePoint.current = p;
+        setLivePointState(p);
         const firstIdx = nearestIndexAny(p, centers); // snap inicial
         pathRef.current = [firstIdx];
         _setSelected([firstIdx]);
+        // atualiza polyline imediatamente
+        if (polyRef.current) {
+          const pts = buildPointsString(pathRef.current, centers, p);
+          polyRef.current.setNativeProps({ points: pts });
+        }
       },
 
       onPanResponderMove: (e: GestureResponderEvent) => {
         const p = { x: e.nativeEvent.locationX, y: e.nativeEvent.locationY };
         livePoint.current = p;
+        scheduleCursorUpdate();
+
+        // atualiza polyline para seguir o cursor com mais precisão
+        if (polyRef.current) {
+          const pts = buildPointsString(pathRef.current, centers, p);
+          polyRef.current.setNativeProps({ points: pts });
+        }
 
         setSelectedSync(prev => {
           const last = prev[prev.length - 1];
@@ -219,6 +303,12 @@ export function PatternUnlockScreen({
           const mid = intermediateIndex(last, idx);
           if (mid != null && !next.includes(mid)) next.push(mid);
           next.push(idx);
+
+          // quando seleciona novo ponto, atualiza polyline com base atualizada
+          if (polyRef.current) {
+            const pts = buildPointsString(next, centers, p);
+            polyRef.current.setNativeProps({ points: pts });
+          }
           return next;
         });
       },
@@ -259,28 +349,48 @@ export function PatternUnlockScreen({
           <Svg width={BOX_SIZE} height={BOX_SIZE}>
             {linePoints.length > 1 && (
               <Polyline
+                ref={polyRef}
                 points={linePoints.map(p => `${p.x},${p.y}`).join(' ')}
                 fill="none"
                 stroke={strokeColor}
-                strokeWidth={6}
-                strokeLinejoin="round"
-                strokeLinecap="round"
+                strokeOpacity={0.9}
+                strokeWidth={4}
+                strokeLinejoin="miter"
+                strokeLinecap="butt"
               />
             )}
             {GRID_INDEXES.map((i) => {
               const c = centers[i];
-              const active = selected.includes(i);
+              // Interpola raio e opacidade do preenchimento conforme ativação
+              const rAnimated = dotProgress[i].interpolate({
+                inputRange: [0, 1],
+                outputRange: [DOT_R, DOT_R * 1.6],
+              });
+              const fillOpacity = dotProgress[i].interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 0.22],
+              });
               return (
-                <Circle
-                  key={i}
-                  cx={c.x}
-                  cy={c.y}
-                  r={DOT_R}
-                  stroke="white"
-                  strokeOpacity={0.95}
-                  strokeWidth={3}
-                  fill={active ? 'rgba(255,255,255,0.18)' : 'transparent'}
-                />
+                <React.Fragment key={i}>
+                  {/* Círculo preenchido e com scale animado */}
+                  <AnimatedCircle
+                    cx={c.x}
+                    cy={c.y}
+                    r={rAnimated as any}
+                    fill="#FFFFFF"
+                    fillOpacity={fillOpacity as any}
+                  />
+                  {/* Anel estático por cima */}
+                  <Circle
+                    cx={c.x}
+                    cy={c.y}
+                    r={DOT_R}
+                    stroke="white"
+                    strokeOpacity={0.95}
+                    strokeWidth={3}
+                    fill="transparent"
+                  />
+                </React.Fragment>
               );
             })}
           </Svg>
