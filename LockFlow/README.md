@@ -24,7 +24,7 @@ Crie uma tela de bloqueio estilo Android com padrão 3×3: arraste e conecte pon
 
 ## Demo
 
-
+https://github.com/user-attachments/assets/686d74d4-dcf2-4ae6-89cf-e6a316a39688
 
 ## Pré‑requisitos
 
