@@ -4,15 +4,17 @@ import {
   Text,
   StyleSheet,
   PanResponder,
-  Pressable,
   Vibration,
   Platform,
   GestureResponderEvent,
+  Animated,
+  Easing,
+  Pressable,
 } from 'react-native';
 import Svg, { Circle, Polyline } from 'react-native-svg';
 
 type Props = {
-  registeredPattern: number[];      // ex.: [3,4,7,8]
+  registeredPattern: number[];
   onSuccess?: () => void;
   onFail?: () => void;
   showDebug?: boolean;
@@ -20,13 +22,12 @@ type Props = {
 
 type Point = { x: number; y: number };
 
-const GRID_INDEXES = [...Array(9).keys()]; // 0..8
+const GRID_INDEXES = [...Array(9).keys()];
 const BOX_SIZE = 300;
-const PADDING = 24;
+const PADDING = 48;
 
 const DOT_R = 12;
-const FIRST_HIT_R = 48;  // 1º toque (snap amplo)
-const MOVE_HIT_R  = 28;  // arrasto (mais estrito)
+const MOVE_HIT_R = 28;     // arrasto (estrito)
 
 function safeVibrate(ms = 60) {
   try { if (Platform.OS === 'android' || Platform.OS === 'ios') Vibration.vibrate(ms); } catch {}
@@ -64,7 +65,6 @@ function nearestIndexAny(p: Point, centers: Point[]) {
   });
   return idx;
 }
-
 function nearestIndexWithin(p: Point, centers: Point[], radius: number): number | null {
   let idx: number | null = null, best = Number.MAX_VALUE;
   centers.forEach((c, i) => {
@@ -81,10 +81,15 @@ export function PatternUnlockScreen({
   showDebug = false,
 }: Props) {
   const [selected, _setSelected] = useState<number[]>([]);
-  const pathRef = useRef<number[]>([]);         // <- fonte da verdade p/ validação
+  const pathRef = useRef<number[]>([]);
   const [status, setStatus] = useState<'idle'|'ok'|'fail'>('idle');
 
-  // helpers para manter state e ref sempre em sincronia
+  // --- Animações (sucesso) ---
+  const frameScale = useRef(new Animated.Value(1)).current;
+  const frameOpacity = useRef(new Animated.Value(1)).current;
+  const haloScale = useRef(new Animated.Value(1)).current;
+
+  // sync helpers
   const setSelectedSync = (next: number[] | ((prev: number[]) => number[])) => {
     _setSelected(prev => {
       const value = typeof next === 'function' ? (next as any)(prev) : next;
@@ -93,17 +98,14 @@ export function PatternUnlockScreen({
     });
   };
 
-  const pushIndex = (idx: number) => {
-    setSelectedSync(prev => (prev.includes(idx) ? prev : [...prev, idx]));
-  };
-
   // centros dos 9 pontos
   const centers = useMemo<Point[]>(() => {
     const area = BOX_SIZE - PADDING * 2;
-    const step = area / 2; // 3 pontos => 2 steps
+    const step = area / 2;
     const base = PADDING;
     const pts: Point[] = [];
-    for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) pts.push({ x: base + c * step, y: base + r * step });
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++)
+      pts.push({ x: base + c * step, y: base + r * step });
     return pts;
   }, []);
 
@@ -119,22 +121,18 @@ export function PatternUnlockScreen({
     _setSelected([]);
     setStatus('idle');
     livePoint.current = null;
+    frameScale.setValue(1);
+    frameOpacity.setValue(1);
+    haloScale.setValue(1);
   }
 
-  // garante que o último ponto (onde o dedo/curso parou) entre antes de validar
   function commitFinalPoint() {
     const lp = livePoint.current;
     if (!lp) return;
     const last = pathRef.current[pathRef.current.length - 1];
-    // tente pegar dentro do MOVE_HIT_R
     let idx = nearestIndexWithin(lp, centers, MOVE_HIT_R);
-    if (idx == null) {
-      // como fallback, se estiver muito colado, pegue o mais próximo
-      idx = nearestIndexAny(lp, centers);
-    }
+    if (idx == null) idx = nearestIndexAny(lp, centers);
     if (idx == null || pathRef.current.includes(idx)) return;
-
-    // só aceita se adjacente/dois passos (com intermediário)
     if (!isAdjacentOrTwoSteps(last, idx)) return;
 
     const next = [...pathRef.current];
@@ -146,24 +144,48 @@ export function PatternUnlockScreen({
     _setSelected(next);
   }
 
-  function finish() {
-    // garanta captura do último
-    commitFinalPoint();
+  // toca animação de sucesso e só depois chama onSuccess
+  function playSuccessAndNavigate() {
+    setStatus('ok');
 
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(frameScale, { toValue: 1.08, duration: 140, useNativeDriver: true }),
+        Animated.timing(haloScale,  { toValue: 1.15, duration: 140, useNativeDriver: true }),
+      ]),
+      Animated.parallel([
+        Animated.timing(frameScale, {
+          toValue: 0.82,
+          duration: 260,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(frameOpacity, { toValue: 0, duration: 260, useNativeDriver: true }),
+        Animated.timing(haloScale,    { toValue: 1.6, duration: 260, useNativeDriver: true }),
+      ]),
+    ]).start(({ finished }) => {
+      if (finished) {
+        onSuccess?.();
+        // não resetamos aqui para não “piscAR” ao trocar de tela
+      }
+    });
+  }
+
+  function finish() {
+    commitFinalPoint();
     const captured = pathRef.current;
     const ok =
       captured.length === registeredPattern.length &&
       captured.every((v, i) => v === registeredPattern[i]);
 
     if (ok) {
-      setStatus('ok');
-      onSuccess?.();
-      setTimeout(reset, 600);
+      playSuccessAndNavigate();
     } else {
       setStatus('fail');
       safeVibrate(60);
       onFail?.();
-      setTimeout(reset, 700);
+      // feedback visual breve e reset
+      setTimeout(reset, 600);
     }
   }
 
@@ -178,7 +200,6 @@ export function PatternUnlockScreen({
         reset();
         const p = { x: e.nativeEvent.locationX, y: e.nativeEvent.locationY };
         livePoint.current = p;
-
         const firstIdx = nearestIndexAny(p, centers); // snap inicial
         pathRef.current = [firstIdx];
         _setSelected([firstIdx]);
@@ -192,7 +213,6 @@ export function PatternUnlockScreen({
           const last = prev[prev.length - 1];
           const idx = nearestIndexWithin(p, centers, MOVE_HIT_R);
           if (idx == null || prev.includes(idx)) return prev;
-
           if (!isAdjacentOrTwoSteps(last, idx)) return prev;
 
           const next = [...prev];
@@ -215,9 +235,19 @@ export function PatternUnlockScreen({
 
   return (
     <View style={styles.screen}>
-      <View style={styles.backHalo} />
-      <View style={styles.phoneFrame}>
-        <Text style={styles.title}>Enter password</Text>
+      <Animated.View
+        style={[
+          styles.backHalo,
+          { transform: [{ scale: haloScale }] }
+        ]}
+      />
+      <Animated.View
+        style={[
+          styles.phoneFrame,
+          { transform: [{ scale: frameScale }], opacity: frameOpacity }
+        ]}
+      >
+        {/* <Text style={styles.title}>Enter password</Text> */}
 
         <View
           pointerEvents="box-only"
@@ -256,19 +286,10 @@ export function PatternUnlockScreen({
           </Svg>
         </View>
 
-        <View style={styles.footer}>
-          <Pressable onPress={() => { /* tela de emergência */ }}>
-            <Text style={styles.footerBtn}>Emergency</Text>
-          </Pressable>
-          <Pressable onPress={reset}>
-            <Text style={styles.footerBtn}>Cancel</Text>
-          </Pressable>
-        </View>
-
         {showDebug && (
           <Text style={styles.debug}>captured: [{selected.join(', ')}]</Text>
         )}
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -293,13 +314,6 @@ const styles = StyleSheet.create({
     paddingTop: 28,
     paddingBottom: 20,
     backgroundColor: '#108CFF',
-    borderWidth: 10,
-    borderColor: '#0A2A49',
-    shadowColor: '#000',
-    shadowOpacity: 0.25,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
     alignItems: 'center',
   },
   title: {
