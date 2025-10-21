@@ -8,27 +8,27 @@ Aqui você encontrará **aplicações completas** desenvolvidas com **boas prát
 
 Cada aplicação neste repositório aborda um cenário específico e demonstra como utilizar bibliotecas populares para React Native.
 
-### 🔹 **1. Dokterian**
+### 🔹 **Dokterian**
 
 [![Dokterian](./Dokterian/cover.png)](./Dokterian)
 
-### 🔹 **2. Healtec**
+### 🔹 **Healtec**
 
 [![Healtec](./Healtec/cover.png)](./Healtec)
 
-### 🔹 **3. Login Animated**
+### 🔹 **Login Animated**
 
 <a href="./LoginAnimated">
 <img width="1096" height="777" alt="from-splash-to-login-a-lively-and-consistent-flow-in-react-native" src="https://github.com/user-attachments/assets/8545e2dd-8ea2-4edf-8b9e-adb82332ac3f" />
 </a>
 
-### 🔹 **4. Onboarding**
+### 🔹 **Onboarding**
 
 <a href="./Onboarding">
 <img width="1815" height="1091" alt="Frame 1" src="https://github.com/user-attachments/assets/c3898a5b-ac64-4b19-babd-665e9d8eaa86" />
 </a>
 
-### 🔹 **5. Dark/Light Mode Animated**
+### 🔹 **Dark/Light Mode Animated**
 
 <a href="./DarkLightAnimated">
 <img width="1404" height="1080" alt="toggle swith" src="https://github.com/user-attachments/assets/85d0bd9b-6745-49bf-8112-15ef836a43a7" />
