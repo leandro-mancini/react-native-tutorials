@@ -34,6 +34,12 @@ Cada aplicação neste repositório aborda um cenário específico e demonstra c
 <img width="1404" height="1080" alt="toggle swith" src="https://github.com/user-attachments/assets/85d0bd9b-6745-49bf-8112-15ef836a43a7" />
 </a>
 
+### 🔹 **Lock Flow**
+
+<a href="./LockFlow">
+<img width="1404" height="1080" alt="toggle swith" src="https://github.com/user-attachments/assets/85d0bd9b-6745-49bf-8112-15ef836a43a7" />
+</a>
+
 
 ## 🛠️ Como Utilizar
 Cada aplicação neste repositório serve como referência para implementação de funcionalidades no React Native.
