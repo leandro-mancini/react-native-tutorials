@@ -1,7 +1,6 @@
 import React from "react";
 import { View, StyleSheet, Text } from "react-native";
 import Slider from "@react-native-community/slider";
-// import { useMusicPlayer } from "../hooks/useMusicPlayer";
 
 function formatTime(seconds: number) {
   const min = Math.floor(seconds / 60);

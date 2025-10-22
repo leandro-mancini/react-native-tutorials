@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -21,7 +21,6 @@ import Animated, {
 import TrackPlayer, {
   State,
   usePlaybackState,
-  useProgress,
 } from "react-native-track-player";
 import { useMusicPlayer } from "../hooks/useMusicPlayer";
 
@@ -38,13 +37,10 @@ export function PlayerScreen() {
   const { tracks, currentIndex, playbackState: hookState, progress, togglePlay, next, previous } =
     useMusicPlayer();
 
-  // usePlaybackState é redundante se você já expõe via hook, mas deixei aqui
-  // caso queira usar diretamente; em ambos os casos o valor é um enum State
   const playbackEnum = usePlaybackState() ?? State.None;
   const playingState = hookState ?? playbackEnum;
   const isPlaying = playingState === State.Playing;
 
-  // Gradiente animado: duas camadas alternando opacidade
   const fade = useSharedValue(0);
   React.useEffect(() => {
     fade.value = withRepeat(
@@ -79,7 +75,6 @@ export function PlayerScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      {/* Fundo gradiente animado (2 camadas) */}
       <Animated.View style={[StyleSheet.absoluteFill, layerAStyle]}>
         <LinearGradient
           style={StyleSheet.absoluteFill}
@@ -97,7 +92,6 @@ export function PlayerScreen() {
         />
       </Animated.View>
 
-      {/* Conteúdo */}
       <View style={styles.content}>
         <Image source={{ uri: current.albumCover }} style={styles.cover} />
 
@@ -110,7 +104,6 @@ export function PlayerScreen() {
           </Text>
         </View>
 
-        {/* Barra de progresso */}
         <View style={styles.progressWrapper}>
           <Slider
             value={position}
@@ -128,7 +121,6 @@ export function PlayerScreen() {
           </View>
         </View>
 
-        {/* Controles */}
         <View style={styles.controls}>
           <Pressable onPress={previous} hitSlop={12} style={styles.smallBtn}>
             <Icon name="skip-back" size={26} color="#fff" />
@@ -214,3 +206,5 @@ const styles = StyleSheet.create({
     padding: 8,
   },
 });
+
+export default PlayerScreen;

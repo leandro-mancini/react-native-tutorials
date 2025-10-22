@@ -10,8 +10,7 @@ export function useMusicPlayer() {
   const [tracks, setTracks] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // v4: hook já entrega objeto com `state`
-  const playback = usePlaybackState();      // { state: State, ... }
+  const playback = usePlaybackState();
   const progress = useProgress();
 
   useEffect(() => {
@@ -27,22 +26,18 @@ export function useMusicPlayer() {
           title: t.title,
           artist: t.artist,
           artwork: t.albumCover,
-          // dica: inclua `duration` se souber (melhora precisão)
         }))
       );
 
-      // posicione no primeiro
       await TrackPlayer.skip(0);
     })();
 
-    // v4: destroy removido → use reset no cleanup
     return () => {
       TrackPlayer.reset();
     };
   }, []);
 
   async function togglePlay() {
-    // v4: getState() deprecated → use getPlaybackState()
     const { state } = await TrackPlayer.getPlaybackState();
     if (state === State.Playing) {
       await TrackPlayer.pause();
@@ -54,10 +49,8 @@ export function useMusicPlayer() {
   async function next() {
     const nextIdx = (currentIndex + 1) % tracks.length;
     setCurrentIndex(nextIdx);
-    // v4: passe NÚMERO (não string)
     await TrackPlayer.skip(nextIdx);
     await TrackPlayer.play();
-    // (alternativa) await TrackPlayer.skipToNext();
   }
 
   async function previous() {
@@ -65,13 +58,12 @@ export function useMusicPlayer() {
     setCurrentIndex(prevIdx);
     await TrackPlayer.skip(prevIdx);
     await TrackPlayer.play();
-    // (alternativa) await TrackPlayer.skipToPrevious();
   }
 
   return {
     tracks,
     currentIndex,
-    playbackState: playback.state, // mantém API limpa para a UI
+    playbackState: playback.state,
     progress,
     togglePlay,
     next,
