@@ -5,10 +5,30 @@
  * @format
  */
 
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { PlayerScreen } from './src/screens/PlayerScreen';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
+import { AuthorPlaylistScreen } from './src/screens/AuthorPlaylistScreen';
+
+export type RootStackParamList = {
+  Player: undefined;
+  AuthorPlaylist: { artist: string; hero?: string };
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function App() {
-  return <PlayerScreen />;
+  return (
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Player" component={PlayerScreen} />
+          <Stack.Screen name="AuthorPlaylist" component={AuthorPlaylistScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
+  );
 }
 
 export default App;
