@@ -7,10 +7,11 @@ import {
   Dimensions,
   Pressable,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import Slider from "@react-native-community/slider";
-import Icon from "react-native-vector-icons/Feather";
+import { Pause, Play, SkipBack, SkipForward } from "lucide-react-native";
 import Animated, {
   Easing,
   useSharedValue,
@@ -63,7 +64,7 @@ export function PlayerScreen() {
     return (
       <View style={[styles.container, styles.center]}>
         <StatusBar barStyle="light-content" />
-        <Text style={{ color: "#fff", opacity: 0.9 }}>Carregando músicas…</Text>
+        <ActivityIndicator color="#fff" />
       </View>
     );
   }
@@ -123,15 +124,15 @@ export function PlayerScreen() {
 
         <View style={styles.controls}>
           <Pressable onPress={previous} hitSlop={12} style={styles.smallBtn}>
-            <Icon name="skip-back" size={26} color="#fff" />
+            <SkipBack />
           </Pressable>
 
           <Pressable onPress={togglePlay} style={styles.playBtn} hitSlop={12}>
-            <Icon name={isPlaying ? "pause" : "play"} size={34} color="#000" />
+            {isPlaying ? (<Pause />) : (<Play />)}
           </Pressable>
 
           <Pressable onPress={next} hitSlop={12} style={styles.smallBtn}>
-            <Icon name="skip-forward" size={26} color="#fff" />
+            <SkipForward />
           </Pressable>
         </View>
       </View>

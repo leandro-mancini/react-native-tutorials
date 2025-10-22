@@ -1,12 +1,12 @@
 import React from "react";
 import { View, Pressable } from "react-native";
-import Icon from "react-native-vector-icons/Feather";
+import { Pause, Play, SkipBack, SkipForward } from "lucide-react-native";
 
 export function PlayerControls({ isPlaying, onPlayPause, onNext, onPrev }: any) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 30 }}>
       <Pressable onPress={onPrev}>
-        <Icon name="skip-back" size={28} color="#fff" />
+        <SkipBack />
       </Pressable>
 
       <Pressable
@@ -20,11 +20,11 @@ export function PlayerControls({ isPlaying, onPlayPause, onNext, onPrev }: any) 
           justifyContent: "center",
         }}
       >
-        <Icon name={isPlaying ? "pause" : "play"} size={32} color="#000" />
+        {isPlaying ? (<Play />) : (<Pause />)}
       </Pressable>
 
       <Pressable onPress={onNext}>
-        <Icon name="skip-forward" size={28} color="#fff" />
+        <SkipForward />
       </Pressable>
     </View>
   );
