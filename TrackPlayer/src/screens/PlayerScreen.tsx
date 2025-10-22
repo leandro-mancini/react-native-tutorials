@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import Slider from "@react-native-community/slider";
-import { Pause, Play, SkipBack, SkipForward } from "lucide-react-native";
+import { Pause, Play, SkipBack, SkipForward, Heart, Shuffle, Repeat, MonitorSpeaker, ListMusic, } from "lucide-react-native";
 import Animated, {
   Easing,
   useSharedValue,
@@ -21,11 +21,13 @@ import Animated, {
 } from "react-native-reanimated";
 import TrackPlayer, {
   State,
+  RepeatMode,
   usePlaybackState,
 } from "react-native-track-player";
 import { useMusicPlayer } from "../hooks/useMusicPlayer";
 
 const { width } = Dimensions.get("window");
+const PADDING_H = 22;
 
 function formatTime(seconds: number) {
   const s = Math.max(0, Math.floor(seconds || 0));
@@ -37,6 +39,11 @@ function formatTime(seconds: number) {
 export function PlayerScreen() {
   const { tracks, currentIndex, playbackState: hookState, progress, togglePlay, next, previous } =
     useMusicPlayer();
+
+  // Estados extras (UI)
+  const [liked, setLiked] = React.useState<Set<string | number>>(new Set());
+  const [isShuffled, setIsShuffled] = React.useState(false);
+  const [repeatMode, setRepeatMode] = React.useState<RepeatMode>(RepeatMode.Off);
 
   const playbackEnum = usePlaybackState() ?? State.None;
   const playingState = hookState ?? playbackEnum;
@@ -69,8 +76,43 @@ export function PlayerScreen() {
     );
   }
 
+  const trackKey = current.id ?? `${current.title}-${current.artist}`;
+  const isLiked = liked.has(trackKey);
+
   const duration = progress.duration || 30; // Deezer preview ~30s
   const position = Math.min(progress.position || 0, duration);
+
+  // Handlers extras
+  function toggleLike() {
+    setLiked((prev) => {
+      const set = new Set(prev);
+      if (set.has(trackKey)) set.delete(trackKey);
+      else set.add(trackKey);
+      return set;
+    });
+  }
+
+  async function toggleRepeat() {
+    const nextMode =
+      repeatMode === RepeatMode.Off
+        ? RepeatMode.Queue
+        : repeatMode === RepeatMode.Queue
+        ? RepeatMode.Track
+        : RepeatMode.Off;
+
+    setRepeatMode(nextMode);
+    try {
+      await TrackPlayer.setRepeatMode(nextMode);
+    } catch {
+      // se não suportar, fica só no estado visual
+    }
+  }
+
+  function toggleShuffle() {
+    // RNTP não tem shuffle nativo na fila; aqui controlamos visualmente.
+    // Você pode embaralhar a fila manualmente no seu hook se quiser.
+    setIsShuffled((v) => !v);
+  }
 
   return (
     <View style={styles.container}>
@@ -96,13 +138,22 @@ export function PlayerScreen() {
       <View style={styles.content}>
         <Image source={{ uri: current.albumCover }} style={styles.cover} />
 
-        <View style={{ alignItems: "flex-start", width: "100%", marginTop: 24 }}>
-          <Text style={styles.title} numberOfLines={1}>
-            {current.title}
-          </Text>
-          <Text style={styles.artist} numberOfLines={1}>
-            {current.artist}
-          </Text>
+        <View style={styles.headerRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.title} numberOfLines={1}>
+              {current.title}
+            </Text>
+            <Text style={styles.artist} numberOfLines={1}>
+              {current.artist}
+            </Text>
+          </View>
+          <Pressable onPress={toggleLike} hitSlop={10} style={styles.iconHitArea}>
+            <Heart
+              size={26}
+              color={isLiked ? "#1ED760" : "#ffffff"}
+              fill={isLiked ? "#1ED760" : "transparent"}
+            />
+          </Pressable>
         </View>
 
         <View style={styles.progressWrapper}>
@@ -122,25 +173,57 @@ export function PlayerScreen() {
           </View>
         </View>
 
+        {/* Linha auxiliar com Shuffle e Repeat (como no Spotify) */}
+        <View style={styles.topControlsRow}>
+          <Pressable onPress={toggleShuffle} hitSlop={10} style={styles.smallBtn}>
+            <Shuffle
+              size={22}
+              color={isShuffled ? "#1ED760" : "#ffffff"}
+              strokeWidth={2.2}
+            />
+          </Pressable>
+
+          <Pressable onPress={toggleRepeat} hitSlop={10} style={styles.smallBtn}>
+            <Repeat
+              size={22}
+              color={repeatMode !== RepeatMode.Off ? "#1ED760" : "#ffffff"}
+              strokeWidth={2.2}
+            />
+            {repeatMode === RepeatMode.Track && (
+              <View style={styles.repeatBadge}>
+                <Text style={styles.repeatBadgeText}>1</Text>
+              </View>
+            )}
+          </Pressable>
+        </View>
+
         <View style={styles.controls}>
           <Pressable onPress={previous} hitSlop={12} style={styles.smallBtn}>
-            <SkipBack />
+            <SkipBack size={26} color="#fff" />
           </Pressable>
 
           <Pressable onPress={togglePlay} style={styles.playBtn} hitSlop={12}>
-            {isPlaying ? (<Pause />) : (<Play />)}
+            {isPlaying ? <Pause size={34} color="#000" /> : <Play size={34} color="#000" />}
           </Pressable>
 
           <Pressable onPress={next} hitSlop={12} style={styles.smallBtn}>
-            <SkipForward />
+            <SkipForward size={26} color="#fff" />
+          </Pressable>
+        </View>
+
+        <View style={styles.bottomRow}>
+          <Pressable hitSlop={10} style={styles.smallBtn} onPress={() => { /* abrir modal de dispositivos */ }}>
+            <MonitorSpeaker size={22} color="#ffffff" />
+          </Pressable>
+
+          <Pressable hitSlop={10} style={styles.smallBtn} onPress={() => { /* abrir fila atual */ }}>
+            <ListMusic size={22} color="#ffffff" />
           </Pressable>
         </View>
       </View>
     </View>
   );
 }
-
-const PADDING_H = 22;
 
 const styles = StyleSheet.create({
   container: {
@@ -165,6 +248,18 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.25)",
     alignSelf: "center",
   },
+  headerRow: {
+    marginTop: 24,
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  iconHitArea: {
+    padding: 6,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   title: {
     color: "#fff",
     fontSize: 22,
@@ -177,7 +272,7 @@ const styles = StyleSheet.create({
   },
   progressWrapper: {
     width: "100%",
-    marginTop: 24,
+    marginTop: 18,
   },
   timeRow: {
     marginTop: 6,
@@ -188,8 +283,15 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.9)",
     fontSize: 12,
   },
+  topControlsRow: {
+    marginTop: 14,
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 4,
+  },
   controls: {
-    marginTop: 32,
+    marginTop: 18,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
@@ -205,6 +307,28 @@ const styles = StyleSheet.create({
   },
   smallBtn: {
     padding: 8,
+  },
+  repeatBadge: {
+    position: "absolute",
+    right: 3,
+    bottom: 3,
+    width: 14,
+    height: 14,
+    borderRadius: 14,
+    backgroundColor: "#1ED760",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  repeatBadgeText: {
+    color: "#000",
+    fontSize: 9,
+    fontWeight: "700",
+  },
+  bottomRow: {
+    marginTop: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 6,
   },
 });
 
