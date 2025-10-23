@@ -1,4 +1,5 @@
 export type RootStackParamList = {
-  Player: undefined;
+  Main: undefined;
+  Player: { trackId: string } | undefined;
   AuthorPlaylist: { artist: string; hero?: string };
 };
