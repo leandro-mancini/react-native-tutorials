@@ -196,10 +196,11 @@ export const getTopHitsOfTheMoment = getTracks;
 export async function getDiscoveriesForYou(limit = 30): Promise<PlaylistCard[]> {
   // “selection” costuma retornar coleções editoriais/curadorias
   const res = await api.get("/editorial/0/selection", { params: { limit } });
+
   return (res.data?.data ?? []).map((p: any) => ({
     id: p.id,
     title: p.title,
-    cover: p.picture_xl || p.picture_big,
+    cover: p.cover_xl || p.cover_big,
     nb_tracks: p.nb_tracks,
   }));
 }
