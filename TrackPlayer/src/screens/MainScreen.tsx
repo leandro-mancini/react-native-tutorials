@@ -109,7 +109,8 @@ export default function MainScreen() {
     [playerTracks.length],
   );
 
-  const showMusic = selected === 'Tudo' || selected === 'Musicas';
+  // Corrige comparação com acento para a categoria "Músicas"
+  const showMusic = selected === 'Tudo' || selected === 'Músicas';
   const showPodcasts = selected === 'Tudo' || selected === 'Podcasts';
 
   const renderTrack = ({ item }: { item: any }) => (
