@@ -24,7 +24,10 @@ import TrackPlayer, {
   RepeatMode,
   usePlaybackState,
 } from "react-native-track-player";
+import { useNavigation } from "@react-navigation/native";
 import { useMusicPlayer } from "../hooks/useMusicPlayer";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../types";
 
 const { width } = Dimensions.get("window");
 const PADDING_H = 22;
@@ -39,6 +42,8 @@ function formatTime(seconds: number) {
 export function PlayerScreen() {
   const { tracks, currentIndex, playbackState: hookState, progress, togglePlay, next, previous } =
     useMusicPlayer();
+
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   // Estados extras (UI)
   const [liked, setLiked] = React.useState<Set<string | number>>(new Set());
@@ -109,9 +114,14 @@ export function PlayerScreen() {
   }
 
   function toggleShuffle() {
-    // RNTP não tem shuffle nativo na fila; aqui controlamos visualmente.
-    // Você pode embaralhar a fila manualmente no seu hook se quiser.
     setIsShuffled((v) => !v);
+  }
+
+  function goToAuthor() {
+    navigation.navigate("AuthorPlaylist", {
+      artist: current.artist,
+      hero: current.albumCover,
+    });
   }
 
   return (
@@ -216,7 +226,7 @@ export function PlayerScreen() {
             <MonitorSpeaker size={22} color="#ffffff" />
           </Pressable>
 
-          <Pressable hitSlop={10} style={styles.smallBtn} onPress={() => { /* abrir fila atual */ }}>
+          <Pressable hitSlop={10} style={styles.smallBtn} onPress={goToAuthor}>
             <ListMusic size={22} color="#ffffff" />
           </Pressable>
         </View>

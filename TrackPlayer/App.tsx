@@ -10,11 +10,7 @@ import { PlayerScreen } from './src/screens/PlayerScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { AuthorPlaylistScreen } from './src/screens/AuthorPlaylistScreen';
-
-export type RootStackParamList = {
-  Player: undefined;
-  AuthorPlaylist: { artist: string; hero?: string };
-};
+import { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
