@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import MiniPlayer from '../components/MiniPlayer';
+import { Avatar } from '../components';
 import { useMusicPlayer } from '../hooks/useMusicPlayer';
 
 import {
@@ -28,6 +29,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types';
+import { Cast, Search } from 'lucide-react-native';
 
 const categories = ['Tudo', 'Músicas', 'Podcasts'];
 type Category = (typeof categories)[number];
@@ -234,11 +236,23 @@ export default function MainScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.logo}>Music</Text>
-          <View style={{ flexDirection: 'row', gap: 16 }}>
-            <Text style={styles.icon}>📡</Text>
-            <Text style={styles.icon}>🔍</Text>
-            <Text style={styles.icon}>👤</Text>
+          <Text style={styles.logo}>Muze</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Pressable style={styles.iconButton}>
+              <Cast size={24} color="#ffffff" />
+            </Pressable>
+            <Pressable style={styles.iconButton}>
+              <Search size={24} color="#ffffff" />
+            </Pressable>
+            <Pressable style={styles.iconButton}>
+              <Avatar
+                uri="https://avatars.githubusercontent.com/u/8883746?v=4"
+                size={28}
+                borderWidth={1}
+                borderColor="#ffffff33"
+                backgroundColor="#222"
+              />
+            </Pressable>
           </View>
         </View>
 
@@ -288,7 +302,7 @@ export default function MainScreen() {
                   renderItem={renderRadio}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                  contentContainerStyle={{ paddingLeft: 16 }}
                 />
               </Section>
             )}
@@ -301,7 +315,7 @@ export default function MainScreen() {
                   renderItem={renderAlbum}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                  contentContainerStyle={{ paddingLeft: 16 }}
                 />
               </Section>
             )}
@@ -314,7 +328,7 @@ export default function MainScreen() {
                   renderItem={renderMix}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                  contentContainerStyle={{ paddingLeft: 16 }}
                 />
               </Section>
             )}
@@ -349,7 +363,7 @@ export default function MainScreen() {
                   )}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                  contentContainerStyle={{ paddingLeft: 16 }}
                 />
               </Section>
             )}
@@ -362,7 +376,7 @@ export default function MainScreen() {
                   renderItem={renderTrack}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                  contentContainerStyle={{ paddingLeft: 16 }}
                 />
               </Section>
             )}
@@ -375,7 +389,7 @@ export default function MainScreen() {
                   renderItem={renderMix}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                  contentContainerStyle={{ paddingLeft: 16 }}
                 />
               </Section>
             )}
@@ -388,7 +402,7 @@ export default function MainScreen() {
                   renderItem={renderAlbum}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                  contentContainerStyle={{ paddingLeft: 16 }}
                 />
               </Section>
             )}
@@ -401,7 +415,7 @@ export default function MainScreen() {
                   renderItem={renderTrack}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                  contentContainerStyle={{ paddingLeft: 16 }}
                 />
               </Section>
             )}
@@ -414,7 +428,7 @@ export default function MainScreen() {
                   renderItem={renderTrack}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                  contentContainerStyle={{ paddingLeft: 16 }}
                 />
               </Section>
             )}
@@ -430,7 +444,7 @@ export default function MainScreen() {
               renderItem={renderPodcast}
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 16 }}
+              contentContainerStyle={{ paddingLeft: 16 }}
             />
           </Section>
         )}
@@ -460,12 +474,13 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0f0f0f' },
   header: {
     marginTop: 16,
-    paddingHorizontal: 16,
+    paddingTop: 36,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  logo: { color: '#fff', fontSize: 22, fontWeight: '800' },
+  iconButton: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
+  logo: { color: '#fff', fontSize: 22, fontWeight: '800', paddingLeft: 16 },
   icon: { color: '#fff', fontSize: 20 },
   categoryButton: {
     backgroundColor: '#272727',
@@ -489,14 +504,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
 
-  card: { marginRight: 12, width: 140 },
+  card: { marginRight: 16, width: 140 },
   cardCover: {
     width: 140,
     height: 140,
     borderRadius: 8,
     backgroundColor: '#222',
   },
-  cardSm: { marginRight: 12, width: 130 },
+  cardSm: { marginRight: 16, width: 130 },
   cardSmCover: {
     width: 130,
     height: 130,

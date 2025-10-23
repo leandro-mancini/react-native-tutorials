@@ -30,29 +30,30 @@ export default function MiniPlayer() {
   const pct = position / duration;
 
   return (
-    <Pressable
-      // ✅ Rota tipada corretamente
-      onPress={() => navigation.navigate("Player", { trackId: current.id })}
-      style={styles.container}
-    >
-      <View style={styles.progressBg} />
-      <View style={[styles.progressFill, { width: `${pct * 100}%` }]} />
+    <View style={styles.container}>
+      <Pressable
+        onPress={() => navigation.navigate("Player", { trackId: current.id })}
+        style={styles.miniPlayer}
+      >
+        <View style={styles.progressBg} />
+        <View style={[styles.progressFill, { width: `${pct * 100}%` }]} />
 
-      <Image source={{ uri: current.albumCover }} style={styles.cover} />
+        <Image source={{ uri: current.albumCover }} style={styles.cover} />
 
-      <View style={styles.meta}>
-        <Text numberOfLines={1} style={styles.title}>
-          {current.title}
-        </Text>
-        <Text numberOfLines={1} style={styles.artist}>
-          {current.artist}
-        </Text>
-      </View>
+        <View style={styles.meta}>
+          <Text numberOfLines={1} style={styles.title}>
+            {current.title}
+          </Text>
+          <Text numberOfLines={1} style={styles.artist}>
+            {current.artist}
+          </Text>
+        </View>
 
-      <Pressable onPress={togglePlay} style={styles.playBtn} hitSlop={10}>
-        {isPlaying ? <Pause size={20} color="#fff" /> : <Play size={20} color="#fff" />}
+        <Pressable onPress={togglePlay} style={styles.playBtn} hitSlop={10}>
+          {isPlaying ? <Pause size={20} color="#fff" /> : <Play size={20} color="#fff" />}
+        </Pressable>
       </Pressable>
-    </Pressable>
+    </View>
   );
 }
 
@@ -63,14 +64,18 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: 0,
+    bottom: 20,
+    paddingHorizontal: 8,
+  },
+  miniPlayer: {
     height: HEIGHT,
     backgroundColor: "#181818",
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 14,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+    borderRadius: 8,
+    paddingHorizontal: 8,
     overflow: "hidden",
   },
   progressBg: {
