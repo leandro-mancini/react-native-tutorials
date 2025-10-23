@@ -7,6 +7,7 @@ import TrackPlayer, {
   useTrackPlayerEvents,
 } from "react-native-track-player";
 import { getTracks } from "../services/api";
+import { setupPlayerOnce } from "../player/setup";
 
 export function useMusicPlayer() {
   const [tracks, setTracks] = useState<any[]>([]);
@@ -17,7 +18,7 @@ export function useMusicPlayer() {
 
   useEffect(() => {
     (async () => {
-      await TrackPlayer.setupPlayer();
+      await setupPlayerOnce();
       const loaded = await getTracks();
       setTracks(loaded);
 

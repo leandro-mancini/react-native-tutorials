@@ -12,10 +12,16 @@ import { NavigationContainer } from '@react-navigation/native';
 import { AuthorPlaylistScreen } from './src/screens/AuthorPlaylistScreen';
 import { RootStackParamList } from './types';
 import MainScreen from './src/screens/MainScreen';
+import { useEffect } from 'react';
+import { setupPlayerOnce } from './src/player/setup';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function App() {
+  useEffect(() => {
+    setupPlayerOnce();
+  }, []);
+  
   return (
     <SafeAreaProvider>
       <NavigationContainer>
