@@ -23,12 +23,14 @@ import {
   getBestOfEachArtist,
   getDiscoveriesForYou,
   getTrendingAlbums,
+  getTopPodcasts,
 } from '../services/api';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types';
 
 const categories = ['Tudo', 'Músicas', 'Podcasts'];
+type Category = (typeof categories)[number];
 
 const USER_TOKEN: string | null = null;
 
@@ -37,6 +39,8 @@ export default function MainScreen() {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const { currentIndex, tracks: playerTracks } = useMusicPlayer();
+
+  const [selected, setSelected] = useState<Category>('Tudo');
 
   const [loading, setLoading] = useState(true);
   const [stations, setStations] = useState<any[]>([]);
@@ -48,6 +52,7 @@ export default function MainScreen() {
   const [topHits, setTopHits] = useState<any[]>([]);
   const [discoveries, setDiscoveries] = useState<any[]>([]);
   const [trendingAlbums, setTrendingAlbums] = useState<any[]>([]);
+  const [podcasts, setPodcasts] = useState<any[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -62,6 +67,7 @@ export default function MainScreen() {
           discoveriesRes,
           trendingRes,
           bestOfRes,
+          podcastsRes,
         ] = await Promise.all([
           getRecommendedStations(20),
           getRecentReleases(20),
@@ -70,6 +76,7 @@ export default function MainScreen() {
           getDiscoveriesForYou(20),
           getTrendingAlbums(20),
           getBestOfEachArtist(8, 5),
+          getTopPodcasts(20),
         ]);
 
         setStations(stationsRes);
@@ -79,6 +86,7 @@ export default function MainScreen() {
         setDiscoveries(discoveriesRes);
         setTrendingAlbums(trendingRes);
         setBestOfArtists(bestOfRes);
+        setPodcasts(podcastsRes);
 
         if (USER_TOKEN) {
           const [liked, based] = await Promise.all([
@@ -99,8 +107,21 @@ export default function MainScreen() {
     [playerTracks.length],
   );
 
+  const showMusic = selected === 'Tudo' || selected === 'Musicas';
+  const showPodcasts = selected === 'Tudo' || selected === 'Podcasts';
+
   const renderTrack = ({ item }: { item: any }) => (
-    <Pressable style={styles.cardSm}>
+    <Pressable
+        style={styles.cardSm}
+        onPress={() =>
+            navigation.navigate('Album', {
+                albumId: Number(item.id),
+                cover: item.cover || item.albumCover,
+                title: item.title,
+                artist: item.artist,
+            })
+        }
+    >
       <Image source={{ uri: item.albumCover }} style={styles.cardSmCover} />
       <Text style={styles.cardTitle} numberOfLines={1}>
         {item.title}
@@ -113,15 +134,15 @@ export default function MainScreen() {
 
   const renderAlbum = ({ item }: { item: any }) => (
     <Pressable
-      style={styles.albumCard}
-      onPress={() =>
-        navigation.navigate('Album', {
-          albumId: Number(item.id),
-          cover: item.cover || item.albumCover,
-          title: item.title,
-          artist: item.artist,
-        })
-      }
+        style={styles.albumCard}
+        onPress={() =>
+            navigation.navigate('Album', {
+                albumId: Number(item.id),
+                cover: item.cover || item.albumCover,
+                title: item.title,
+                artist: item.artist,
+            })
+        }
     >
       <Image
         source={{ uri: item.cover || item.albumCover }}
@@ -139,7 +160,17 @@ export default function MainScreen() {
   );
 
   const renderMix = ({ item }: { item: any }) => (
-    <Pressable style={styles.card}>
+    <Pressable
+        style={styles.card}
+        onPress={() =>
+            navigation.navigate('Album', {
+                albumId: Number(item.id),
+                cover: item.cover || item.albumCover,
+                title: item.title,
+                artist: item.artist,
+            })
+        }
+    >
       <Image source={{ uri: item.cover }} style={styles.cardCover} />
       <Text style={styles.cardTitle} numberOfLines={1}>
         {item.title}
@@ -153,7 +184,17 @@ export default function MainScreen() {
   );
 
   const renderRadio = ({ item }: { item: any }) => (
-    <Pressable style={styles.card}>
+    <Pressable
+        style={styles.card}
+        onPress={() =>
+            navigation.navigate('Album', {
+                albumId: Number(item.id),
+                cover: item.cover || item.albumCover,
+                title: item.title,
+                artist: item.artist,
+            })
+        }
+    >
       <Image source={{ uri: item.picture }} style={styles.cardCover} />
       <Text style={styles.cardTitle} numberOfLines={1}>
         {item.title}
@@ -161,22 +202,28 @@ export default function MainScreen() {
     </Pressable>
   );
 
-  const renderBestOf = ({ item }: { item: any }) => (
-    <View style={{ marginRight: 16, width: 180 }}>
-      <Image source={{ uri: item.picture }} style={styles.bestOfCover} />
-      <Text style={[styles.cardTitle, { marginTop: 8 }]} numberOfLines={1}>
-        O melhor de {item.artist}
+  const renderPodcast = ({ item }: { item: any }) => (
+    <Pressable
+        style={styles.card}
+        onPress={() =>
+            navigation.navigate('Album', {
+                albumId: Number(item.id),
+                cover: item.cover || item.albumCover,
+                title: item.title,
+                artist: item.artist,
+            })
+        }
+    >
+      <Image source={{ uri: item.cover }} style={styles.cardCover} />
+      <Text style={styles.cardTitle} numberOfLines={1}>
+        {item.title}
       </Text>
-      <FlatList
-        data={item.tracks.slice(0, 3)}
-        keyExtractor={t => String(t.id)}
-        renderItem={({ item: t }) => (
-          <Text style={styles.bestOfTrack} numberOfLines={1}>
-            • {t.title}
-          </Text>
-        )}
-      />
-    </View>
+      {!!item.nb_episodes && (
+        <Text style={styles.cardSubtitle} numberOfLines={1}>
+          {item.nb_episodes} episódios
+        </Text>
+      )}
+    </Pressable>
   );
 
   return (
@@ -200,11 +247,27 @@ export default function MainScreen() {
           keyExtractor={item => item}
           horizontal
           showsHorizontalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <Pressable style={styles.categoryButton}>
-              <Text style={styles.categoryText}>{item}</Text>
-            </Pressable>
-          )}
+          renderItem={({ item }) => {
+            const active = selected === item;
+            return (
+              <Pressable
+                onPress={() => setSelected(item as Category)}
+                style={[
+                  styles.categoryButton,
+                  active && styles.categoryButtonActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.categoryText,
+                    active && styles.categoryTextActive,
+                  ]}
+                >
+                  {item}
+                </Text>
+              </Pressable>
+            );
+          }}
           style={{ marginVertical: 10 }}
           contentContainerStyle={{ paddingHorizontal: 16 }}
         />
@@ -215,116 +278,156 @@ export default function MainScreen() {
           </View>
         )}
 
-        {!!stations.length && (
-          <Section title="Estações recomendadas">
-            <FlatList
-              data={stations}
-              keyExtractor={item => String(item.id)}
-              renderItem={renderRadio}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 16 }}
-            />
-          </Section>
+        {showMusic && (
+          <>
+            {!!stations.length && (
+              <Section title="Estações recomendadas">
+                <FlatList
+                  data={stations}
+                  keyExtractor={item => String(item.id)}
+                  renderItem={renderRadio}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                />
+              </Section>
+            )}
+
+            {!!recentReleases.length && (
+              <Section title="Recentes">
+                <FlatList
+                  data={recentReleases}
+                  keyExtractor={item => String(item.id)}
+                  renderItem={renderAlbum}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                />
+              </Section>
+            )}
+
+            {!!mixes.length && (
+              <Section title="Mixes mais ouvidos">
+                <FlatList
+                  data={mixes}
+                  keyExtractor={item => String(item.id)}
+                  renderItem={renderMix}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                />
+              </Section>
+            )}
+
+            {!!bestOfArtists.length && (
+              <Section title="O melhor de cada artista">
+                <FlatList
+                  data={bestOfArtists}
+                  keyExtractor={item => String(item.artistId)}
+                  renderItem={({ item }) => (
+                    <View style={{ marginRight: 16, width: 180 }}>
+                      <Image
+                        source={{ uri: item.picture }}
+                        style={styles.bestOfCover}
+                      />
+                      <Text
+                        style={[styles.cardTitle, { marginTop: 8 }]}
+                        numberOfLines={1}
+                      >
+                        O melhor de {item.artist}
+                      </Text>
+                      <FlatList
+                        data={item.tracks.slice(0, 3)}
+                        keyExtractor={t => String(t.id)}
+                        renderItem={({ item: t }) => (
+                          <Text style={styles.bestOfTrack} numberOfLines={1}>
+                            • {t.title}
+                          </Text>
+                        )}
+                      />
+                    </View>
+                  )}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                />
+              </Section>
+            )}
+
+            {!!topHits.length && (
+              <Section title="Os maiores hits do momento">
+                <FlatList
+                  data={topHits}
+                  keyExtractor={item => String(item.id)}
+                  renderItem={renderTrack}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                />
+              </Section>
+            )}
+
+            {!!discoveries.length && (
+              <Section title="Descobertas para você">
+                <FlatList
+                  data={discoveries}
+                  keyExtractor={item => String(item.id)}
+                  renderItem={renderMix}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                />
+              </Section>
+            )}
+
+            {!!trendingAlbums.length && (
+              <Section title="Álbuns em alta para você">
+                <FlatList
+                  data={trendingAlbums}
+                  keyExtractor={item => String(item.id)}
+                  renderItem={renderAlbum}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                />
+              </Section>
+            )}
+
+            {USER_TOKEN && !!likedMore.length && (
+              <Section title="Mais do que você curte">
+                <FlatList
+                  data={likedMore}
+                  keyExtractor={item => String(item.id)}
+                  renderItem={renderTrack}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                />
+              </Section>
+            )}
+
+            {USER_TOKEN && !!basedOnRecent.length && (
+              <Section title="Com base no que você ouviu recentemente">
+                <FlatList
+                  data={basedOnRecent}
+                  keyExtractor={item => String(item.id)}
+                  renderItem={renderTrack}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                />
+              </Section>
+            )}
+          </>
         )}
 
-        {!!recentReleases.length && (
-          <Section title="Recentes">
+        {/* ====== PODCASTS ====== */}
+        {showPodcasts && !!podcasts.length && (
+          <Section title="Podcasts em alta">
             <FlatList
-              data={recentReleases}
+              data={podcasts}
               keyExtractor={item => String(item.id)}
-              renderItem={renderAlbum}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 16 }}
-            />
-          </Section>
-        )}
-
-        {!!mixes.length && (
-          <Section title="Mixes mais ouvidos">
-            <FlatList
-              data={mixes}
-              keyExtractor={item => String(item.id)}
-              renderItem={renderMix}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 16 }}
-            />
-          </Section>
-        )}
-
-        {USER_TOKEN && !!likedMore.length && (
-          <Section title="Mais do que você curte">
-            <FlatList
-              data={likedMore}
-              keyExtractor={item => String(item.id)}
-              renderItem={renderTrack}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 16 }}
-            />
-          </Section>
-        )}
-
-        {USER_TOKEN && !!basedOnRecent.length && (
-          <Section title="Com base no que você ouviu recentemente">
-            <FlatList
-              data={basedOnRecent}
-              keyExtractor={item => String(item.id)}
-              renderItem={renderTrack}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 16 }}
-            />
-          </Section>
-        )}
-
-        {!!bestOfArtists.length && (
-          <Section title="O melhor de cada artista">
-            <FlatList
-              data={bestOfArtists}
-              keyExtractor={item => String(item.artistId)}
-              renderItem={renderBestOf}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 16 }}
-            />
-          </Section>
-        )}
-
-        {!!topHits.length && (
-          <Section title="Os maiores hits do momento">
-            <FlatList
-              data={topHits}
-              keyExtractor={item => String(item.id)}
-              renderItem={renderTrack}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 16 }}
-            />
-          </Section>
-        )}
-
-        {!!discoveries.length && (
-          <Section title="Descobertas para você">
-            <FlatList
-              data={discoveries}
-              keyExtractor={item => String(item.id)}
-              renderItem={renderMix}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 16 }}
-            />
-          </Section>
-        )}
-
-        {!!trendingAlbums.length && (
-          <Section title="Álbuns em alta para você">
-            <FlatList
-              data={trendingAlbums}
-              keyExtractor={item => String(item.id)}
-              renderItem={renderAlbum}
+              renderItem={renderPodcast}
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{ paddingHorizontal: 16 }}
@@ -371,7 +474,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 8,
   },
+  categoryButtonActive: {
+    backgroundColor: '#ffffff',
+  },
   categoryText: { color: '#fff', fontSize: 13, fontWeight: '600' },
+  categoryTextActive: { color: '#0f0f0f' },
 
   section: { marginTop: 20 },
   sectionTitle: {
@@ -423,14 +530,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#222',
   },
-
   albumTitle: {
     color: '#fff',
     fontSize: 13,
     fontWeight: '600',
     marginTop: 6,
   },
-
   albumArtist: {
     color: '#aaa',
     fontSize: 12,

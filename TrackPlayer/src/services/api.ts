@@ -39,6 +39,17 @@ export type RadioCard = {
 
 // ============ BLOCO BASE ============
 
+export async function getTopPodcasts(limit = 24) {
+  const res = await api.get("/chart/0/podcasts", { params: { limit } });
+  return (res.data?.data ?? []).map((p: any) => ({
+    id: p.id,
+    title: p.title,
+    cover: p.picture_xl || p.picture_big || p.picture_medium,
+    nb_episodes: p.nb_tracks, // Deezer chama de nb_tracks em podcasts
+    description: p.description,
+  }));
+}
+
 /** Chart global – “Os maiores hits do momento” */
 export async function getTracks(): Promise<TrackCard[]> {
   const res = await api.get("/chart/0/tracks");
