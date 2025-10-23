@@ -10,7 +10,7 @@ import {
   Dimensions,
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
-import { Download, Ellipsis, Heart, Play, Shuffle } from "lucide-react-native";
+import { Download, Ellipsis, Heart, Play, Shuffle, Pause } from "lucide-react-native";
 import Animated, {
   Easing,
   useSharedValue,
@@ -18,7 +18,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-import TrackPlayer from "react-native-track-player";
+import TrackPlayer, { Event, State, usePlaybackState, useTrackPlayerEvents } from "react-native-track-player";
 import { getArtistPlaylist } from "../services/api";
 
 type Props = {
@@ -34,6 +34,10 @@ export function AuthorPlaylistScreen({ route }: Props) {
   const [loading, setLoading] = useState(true);
   const [hero, setHero] = useState<string | undefined>(heroFromRoute);
   const [tracks, setTracks] = useState<any[]>([]);
+  const [liked, setLiked] = useState(false);
+  const [isShuffled, setIsShuffled] = useState(false);
+  const playbackState = usePlaybackState();
+  const isPlaying = (((playbackState as unknown) as any)?.state ?? playbackState) === State.Playing;
 
   // gradiente respirando ao fundo
   const fade = useSharedValue(0);
@@ -61,6 +65,18 @@ export function AuthorPlaylistScreen({ route }: Props) {
     })();
   }, [artist]);
 
+  // Atualiza capa com base na faixa ativa
+  useTrackPlayerEvents([Event.PlaybackActiveTrackChanged], async () => {
+    try {
+      const idx = await TrackPlayer.getActiveTrackIndex();
+      if (typeof idx === "number") {
+        const q = await TrackPlayer.getQueue();
+        const t = q[idx] as any;
+        const art = (t?.artwork as string) ?? t?.albumCover;
+        if (art) setHero(art);
+      }
+    } catch {}
+  });
   const setupAndPlay = useCallback(
     async (startIndex = 0) => {
       if (!tracks.length) return;
@@ -80,8 +96,36 @@ export function AuthorPlaylistScreen({ route }: Props) {
     },
     [tracks]
   );
+  const togglePlayPause = useCallback(async () => {
+    try {
+      const stObjOrEnum = await TrackPlayer.getPlaybackState();
+      const st = (stObjOrEnum as any)?.state ?? stObjOrEnum;
+      if (st === State.Playing) await TrackPlayer.pause();
+      else await TrackPlayer.play();
+    } catch {}
+  }, []);
 
-  const onPressPlay = () => setupAndPlay(0);
+  const queueMatchesThisArtist = useCallback(async () => {
+    try {
+      const q = await TrackPlayer.getQueue();
+      if (!q?.length || !tracks.length) return false;
+      const a = q.slice(0, 3).map((t: any) => String(t.id));
+      const b = tracks.slice(0, 3).map((t: any) => String(t.id));
+      return a.join("|") === b.join("|");
+    } catch {
+      return false;
+    }
+  }, [tracks]);
+
+  const onPressPlay = useCallback(async () => {
+    const match = await queueMatchesThisArtist();
+    if (!match) {
+      const startIndex = isShuffled && tracks.length ? Math.floor(Math.random() * tracks.length) : 0;
+      await setupAndPlay(startIndex);
+    } else {
+      await togglePlayPause();
+    }
+  }, [queueMatchesThisArtist, isShuffled, tracks.length, setupAndPlay, togglePlayPause]);
   const onPressItem = (index: number) => setupAndPlay(index);
 
   const Header = useMemo(
@@ -118,9 +162,16 @@ export function AuthorPlaylistScreen({ route }: Props) {
 
           {/* ações */}
           <View style={styles.actionsRow}>
-            <Pressable hitSlop={10} style={styles.roundIcon}>
-                <Heart />
-              {/* <Icon name="heart" size={22} color="#1ed760" /> */}
+            <Pressable
+              hitSlop={10}
+              style={styles.roundIcon}
+              onPress={() => setLiked((v) => !v)}
+            >
+              <Heart
+                size={22}
+                color={liked ? "#1ED760" : "#ffffff"}
+                fill={liked ? "#1ED760" : "transparent"}
+              />
             </Pressable>
             <Pressable hitSlop={10} style={styles.roundIcon}>
               {/* <Icon name="download" size={22} color="#fff" /> */}
@@ -134,19 +185,24 @@ export function AuthorPlaylistScreen({ route }: Props) {
 
           {/* Botão play grande (com mini shuffle no canto) */}
           <Pressable onPress={onPressPlay} style={styles.bigPlayBtn} hitSlop={8}>
-            {/* <Icon name="play" size={34} color="#000" /> */}
-            <Play />
-            <View style={styles.shuffleBadge}>
-              {/* <Icon name="shuffle" size={14} color="#000" /> */}
-              <Shuffle />
-            </View>
+            {isPlaying ? <Pause color="#000" /> : <Play color="#000" />}
+            <Pressable
+              onPress={() => setIsShuffled((s) => !s)}
+              hitSlop={6}
+              style={[
+                styles.shuffleBadge,
+                { backgroundColor: isShuffled ? "#34D399" : "#A7F3D0" },
+              ]}
+            >
+              <Shuffle color="#000" />
+            </Pressable>
           </Pressable>
         </View>
 
         <Text style={styles.sectionLabel}>Populares de {artist}</Text>
       </View>
     ),
-    [artist, hero, layerA, layerB]
+    [artist, hero, layerA, layerB, liked, isShuffled, isPlaying]
   );
 
   return (

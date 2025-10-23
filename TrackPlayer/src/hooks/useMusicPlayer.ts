@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import TrackPlayer, {
+  Event,
   State,
   usePlaybackState,
   useProgress,
+  useTrackPlayerEvents,
 } from "react-native-track-player";
 import { getTracks } from "../services/api";
 
@@ -31,11 +33,37 @@ export function useMusicPlayer() {
 
       await TrackPlayer.skip(0);
     })();
-
-    return () => {
-      TrackPlayer.reset();
-    };
   }, []);
+
+  // Sincroniza quando faixa ativa mudar (inclusive vindo de outras telas)
+  useTrackPlayerEvents(
+    [Event.PlaybackActiveTrackChanged, Event.PlaybackQueueEnded],
+    async (event) => {
+      try {
+        if (event.type === Event.PlaybackActiveTrackChanged) {
+          const idx = await TrackPlayer.getActiveTrackIndex();
+          if (typeof idx === "number") setCurrentIndex(idx);
+          const q = await TrackPlayer.getQueue();
+          // Normaliza para o shape usado nas telas (albumCover)
+          setTracks(
+            q.map((t: any) => ({
+              id: t.id,
+              title: t.title,
+              artist: t.artist,
+              albumCover: (t.artwork as string) ?? t.albumCover,
+              preview: t.url,
+              duration: (t as any).duration,
+            }))
+          );
+        }
+        if (event.type === Event.PlaybackQueueEnded) {
+          // Mantém o índice estável no fim da fila
+          const idx = await TrackPlayer.getActiveTrackIndex();
+          if (typeof idx === "number") setCurrentIndex(idx);
+        }
+      } catch {}
+    }
+  );
 
   async function togglePlay() {
     const { state } = await TrackPlayer.getPlaybackState();
@@ -63,7 +91,8 @@ export function useMusicPlayer() {
   return {
     tracks,
     currentIndex,
-    playbackState: playback.state,
+    // usePlaybackState em v5 já retorna o enum State
+    playbackState: (playback as unknown as State) ?? State.None,
     progress,
     togglePlay,
     next,
