@@ -216,3 +216,27 @@ export async function getTrendingAlbums(limit = 30): Promise<AlbumCard[]> {
     link: a.link,
   }));
 }
+
+export async function getAlbum(albumId: number | string) {
+  const res = await api.get(`/album/${albumId}`);
+  const a = res.data;
+
+  return {
+    id: a.id,
+    title: a.title,
+    artist: a.artist?.name,
+    cover: a.cover_xl || a.cover_big,
+    nb_tracks: a.nb_tracks,
+    tracks: (a.tracks?.data ?? [])
+      .filter((t: any) => !!t.preview) // só faixas com preview
+      .map((t: any) => ({
+        id: t.id,
+        title: t.title,
+        artist: t.artist?.name,
+        album: a.title,
+        albumCover: a.cover_xl || a.cover_big,
+        preview: t.preview,
+        duration: t.duration,
+      })),
+  };
+}
