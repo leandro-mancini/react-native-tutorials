@@ -19,20 +19,39 @@ export function useMusicPlayer() {
   useEffect(() => {
     (async () => {
       await setupPlayerOnce();
-      const loaded = await getTracks();
-      setTracks(loaded);
+      // Se já existe fila ativa, sincroniza estado local e NÃO modifica a fila nem a posição
+      const existingQueue = await TrackPlayer.getQueue();
+      if (existingQueue?.length) {
+        setTracks(
+          existingQueue.map((t: any) => ({
+            id: t.id,
+            title: t.title,
+            artist: t.artist,
+            albumCover: (t.artwork as string) ?? t.albumCover,
+            preview: t.url,
+            duration: (t as any).duration,
+          }))
+        );
+        const idx = await TrackPlayer.getActiveTrackIndex();
+        if (typeof idx === "number") setCurrentIndex(idx);
+        return;
+      }
 
-      await TrackPlayer.add(
-        loaded.map((t: any, i: any) => ({
-          id: String(t.id),
-          url: t.preview,
-          title: t.title,
-          artist: t.artist,
-          artwork: t.albumCover,
-        }))
-      );
-
-      await TrackPlayer.skip(0);
+      // Caso contrário, podemos carregar um conjunto inicial (ex.: chart), sem avançar posição
+      try {
+        const loaded = await getTracks();
+        setTracks(loaded);
+        await TrackPlayer.add(
+          loaded.map((t: any) => ({
+            id: String(t.id),
+            url: t.preview,
+            title: t.title,
+            artist: t.artist,
+            artwork: t.albumCover,
+            duration: t.duration,
+          }))
+        );
+      } catch {}
     })();
   }, []);
 
@@ -67,26 +86,37 @@ export function useMusicPlayer() {
   );
 
   async function togglePlay() {
-    const { state } = await TrackPlayer.getPlaybackState();
-    if (state === State.Playing) {
-      await TrackPlayer.pause();
-    } else {
+    const ps = await TrackPlayer.getPlaybackState();
+    const state = (ps as any)?.state ?? ps;
+    if (state === State.Playing) await TrackPlayer.pause();
+    else await TrackPlayer.play();
+  }
+
+  async function next() {
+    try {
+      await TrackPlayer.skipToNext();
+      await TrackPlayer.play();
+    } catch {
+      // fallback para índice quando API não suportar
+      const q = await TrackPlayer.getQueue();
+      if (!q?.length) return;
+      const nextIdx = (currentIndex + 1) % q.length;
+      await TrackPlayer.skip(nextIdx);
       await TrackPlayer.play();
     }
   }
 
-  async function next() {
-    const nextIdx = (currentIndex + 1) % tracks.length;
-    setCurrentIndex(nextIdx);
-    await TrackPlayer.skip(nextIdx);
-    await TrackPlayer.play();
-  }
-
   async function previous() {
-    const prevIdx = (currentIndex - 1 + tracks.length) % tracks.length;
-    setCurrentIndex(prevIdx);
-    await TrackPlayer.skip(prevIdx);
-    await TrackPlayer.play();
+    try {
+      await TrackPlayer.skipToPrevious();
+      await TrackPlayer.play();
+    } catch {
+      const q = await TrackPlayer.getQueue();
+      if (!q?.length) return;
+      const prevIdx = (currentIndex - 1 + q.length) % q.length;
+      await TrackPlayer.skip(prevIdx);
+      await TrackPlayer.play();
+    }
   }
 
   return {
