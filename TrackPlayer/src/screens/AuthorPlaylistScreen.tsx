@@ -22,6 +22,7 @@ import TrackPlayer, { Event, State, usePlaybackState, useTrackPlayerEvents } fro
 import { getArtistPlaylist } from "../services/api";
 import MiniPlayer from "../components/MiniPlayer";
 import { useMusicPlayer } from "../hooks/useMusicPlayer";
+import TrackOptionsSheet, { type TrackInfo } from "../components/TrackOptionsSheet";
 
 type Props = {
   route: { params: { artist: string; hero?: string } };
@@ -41,6 +42,8 @@ export function AuthorPlaylistScreen({ route }: Props) {
   const playbackState = usePlaybackState();
   const isPlaying = (((playbackState as unknown) as any)?.state ?? playbackState) === State.Playing;
   const { currentIndex, tracks: playerTracks } = useMusicPlayer();
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  const [selected, setSelected] = useState<TrackInfo | null>(null);
 
   // gradiente respirando ao fundo
   const fade = useSharedValue(0);
@@ -130,6 +133,21 @@ export function AuthorPlaylistScreen({ route }: Props) {
     }
   }, [queueMatchesThisArtist, isShuffled, tracks.length, setupAndPlay, togglePlayPause]);
   const onPressItem = (index: number) => setupAndPlay(index);
+  const openOptions = (item: any) => {
+    setSelected({
+      id: item.id,
+      title: item.title,
+      artist: item.artist,
+      album: item.album,
+      albumCover: item.albumCover,
+      preview: item.preview,
+      duration: item.duration,
+    });
+    setOptionsOpen(true);
+  };
+  const hideFromList = (id: string | number) => {
+    setTracks((prev) => prev.filter((t) => String(t.id) !== String(id)));
+  };
 
   const Header = useMemo(
     () => (
@@ -228,7 +246,7 @@ export function AuthorPlaylistScreen({ route }: Props) {
                 {item.artist}
               </Text>
             </View>
-            <Pressable hitSlop={10} style={{ paddingHorizontal: 8 }}>
+            <Pressable hitSlop={10} style={{ paddingHorizontal: 8 }} onPress={() => openOptions(item)}>
               {/* <Icon name="more-vertical" size={20} color="#aaa" /> */}
               <Ellipsis />
             </Pressable>
@@ -241,6 +259,13 @@ export function AuthorPlaylistScreen({ route }: Props) {
             </Text>
           </View>
         }
+      />
+      <TrackOptionsSheet
+        visible={optionsOpen}
+        onClose={() => setOptionsOpen(false)}
+        track={selected}
+        onHideFromList={hideFromList}
+        showHideOption
       />
       {playerTracks.length > 0 && currentIndex >= 0 && <MiniPlayer />}
     </View>

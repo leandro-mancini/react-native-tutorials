@@ -8,6 +8,8 @@ import { RootStackParamList } from "../../types";
 import { getPlaylist } from "../services/api";
 import MiniPlayer from "../components/MiniPlayer";
 import { useMusicPlayer } from "../hooks/useMusicPlayer";
+import TrackOptionsSheet from "../components/TrackOptionsSheet";
+import type { TrackInfo } from "../components/TrackOptionsSheet";
 
 function normalizeState(s: unknown): State {
   if (typeof s === "number") return s as unknown as State;
@@ -28,6 +30,8 @@ export default function PlaylistScreen({ route }: NativeStackScreenProps<RootSta
   const isPlaying = playbackState === State.Playing;
   const { currentIndex, tracks: playerTracks } = useMusicPlayer();
   const bottomPadding = { paddingBottom: playerTracks.length ? 90 : 24 };
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  const [selected, setSelected] = useState<TrackInfo | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -94,6 +98,23 @@ export default function PlaylistScreen({ route }: NativeStackScreenProps<RootSta
     if (playlist?.tracks?.length) await buildQueue(0, !isShuffled);
   }
 
+  const openOptions = (item: any) => {
+    setSelected({
+      id: item.id,
+      title: item.title,
+      artist: item.artist,
+      album: item.album,
+      albumCover: item.albumCover,
+      preview: item.preview,
+      duration: item.duration,
+    });
+    setOptionsOpen(true);
+  };
+
+  const hideFromList = (id: string | number) => {
+    setPlaylist((prev: any | null) => prev ? { ...prev, tracks: prev.tracks.filter((t: any) => String(t.id) !== String(id)) } : prev);
+  };
+
   const renderItem = ({ item, index }: { item: any; index: number }) => {
     const disabled = !item.preview;
     return (
@@ -108,7 +129,9 @@ export default function PlaylistScreen({ route }: NativeStackScreenProps<RootSta
             {disabled ? "Sem preview disponível" : item.artist}
           </Text>
         </View>
-        <Text style={styles.trackDots}>⋯</Text>
+        <Pressable hitSlop={10} onPress={() => openOptions(item)}>
+          <Text style={styles.trackDots}>⋯</Text>
+        </Pressable>
       </Pressable>
     );
   };
@@ -149,6 +172,14 @@ export default function PlaylistScreen({ route }: NativeStackScreenProps<RootSta
             Nenhuma faixa encontrada nesta playlist.
           </Text>
         ) : null}
+      />
+      <TrackOptionsSheet
+        visible={optionsOpen}
+        onClose={() => setOptionsOpen(false)}
+        track={selected}
+        onHideFromList={hideFromList}
+        navigation={undefined as any}
+        showHideOption
       />
       {playerTracks.length > 0 && currentIndex >= 0 && <MiniPlayer />}
     </View>

@@ -11,6 +11,8 @@ import { getAlbum } from "../services/api";
 import { RootStackParamList } from "../../types";
 import MiniPlayer from "../components/MiniPlayer";
 import { useMusicPlayer } from "../hooks/useMusicPlayer";
+import TrackOptionsSheet from "../components/TrackOptionsSheet";
+import type { TrackInfo } from "../components/TrackOptionsSheet";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Album">;
 
@@ -39,6 +41,8 @@ export default function AlbumScreen({ route, navigation }: Props) {
     () => ({ paddingBottom: playerTracks.length ? 90 : 24 }),
     [playerTracks.length]
   );
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  const [selected, setSelected] = useState<TrackInfo | null>(null);
 
   // gradiente respirando
   const fade = useSharedValue(0);
@@ -118,6 +122,19 @@ export default function AlbumScreen({ route, navigation }: Props) {
     }
   }
 
+  const openOptions = (item: any) => {
+    setSelected({
+      id: item.id,
+      title: item.title,
+      artist: item.artist,
+      album: item.album,
+      albumCover: item.albumCover,
+      preview: item.preview,
+      duration: item.duration,
+    });
+    setOptionsOpen(true);
+  };
+
   const renderItem = ({ item, index }: { item: any; index: number }) => {
     const disabled = !item.preview;
     return (
@@ -132,7 +149,9 @@ export default function AlbumScreen({ route, navigation }: Props) {
             {disabled ? "Sem preview disponível" : item.artist}
           </Text>
         </View>
-        <Text style={styles.trackDots}>⋯</Text>
+        <Pressable hitSlop={10} onPress={() => openOptions(item)}>
+          <Text style={styles.trackDots}>⋯</Text>
+        </Pressable>
       </Pressable>
     );
   };
@@ -182,6 +201,12 @@ export default function AlbumScreen({ route, navigation }: Props) {
             Nenhuma faixa encontrada neste álbum.
           </Text>
         ) : null}
+      />
+      <TrackOptionsSheet
+        visible={optionsOpen}
+        onClose={() => setOptionsOpen(false)}
+        track={selected}
+        navigation={navigation as any}
       />
       {playerTracks.length > 0 && currentIndex >= 0 && <MiniPlayer />}
     </View>
