@@ -15,6 +15,9 @@ import MainScreen from './src/screens/MainScreen';
 import { useEffect } from 'react';
 import { setupPlayerOnce } from './src/player/setup';
 import AlbumScreen from './src/screens/AlbumScreen';
+import PlaylistScreen from './src/screens/PlaylistScreen';
+import RadioScreen from './src/screens/RadioScreen';
+import PodcastScreen from './src/screens/PodcastScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -31,6 +34,9 @@ function App() {
           <Stack.Screen name="Player" component={PlayerScreen} />
           <Stack.Screen name="AuthorPlaylist" component={AuthorPlaylistScreen} />
           <Stack.Screen name="Album" component={AlbumScreen} />
+          <Stack.Screen name="Playlist" component={PlaylistScreen} />
+          <Stack.Screen name="Radio" component={RadioScreen} />
+          <Stack.Screen name="Podcast" component={PodcastScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

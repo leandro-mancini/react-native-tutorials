@@ -250,3 +250,64 @@ export async function getAlbum(albumId: number | string) {
     })),
   };
 }
+
+// ====== Novos endpoints para telas dedicadas ======
+
+export async function getPlaylist(playlistId: number | string) {
+  const res = await api.get(`/playlist/${playlistId}`);
+  const p = res.data;
+  return {
+    id: p.id,
+    title: p.title,
+    cover: p.picture_xl || p.picture_big,
+    nb_tracks: p.nb_tracks,
+    // Em playlists, cada track tem preview (ou não). Mantemos todas para exibição.
+    tracks: (p.tracks?.data ?? []).map((t: any) => ({
+      id: t.id,
+      title: t.title,
+      artist: t.artist?.name,
+      album: t.album?.title,
+      albumCover: t.album?.cover_xl || t.album?.cover_big,
+      preview: t.preview,
+      duration: t.duration,
+    })),
+  };
+}
+
+export async function getRadioTracks(radioId: number | string, limit = 50) {
+  const res = await api.get(`/radio/${radioId}/tracks`, { params: { limit } });
+  return (res.data?.data ?? []).map((t: any) => ({
+    id: t.id,
+    title: t.title,
+    artist: t.artist?.name,
+    album: t.album?.title,
+    albumCover: t.album?.cover_xl || t.album?.cover_big,
+    preview: t.preview,
+    duration: t.duration,
+  }));
+}
+
+export async function getPodcast(podcastId: number | string) {
+  const res = await api.get(`/podcast/${podcastId}`);
+  const p = res.data;
+  return {
+    id: p.id,
+    title: p.title,
+    description: p.description,
+    cover: p.picture_xl || p.picture_big || p.cover_xl || p.cover_big,
+    nb_episodes: p.nb_episodes ?? p.nb_tracks,
+  };
+}
+
+export async function getPodcastEpisodes(podcastId: number | string, limit = 50) {
+  const res = await api.get(`/podcast/${podcastId}/episodes`, { params: { limit } });
+  return (res.data?.data ?? []).map((e: any) => ({
+    id: e.id,
+    title: e.title,
+    artist: e.show?.title || e.artist?.name || "",
+    album: e.title,
+    albumCover: e.picture_xl || e.picture_big || e.cover_xl || e.cover_big,
+    preview: e.preview, // alguns episódios possuem preview
+    duration: e.duration,
+  }));
+}

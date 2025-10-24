@@ -9,7 +9,6 @@ import {
   Image,
   StatusBar,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import MiniPlayer from '../components/MiniPlayer';
 import { Avatar, PodcastGrid, PodcastHeroCard } from '../components';
@@ -167,7 +166,11 @@ export default function MainScreen() {
     <Pressable
       style={styles.card}
       onPress={() =>
-        Alert.alert('Em breve', 'Abriremos uma tela de playlist dedicada (não é um álbum).')
+        navigation.navigate('Playlist', {
+          playlistId: Number(item.id),
+          cover: item.cover,
+          title: item.title,
+        })
       }
     >
       <Image source={{ uri: item.cover }} style={styles.cardCover} />
@@ -186,7 +189,11 @@ export default function MainScreen() {
     <Pressable
       style={styles.card}
       onPress={() =>
-        Alert.alert('Em breve', 'Abriremos uma tela de rádio dedicada (não é um álbum).')
+        navigation.navigate('Radio', {
+          radioId: Number(item.id),
+          title: item.title,
+          picture: item.picture,
+        })
       }
     >
       <Image source={{ uri: item.picture }} style={styles.cardCover} />
@@ -200,7 +207,11 @@ export default function MainScreen() {
     <Pressable
       style={styles.card}
       onPress={() =>
-        Alert.alert('Em breve', 'Abriremos uma tela de podcast dedicada (não é um álbum).')
+        navigation.navigate('Podcast', {
+          podcastId: Number(item.id),
+          cover: item.cover,
+          title: item.title,
+        })
       }
     >
       <Image source={{ uri: item.cover }} style={styles.cardCover} />
