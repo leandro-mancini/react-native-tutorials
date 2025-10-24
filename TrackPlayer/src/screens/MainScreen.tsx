@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import MiniPlayer from '../components/MiniPlayer';
-import { Avatar } from '../components';
+import { Avatar, PodcastGrid, PodcastHeroCard } from '../components';
 import { useMusicPlayer } from '../hooks/useMusicPlayer';
 
 import {
@@ -438,16 +438,15 @@ export default function MainScreen() {
 
         {/* ====== PODCASTS ====== */}
         {showPodcasts && !!podcasts.length && (
-          <Section title="Podcasts em alta">
-            <FlatList
-              data={podcasts}
-              keyExtractor={item => String(item.id)}
-              renderItem={renderPodcast}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingLeft: 16 }}
-            />
-          </Section>
+          <>
+            <Section title="Seus podcasts">
+              <PodcastGrid data={podcasts.slice(0, 8)} />
+            </Section>
+
+            <Section title="Saiba dos programas favoritos">
+              <PodcastHeroCard podcast={podcasts[0]} />
+            </Section>
+          </>
         )}
       </ScrollView>
 
