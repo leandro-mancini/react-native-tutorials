@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  View, Text, Image, FlatList, StyleSheet, Pressable, StatusBar, ActivityIndicator,
+  View, Text, Image, FlatList, StyleSheet, Pressable, StatusBar, ActivityIndicator, Alert,
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import Animated, { Easing, useSharedValue, useAnimatedStyle, withRepeat, withTiming } from "react-native-reanimated";
@@ -58,7 +58,13 @@ export default function AlbumScreen({ route, navigation }: Props) {
 
   async function buildQueue(startIndex = 0, shuffled = false) {
     if (!album?.tracks?.length) return;
-    const list = shuffled ? shuffle(album.tracks) : album.tracks;
+    const listAll = shuffled ? shuffle(album.tracks) : album.tracks;
+    const list = listAll.filter((t: any) => !!t.preview);
+
+    if (!list.length) {
+      Alert.alert("Sem preview", "Nenhuma faixa deste álbum possui preview disponível para reprodução.");
+      return;
+    }
 
     await TrackPlayer.reset();
     await TrackPlayer.add(
@@ -104,15 +110,24 @@ export default function AlbumScreen({ route, navigation }: Props) {
     }
   }
 
-  const renderItem = ({ item, index }: { item: any; index: number }) => (
-    <Pressable style={styles.row} onPress={() => buildQueue(index, isShuffled)}>
-      <View style={styles.trackMeta}>
-        <Text style={styles.trackTitle} numberOfLines={1}>{item.title}</Text>
-        <Text style={styles.trackArtist} numberOfLines={1}>{item.artist}</Text>
-      </View>
-      <Text style={styles.trackDots}>⋯</Text>
-    </Pressable>
-  );
+  const renderItem = ({ item, index }: { item: any; index: number }) => {
+    const disabled = !item.preview;
+    return (
+      <Pressable
+        style={[styles.row, disabled && { opacity: 0.5 }]}
+        onPress={() => !disabled && buildQueue(index, isShuffled)}
+        disabled={disabled}
+      >
+        <View style={styles.trackMeta}>
+          <Text style={styles.trackTitle} numberOfLines={1}>{item.title}</Text>
+          <Text style={styles.trackArtist} numberOfLines={1}>
+            {disabled ? "Sem preview disponível" : item.artist}
+          </Text>
+        </View>
+        <Text style={styles.trackDots}>⋯</Text>
+      </Pressable>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -154,11 +169,11 @@ export default function AlbumScreen({ route, navigation }: Props) {
         keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
         contentContainerStyle={{ paddingBottom: 24 }}
-        ListEmptyComponent={
-          !loading ? (
-            <Text style={{ color: "#fff", opacity: 0.8, paddingHorizontal: 16 }}>Nenhuma faixa com preview neste álbum.</Text>
-          ) : null
-        }
+        ListEmptyComponent={!loading ? (
+          <Text style={{ color: "#fff", opacity: 0.8, paddingHorizontal: 16 }}>
+            Nenhuma faixa encontrada neste álbum.
+          </Text>
+        ) : null}
       />
     </View>
   );

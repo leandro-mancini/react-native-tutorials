@@ -9,6 +9,7 @@ import {
   Image,
   StatusBar,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import MiniPlayer from '../components/MiniPlayer';
 import { Avatar, PodcastGrid, PodcastHeroCard } from '../components';
@@ -164,15 +165,10 @@ export default function MainScreen() {
 
   const renderMix = ({ item }: { item: any }) => (
     <Pressable
-        style={styles.card}
-        onPress={() =>
-            navigation.navigate('Album', {
-                albumId: Number(item.id),
-                cover: item.cover || item.albumCover,
-                title: item.title,
-                artist: item.artist,
-            })
-        }
+      style={styles.card}
+      onPress={() =>
+        Alert.alert('Em breve', 'Abriremos uma tela de playlist dedicada (não é um álbum).')
+      }
     >
       <Image source={{ uri: item.cover }} style={styles.cardCover} />
       <Text style={styles.cardTitle} numberOfLines={1}>
@@ -188,15 +184,10 @@ export default function MainScreen() {
 
   const renderRadio = ({ item }: { item: any }) => (
     <Pressable
-        style={styles.card}
-        onPress={() =>
-            navigation.navigate('Album', {
-                albumId: Number(item.id),
-                cover: item.cover || item.albumCover,
-                title: item.title,
-                artist: item.artist,
-            })
-        }
+      style={styles.card}
+      onPress={() =>
+        Alert.alert('Em breve', 'Abriremos uma tela de rádio dedicada (não é um álbum).')
+      }
     >
       <Image source={{ uri: item.picture }} style={styles.cardCover} />
       <Text style={styles.cardTitle} numberOfLines={1}>
@@ -207,15 +198,10 @@ export default function MainScreen() {
 
   const renderPodcast = ({ item }: { item: any }) => (
     <Pressable
-        style={styles.card}
-        onPress={() =>
-            navigation.navigate('Album', {
-                albumId: Number(item.id),
-                cover: item.cover || item.albumCover,
-                title: item.title,
-                artist: item.artist,
-            })
-        }
+      style={styles.card}
+      onPress={() =>
+        Alert.alert('Em breve', 'Abriremos uma tela de podcast dedicada (não é um álbum).')
+      }
     >
       <Image source={{ uri: item.cover }} style={styles.cardCover} />
       <Text style={styles.cardTitle} numberOfLines={1}>
