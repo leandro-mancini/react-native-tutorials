@@ -20,6 +20,8 @@ import Animated, {
 } from "react-native-reanimated";
 import TrackPlayer, { Event, State, usePlaybackState, useTrackPlayerEvents } from "react-native-track-player";
 import { getArtistPlaylist } from "../services/api";
+import MiniPlayer from "../components/MiniPlayer";
+import { useMusicPlayer } from "../hooks/useMusicPlayer";
 
 type Props = {
   route: { params: { artist: string; hero?: string } };
@@ -38,6 +40,7 @@ export function AuthorPlaylistScreen({ route }: Props) {
   const [isShuffled, setIsShuffled] = useState(false);
   const playbackState = usePlaybackState();
   const isPlaying = (((playbackState as unknown) as any)?.state ?? playbackState) === State.Playing;
+  const { currentIndex, tracks: playerTracks } = useMusicPlayer();
 
   // gradiente respirando ao fundo
   const fade = useSharedValue(0);
@@ -213,7 +216,7 @@ export function AuthorPlaylistScreen({ route }: Props) {
         data={tracks}
         keyExtractor={(item) => String(item.id)}
         ListHeaderComponent={Header}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: playerTracks.length ? 90 : 40 }}
         renderItem={({ item, index }) => (
           <Pressable style={styles.item} onPress={() => onPressItem(index)}>
             <Image source={{ uri: item.albumCover }} style={styles.itemCover} />
@@ -239,6 +242,7 @@ export function AuthorPlaylistScreen({ route }: Props) {
           </View>
         }
       />
+      {playerTracks.length > 0 && currentIndex >= 0 && <MiniPlayer />}
     </View>
   );
 }

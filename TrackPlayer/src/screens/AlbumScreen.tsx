@@ -9,6 +9,8 @@ import TrackPlayer, { State, usePlaybackState } from "react-native-track-player"
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { getAlbum } from "../services/api";
 import { RootStackParamList } from "../../types";
+import MiniPlayer from "../components/MiniPlayer";
+import { useMusicPlayer } from "../hooks/useMusicPlayer";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Album">;
 
@@ -31,6 +33,12 @@ export default function AlbumScreen({ route, navigation }: Props) {
   const playbackRaw = usePlaybackState();
     const playbackState = normalizeState(playbackRaw);
   const isPlaying = playbackState === State.Playing;
+
+  const { currentIndex, tracks: playerTracks } = useMusicPlayer();
+  const bottomPadding = useMemo(
+    () => ({ paddingBottom: playerTracks.length ? 90 : 24 }),
+    [playerTracks.length]
+  );
 
   // gradiente respirando
   const fade = useSharedValue(0);
@@ -141,7 +149,7 @@ export default function AlbumScreen({ route, navigation }: Props) {
         <LinearGradient style={StyleSheet.absoluteFill} colors={["#134e5e", "#71b280"]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} />
       </Animated.View>
 
-      <FlatList
+  <FlatList
         ListHeaderComponent={
           <View style={styles.header}>
             {hero ? <Image source={{ uri: hero }} style={styles.hero} /> : <View style={[styles.hero, styles.heroPh]} />}
@@ -168,13 +176,14 @@ export default function AlbumScreen({ route, navigation }: Props) {
         data={album?.tracks ?? []}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 24 }}
+        contentContainerStyle={bottomPadding}
         ListEmptyComponent={!loading ? (
           <Text style={{ color: "#fff", opacity: 0.8, paddingHorizontal: 16 }}>
             Nenhuma faixa encontrada neste álbum.
           </Text>
         ) : null}
       />
+      {playerTracks.length > 0 && currentIndex >= 0 && <MiniPlayer />}
     </View>
   );
 }

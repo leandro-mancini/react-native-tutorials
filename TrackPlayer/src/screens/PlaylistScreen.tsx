@@ -6,6 +6,8 @@ import TrackPlayer, { State, usePlaybackState } from "react-native-track-player"
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../types";
 import { getPlaylist } from "../services/api";
+import MiniPlayer from "../components/MiniPlayer";
+import { useMusicPlayer } from "../hooks/useMusicPlayer";
 
 function normalizeState(s: unknown): State {
   if (typeof s === "number") return s as unknown as State;
@@ -24,6 +26,8 @@ export default function PlaylistScreen({ route }: NativeStackScreenProps<RootSta
   const playbackRaw = usePlaybackState();
   const playbackState = normalizeState(playbackRaw);
   const isPlaying = playbackState === State.Playing;
+  const { currentIndex, tracks: playerTracks } = useMusicPlayer();
+  const bottomPadding = { paddingBottom: playerTracks.length ? 90 : 24 };
 
   useEffect(() => {
     (async () => {
@@ -114,7 +118,7 @@ export default function PlaylistScreen({ route }: NativeStackScreenProps<RootSta
       <StatusBar barStyle="light-content" />
       <LinearGradient style={StyleSheet.absoluteFill} colors={["#141e30", "#243b55"]} />
 
-      <FlatList
+  <FlatList
         ListHeaderComponent={
           <View style={styles.header}>
             {hero ? <Image source={{ uri: hero }} style={styles.hero} /> : <View style={[styles.hero, styles.heroPh]} />}
@@ -139,13 +143,14 @@ export default function PlaylistScreen({ route }: NativeStackScreenProps<RootSta
         data={playlist?.tracks ?? []}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 24 }}
+        contentContainerStyle={bottomPadding}
         ListEmptyComponent={!loading ? (
           <Text style={{ color: "#fff", opacity: 0.8, paddingHorizontal: 16 }}>
             Nenhuma faixa encontrada nesta playlist.
           </Text>
         ) : null}
       />
+      {playerTracks.length > 0 && currentIndex >= 0 && <MiniPlayer />}
     </View>
   );
 }

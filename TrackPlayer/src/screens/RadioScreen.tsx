@@ -6,6 +6,8 @@ import TrackPlayer, { State, usePlaybackState } from "react-native-track-player"
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../types";
 import { getRadioTracks } from "../services/api";
+import MiniPlayer from "../components/MiniPlayer";
+import { useMusicPlayer } from "../hooks/useMusicPlayer";
 
 function normalizeState(s: unknown): State {
   if (typeof s === "number") return s as unknown as State;
@@ -24,6 +26,8 @@ export default function RadioScreen({ route }: NativeStackScreenProps<RootStackP
   const playbackRaw = usePlaybackState();
   const playbackState = normalizeState(playbackRaw);
   const isPlaying = playbackState === State.Playing;
+  const { currentIndex, tracks: playerTracks } = useMusicPlayer();
+  const bottomPadding = { paddingBottom: playerTracks.length ? 90 : 24 };
 
   useEffect(() => {
     (async () => {
@@ -136,7 +140,7 @@ export default function RadioScreen({ route }: NativeStackScreenProps<RootStackP
           data={tracks}
           keyExtractor={(item) => String(item.id)}
           renderItem={renderItem}
-          contentContainerStyle={{ paddingBottom: 24 }}
+          contentContainerStyle={bottomPadding}
           ListEmptyComponent={
             <Text style={{ color: "#fff", opacity: 0.8, paddingHorizontal: 16 }}>
               Nenhuma faixa encontrada para esta rádio.
@@ -144,6 +148,7 @@ export default function RadioScreen({ route }: NativeStackScreenProps<RootStackP
           }
         />
       )}
+      {playerTracks.length > 0 && currentIndex >= 0 && <MiniPlayer />}
     </View>
   );
 }
