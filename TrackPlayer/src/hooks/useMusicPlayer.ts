@@ -92,8 +92,7 @@ export function useMusicPlayer() {
   return {
     tracks,
     currentIndex,
-    // usePlaybackState em v5 já retorna o enum State
-    playbackState: (playback as unknown as State) ?? State.None,
+    playbackState: ((playback as any)?.state ?? (playback as unknown as State)) ?? State.None,
     progress,
     togglePlay,
     next,
