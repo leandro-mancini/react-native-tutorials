@@ -1,6 +1,13 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View, Image } from 'react-native';
 import { Play, Plus, Share2 } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+import { Alert } from 'react-native';
+import TrackPlayer from 'react-native-track-player';
+import { getPodcastEpisodes } from '../services/api';
+import { setupPlayerOnce } from '../player/setup';
 
 export type PodcastHero = {
   id: number | string;
@@ -10,8 +17,14 @@ export type PodcastHero = {
 };
 
 export function PodcastHeroCard({ podcast, onPress }: { podcast: PodcastHero; onPress?: () => void }) {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const handlePress = onPress ?? (() => navigation.navigate('Podcast', {
+    podcastId: Number(podcast.id),
+    cover: podcast.cover,
+    title: podcast.title,
+  }));
   return (
-    <Pressable style={styles.container} onPress={onPress} android_ripple={{ color: 'rgba(255,255,255,0.06)' }}>
+    <Pressable style={styles.container} onPress={handlePress} android_ripple={{ color: 'rgba(255,255,255,0.06)' }}>
       <View style={styles.row}>
         <Image source={{ uri: podcast.cover }} style={styles.art} />
         <View style={{ flex: 1 }}>
@@ -26,13 +39,39 @@ export function PodcastHeroCard({ podcast, onPress }: { podcast: PodcastHero; on
           </Text>
 
           <View style={styles.actions}>
-            <Pressable style={styles.previewBtn}>
+            <Pressable
+              style={styles.previewBtn}
+              onPress={async () => {
+                try {
+                  await setupPlayerOnce();
+                  const eps = await getPodcastEpisodes(Number(podcast.id), 10);
+                  const playable = eps.filter((e: any) => !!e.preview);
+                  if (!playable.length) {
+                    Alert.alert('Sem preview', 'Nenhum episódio deste podcast possui prévia disponível.');
+                    return;
+                  }
+                  const first = playable[0];
+                  await TrackPlayer.reset();
+                  await TrackPlayer.add({
+                    id: String(first.id),
+                    url: first.preview,
+                    title: first.title,
+                    artist: first.artist,
+                    artwork: first.albumCover,
+                    duration: first.duration ?? 30,
+                  });
+                  await TrackPlayer.play();
+                } catch (e) {
+                  Alert.alert('Erro', 'Não foi possível reproduzir a prévia agora.');
+                }
+              }}
+            >
               <Share2 size={16} color="#fff" />
               <Text style={styles.previewText}>Prévia do episódio</Text>
             </Pressable>
             <View style={{ flexDirection: 'row', gap: 16 }}>
               <Pressable hitSlop={8}><Plus size={22} color="#fff" /></Pressable>
-              <Pressable hitSlop={8}><Play size={22} color="#fff" /></Pressable>
+              <Pressable hitSlop={8} onPress={handlePress}><Play size={22} color="#fff" /></Pressable>
             </View>
           </View>
         </View>

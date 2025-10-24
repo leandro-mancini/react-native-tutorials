@@ -1,5 +1,8 @@
 import React from 'react';
-import { FlatList, Image, StyleSheet, View } from 'react-native';
+import { FlatList, Image, StyleSheet, View, Pressable } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
 
 export type PodcastItem = {
   id: number | string;
@@ -10,6 +13,7 @@ export type PodcastItem = {
 };
 
 export function PodcastGrid({ data }: { data: PodcastItem[] }) {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   return (
     <FlatList
       data={data}
@@ -19,13 +23,19 @@ export function PodcastGrid({ data }: { data: PodcastItem[] }) {
       columnWrapperStyle={{ gap: 12, paddingHorizontal: 16 }}
       contentContainerStyle={{ gap: 12 }}
       renderItem={({ item }) => (
-        <View style={styles.tile}>
+        <Pressable
+          style={styles.tile}
+          onPress={() =>
+            navigation.navigate('Podcast', {
+              podcastId: Number(item.id),
+              cover: item.cover,
+              title: item.title,
+            })
+          }
+        >
           <Image source={{ uri: item.cover }} style={styles.cover} />
-          {/* indicador simples de novidade */}
-          {item.nb_episodes && item.nb_episodes > 0 ? (
-            <View style={styles.dot} />
-          ) : null}
-        </View>
+          {item.nb_episodes && item.nb_episodes > 0 ? <View style={styles.dot} /> : null}
+        </Pressable>
       )}
     />
   );
