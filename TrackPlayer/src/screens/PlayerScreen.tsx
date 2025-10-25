@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import Slider from "@react-native-community/slider";
-import { Pause, Play, SkipBack, SkipForward, Heart, Shuffle, Repeat, MonitorSpeaker, ListMusic, } from "lucide-react-native";
+import { Pause, Play, SkipBack, SkipForward, Heart, Shuffle, Repeat, MonitorSpeaker, ListMusic, ChevronLeft, Ellipsis } from "lucide-react-native";
 import Animated, {
   Easing,
   useSharedValue,
@@ -28,6 +28,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useMusicPlayer } from "../hooks/useMusicPlayer";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../types";
+import TrackOptionsSheet from "../components/TrackOptionsSheet";
 
 const { width } = Dimensions.get("window");
 const PADDING_H = 22;
@@ -49,6 +50,7 @@ export function PlayerScreen() {
   const [liked, setLiked] = React.useState<Set<string | number>>(new Set());
   const [isShuffled, setIsShuffled] = React.useState(false);
   const [repeatMode, setRepeatMode] = React.useState<RepeatMode>(RepeatMode.Off);
+  const [optionsOpen, setOptionsOpen] = React.useState(false);
 
   const playbackEnum = usePlaybackState() ?? State.None;
   const playingState = hookState ?? playbackEnum;
@@ -127,6 +129,16 @@ export function PlayerScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
+
+      {/* Top nav overlay */}
+      <View style={styles.topNav} pointerEvents="box-none">
+        <Pressable onPress={() => navigation.goBack()} style={styles.navBtn} hitSlop={10}>
+          <ChevronLeft size={22} color="#ffffff" />
+        </Pressable>
+        <Pressable onPress={() => setOptionsOpen(true)} style={styles.navBtn} hitSlop={10}>
+          <Ellipsis size={20} color="#ffffff" />
+        </Pressable>
+      </View>
 
       <Animated.View style={[StyleSheet.absoluteFill, layerAStyle]}>
         <LinearGradient
@@ -231,6 +243,21 @@ export function PlayerScreen() {
           </Pressable>
         </View>
       </View>
+
+      <TrackOptionsSheet
+        visible={optionsOpen}
+        onClose={() => setOptionsOpen(false)}
+        navigation={navigation}
+        track={{
+          id: current.id ?? `${current.title}-${current.artist}`,
+          title: current.title,
+          artist: current.artist,
+          album: (current as any).album,
+          albumCover: current.albumCover,
+          preview: (current as any).preview,
+          duration: (current as any).duration,
+        }}
+      />
     </View>
   );
 }
@@ -239,6 +266,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#111",
+  },
+  topNav: {
+    paddingTop: 30,
+    paddingHorizontal: 16,
+    zIndex: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  navBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(0,0,0,0.25)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   center: {
     justifyContent: "center",

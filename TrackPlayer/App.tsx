@@ -18,6 +18,7 @@ import AlbumScreen from './src/screens/AlbumScreen';
 import PlaylistScreen from './src/screens/PlaylistScreen';
 import RadioScreen from './src/screens/RadioScreen';
 import PodcastScreen from './src/screens/PodcastScreen';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -27,19 +28,21 @@ function App() {
   }, []);
   
   return (
-    <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Main" component={MainScreen} />
-          <Stack.Screen name="Player" component={PlayerScreen} />
-          <Stack.Screen name="AuthorPlaylist" component={AuthorPlaylistScreen} />
-          <Stack.Screen name="Album" component={AlbumScreen} />
-          <Stack.Screen name="Playlist" component={PlaylistScreen} />
-          <Stack.Screen name="Radio" component={RadioScreen} />
-          <Stack.Screen name="Podcast" component={PodcastScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Main" component={MainScreen} />
+            <Stack.Screen name="Player" component={PlayerScreen} />
+            <Stack.Screen name="AuthorPlaylist" component={AuthorPlaylistScreen} />
+            <Stack.Screen name="Album" component={AlbumScreen} />
+            <Stack.Screen name="Playlist" component={PlaylistScreen} />
+            <Stack.Screen name="Radio" component={RadioScreen} />
+            <Stack.Screen name="Podcast" component={PodcastScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 
