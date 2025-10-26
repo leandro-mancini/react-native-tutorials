@@ -86,13 +86,15 @@ export default function TrackOptionsSheet({ visible, onClose, track, onHideFromL
   return (
     <BottomSheet visible={visible} onClose={onClose}>
       {t && (
-        <View style={styles.headerRow}>
-          <Image source={t.albumCover ? { uri: t.albumCover } : undefined} style={styles.cover} />
-          <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.title} numberOfLines={1}>{t.title}</Text>
-            <Text style={styles.subtitle} numberOfLines={1}>{t.artist}{t.album ? ` • ${t.album}` : ""}</Text>
-          </View>
-        </View>
+        <Pressable>
+            <View style={styles.headerRow}>
+                <Image source={t.albumCover ? { uri: t.albumCover } : undefined} style={styles.cover} />
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                    <Text style={styles.title} numberOfLines={1}>{t.title}</Text>
+                    <Text style={styles.subtitle} numberOfLines={1}>{t.artist}{t.album ? ` • ${t.album}` : ""}</Text>
+                </View>
+            </View>
+        </Pressable>
       )}
 
       <View style={styles.list}>
