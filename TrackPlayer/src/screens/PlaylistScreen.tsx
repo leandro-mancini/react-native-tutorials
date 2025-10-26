@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, Image, StyleSheet, FlatList, Pressable, StatusBar, ActivityIndicator, Alert } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { View, Text, Image, StyleSheet, Pressable, StatusBar, ActivityIndicator, Alert } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
-import { Play, Pause, Shuffle } from "lucide-react-native";
+import { Play, Pause, Shuffle, ChevronLeft, Ellipsis } from "lucide-react-native";
 import TrackPlayer, { State, usePlaybackState } from "react-native-track-player";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../types";
@@ -10,6 +10,7 @@ import MiniPlayer from "../components/MiniPlayer";
 import { useMusicPlayer } from "../hooks/useMusicPlayer";
 import TrackOptionsSheet from "../components/TrackOptionsSheet";
 import type { TrackInfo } from "../components/TrackOptionsSheet";
+import Animated, { useSharedValue, useAnimatedScrollHandler, useAnimatedStyle, interpolate, Extrapolate } from "react-native-reanimated";
 
 function normalizeState(s: unknown): State {
   if (typeof s === "number") return s as unknown as State;
@@ -20,7 +21,7 @@ function normalizeState(s: unknown): State {
   return State.None;
 }
 
-export default function PlaylistScreen({ route }: NativeStackScreenProps<RootStackParamList, "Playlist">) {
+export default function PlaylistScreen({ route, navigation }: NativeStackScreenProps<RootStackParamList, "Playlist">) {
   const { playlistId, cover: initialCover, title: initialTitle } = route.params;
   const [loading, setLoading] = useState(true);
   const [playlist, setPlaylist] = useState<any | null>(null);
@@ -32,6 +33,31 @@ export default function PlaylistScreen({ route }: NativeStackScreenProps<RootSta
   const bottomPadding = { paddingBottom: playerTracks.length ? 90 : 24 };
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [selected, setSelected] = useState<TrackInfo | null>(null);
+  const [albumOptionsOpen, setAlbumOptionsOpen] = useState(false);
+
+  // Parallax
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler((e) => {
+    scrollY.value = e.contentOffset.y;
+  });
+  const heroParallax = useAnimatedStyle(() => {
+    const translateY = interpolate(scrollY.value, [-HERO, 0, HERO], [-HERO * 0.5, 0, HERO * 0.2], Extrapolate.CLAMP);
+    const scaleUp = interpolate(scrollY.value, [-HERO, 0], [1.6, 1], Extrapolate.CLAMP);
+    const scaleDown = interpolate(scrollY.value, [0, HERO], [1, 0], Extrapolate.CLAMP);
+    const scale = scrollY.value < 0 ? scaleUp : scaleDown;
+    const opacity = interpolate(scrollY.value, [0, HERO * 0.85, HERO], [1, 1, 0], Extrapolate.CLAMP);
+    return { transform: [{ translateY }, { scale }], opacity };
+  });
+  const blurOverlay = useAnimatedStyle(() => ({
+    opacity: interpolate(scrollY.value, [HERO * 0.5, HERO * 0.85, HERO], [0, 0.35, 0.6], Extrapolate.CLAMP),
+  }));
+  const topTitleStyle = useAnimatedStyle(() => {
+    const start = HERO * 0.85;
+    return {
+      opacity: interpolate(scrollY.value, [start, HERO], [0, 1], Extrapolate.CLAMP),
+      transform: [{ translateY: interpolate(scrollY.value, [start, HERO], [6, 0], Extrapolate.CLAMP) }],
+    };
+  });
 
   useEffect(() => {
     (async () => {
@@ -141,10 +167,32 @@ export default function PlaylistScreen({ route }: NativeStackScreenProps<RootSta
       <StatusBar barStyle="light-content" />
       <LinearGradient style={StyleSheet.absoluteFill} colors={["#141e30", "#243b55"]} />
 
-  <FlatList
+      {/* Top Nav Overlay */}
+      <View style={styles.topNav} pointerEvents="box-none">
+        <Pressable onPress={() => navigation.goBack()} style={styles.navBtn} hitSlop={10}>
+          <ChevronLeft size={22} color="#ffffff" />
+        </Pressable>
+        <Animated.Text style={[styles.topTitle, topTitleStyle]} numberOfLines={1}>{title}</Animated.Text>
+        <Pressable onPress={() => setAlbumOptionsOpen(true)} style={styles.navBtn} hitSlop={10}>
+          <Ellipsis size={20} color="#ffffff" />
+        </Pressable>
+      </View>
+
+      <Animated.FlatList
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         ListHeaderComponent={
           <View style={styles.header}>
-            {hero ? <Image source={{ uri: hero }} style={styles.hero} /> : <View style={[styles.hero, styles.heroPh]} />}
+            <Animated.View style={[styles.hero, heroParallax]}>
+              {hero ? (
+                <>
+                  <Image source={{ uri: hero }} style={StyleSheet.absoluteFillObject as any} />
+                  <Animated.Image source={{ uri: hero }} style={[StyleSheet.absoluteFill, { opacity: 0 }, blurOverlay]} blurRadius={16} />
+                </>
+              ) : (
+                <View style={[StyleSheet.absoluteFill, styles.heroPh]} />
+              )}
+            </Animated.View>
             <Text style={styles.title} numberOfLines={2}>{title}</Text>
 
             <View style={styles.actionsRow}>
@@ -178,8 +226,15 @@ export default function PlaylistScreen({ route }: NativeStackScreenProps<RootSta
         onClose={() => setOptionsOpen(false)}
         track={selected}
         onHideFromList={hideFromList}
-        navigation={undefined as any}
+        navigation={navigation as any}
         showHideOption
+      />
+      <TrackOptionsSheet
+        visible={albumOptionsOpen}
+        onClose={() => setAlbumOptionsOpen(false)}
+        context="album"
+        track={{ id: playlistId, title, artist: "", albumCover: hero }}
+        navigation={navigation as any}
       />
       {playerTracks.length > 0 && currentIndex >= 0 && <MiniPlayer />}
     </View>
@@ -191,12 +246,36 @@ const HERO = 320;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#111" },
+  topNav: {
+    paddingTop: 30,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    zIndex: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  topTitle: {
+    textAlign: 'center',
+    color: '#fff',
+    fontWeight: '800',
+    fontSize: 16,
+  },
+  navBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   header: { paddingHorizontal: P, paddingTop: P, paddingBottom: 8 },
   hero: {
     width: "100%",
     height: HERO,
     borderRadius: 10,
     backgroundColor: "#222",
+    overflow: 'hidden',
   },
   heroPh: { borderWidth: 1, borderColor: "#333" },
   title: { color: "#fff", fontSize: 26, fontWeight: "800", marginTop: 16 },

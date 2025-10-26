@@ -10,13 +10,16 @@ import {
   Dimensions,
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
-import { Download, Ellipsis, Heart, Play, Shuffle, Pause } from "lucide-react-native";
+import { Download, Ellipsis, Heart, Play, Shuffle, Pause, ChevronLeft } from "lucide-react-native";
 import Animated, {
   Easing,
   useSharedValue,
   useAnimatedStyle,
   withRepeat,
   withTiming,
+  useAnimatedScrollHandler,
+  interpolate,
+  Extrapolate,
 } from "react-native-reanimated";
 import TrackPlayer, { Event, State, usePlaybackState, useTrackPlayerEvents } from "react-native-track-player";
 import { getArtistPlaylist } from "../services/api";
@@ -32,7 +35,7 @@ type Props = {
 const { width } = Dimensions.get("window");
 const PADDING = 18;
 
-export function AuthorPlaylistScreen({ route }: Props) {
+export function AuthorPlaylistScreen({ route, navigation }: Props) {
   const { artist, hero: heroFromRoute } = route.params;
   const [loading, setLoading] = useState(true);
   const [hero, setHero] = useState<string | undefined>(heroFromRoute);
@@ -44,6 +47,7 @@ export function AuthorPlaylistScreen({ route }: Props) {
   const { currentIndex, tracks: playerTracks } = useMusicPlayer();
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [selected, setSelected] = useState<TrackInfo | null>(null);
+  const [albumOptionsOpen, setAlbumOptionsOpen] = useState(false);
 
   // gradiente respirando ao fundo
   const fade = useSharedValue(0);
@@ -57,6 +61,31 @@ export function AuthorPlaylistScreen({ route }: Props) {
 
   const layerA = useAnimatedStyle(() => ({ opacity: 1 - fade.value * 0.5 }));
   const layerB = useAnimatedStyle(() => ({ opacity: 0.35 + fade.value * 0.65 }));
+
+  // Parallax do header
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler(event => {
+    scrollY.value = event.contentOffset.y;
+  });
+  const HERO = HERO_SIZE;
+  const heroParallax = useAnimatedStyle(() => {
+    const translateY = interpolate(scrollY.value, [-HERO, 0, HERO], [-HERO * 0.5, 0, HERO * 0.2], Extrapolate.CLAMP);
+    const scaleUp = interpolate(scrollY.value, [-HERO, 0], [1.6, 1], Extrapolate.CLAMP);
+    const scaleDown = interpolate(scrollY.value, [0, HERO], [1, 0], Extrapolate.CLAMP);
+    const scale = scrollY.value < 0 ? scaleUp : scaleDown;
+    const opacity = interpolate(scrollY.value, [0, HERO * 0.85, HERO], [1, 1, 0], Extrapolate.CLAMP);
+    return { transform: [{ translateY }, { scale }], opacity };
+  });
+  const blurOverlay = useAnimatedStyle(() => ({
+    opacity: interpolate(scrollY.value, [HERO * 0.5, HERO * 0.85, HERO], [0, 0.35, 0.6], Extrapolate.CLAMP),
+  }));
+  const topTitleStyle = useAnimatedStyle(() => {
+    const start = HERO * 0.85;
+    return {
+      opacity: interpolate(scrollY.value, [start, HERO], [0, 1], Extrapolate.CLAMP),
+      transform: [{ translateY: interpolate(scrollY.value, [start, HERO], [6, 0], Extrapolate.CLAMP) }],
+    };
+  });
 
   useEffect(() => {
     (async () => {
@@ -149,88 +178,88 @@ export function AuthorPlaylistScreen({ route }: Props) {
     setTracks((prev) => prev.filter((t) => String(t.id) !== String(id)));
   };
 
-  const Header = useMemo(
-    () => (
-      <View>
-        {/* Fundo animado */}
-        <Animated.View style={[StyleSheet.absoluteFill, layerA]}>
-          <LinearGradient
-            style={StyleSheet.absoluteFill}
-            colors={["#1f1c2c", "#928DAB"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          />
-        </Animated.View>
-        <Animated.View style={[StyleSheet.absoluteFill, layerB]}>
-          <LinearGradient
-            style={StyleSheet.absoluteFill}
-            colors={["#3a1c71", "#d76d77", "#ffaf7b"]}
-            start={{ x: 1, y: 0 }}
-            end={{ x: 0, y: 1 }}
-          />
-        </Animated.View>
+  const Header = useMemo(() => (
+    <View>
+      {/* Fundo animado */}
+      <Animated.View style={[StyleSheet.absoluteFill, layerA]}>
+        <LinearGradient
+          style={StyleSheet.absoluteFill}
+          colors={["#1f1c2c", "#928DAB"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
+      </Animated.View>
+      <Animated.View style={[StyleSheet.absoluteFill, layerB]}>
+        <LinearGradient
+          style={StyleSheet.absoluteFill}
+          colors={["#3a1c71", "#d76d77", "#ffaf7b"]}
+          start={{ x: 1, y: 0 }}
+          end={{ x: 0, y: 1 }}
+        />
+      </Animated.View>
 
-        <View style={styles.header}>
+      <View style={styles.header}>
+        <Animated.View style={[styles.hero, heroParallax]}> 
           {hero ? (
-            <Image source={{ uri: hero }} style={styles.hero} />
+            <>
+              <Image source={{ uri: hero }} style={StyleSheet.absoluteFillObject as any} />
+              <Animated.Image source={{ uri: hero }} style={[StyleSheet.absoluteFill, { opacity: 0 }, blurOverlay]} blurRadius={16} />
+            </>
           ) : (
-            <View style={[styles.hero, styles.heroPlaceholder]} />
+            <View style={[StyleSheet.absoluteFill, styles.heroPlaceholder]} />
           )}
+        </Animated.View>
 
-          <Text style={styles.title} numberOfLines={1}>
-            {artist}
-          </Text>
+        <Text style={styles.title} numberOfLines={1}>{artist}</Text>
 
-          {/* ações */}
-          <View style={styles.actionsRow}>
-            <Pressable
-              hitSlop={10}
-              style={styles.roundIcon}
-              onPress={() => setLiked((v) => !v)}
-            >
-              <Heart
-                size={22}
-                color={liked ? "#1ED760" : "#ffffff"}
-                fill={liked ? "#1ED760" : "transparent"}
-              />
-            </Pressable>
-            <Pressable hitSlop={10} style={styles.roundIcon}>
-              {/* <Icon name="download" size={22} color="#fff" /> */}
-              <Download />
-            </Pressable>
-            <Pressable hitSlop={10} style={styles.roundIcon}>
-              {/* <Icon name="more-horizontal" size={22} color="#fff" /> */}
-              <Ellipsis />
-            </Pressable>
-          </View>
-
-          {/* Botão play grande (com mini shuffle no canto) */}
-          <Pressable onPress={onPressPlay} style={styles.bigPlayBtn} hitSlop={8}>
-            {isPlaying ? <Pause color="#000" /> : <Play color="#000" />}
-            <Pressable
-              onPress={() => setIsShuffled((s) => !s)}
-              hitSlop={6}
-              style={[
-                styles.shuffleBadge,
-                { backgroundColor: isShuffled ? "#34D399" : "#A7F3D0" },
-              ]}
-            >
-              <Shuffle color="#000" />
-            </Pressable>
+        {/* ações */}
+        <View style={styles.actionsRow}>
+          <Pressable hitSlop={10} style={styles.roundIcon} onPress={() => setLiked((v) => !v)}>
+            <Heart size={22} color={liked ? "#1ED760" : "#ffffff"} fill={liked ? "#1ED760" : "transparent"} />
+          </Pressable>
+          <Pressable hitSlop={10} style={styles.roundIcon}>
+            <Download />
+          </Pressable>
+          <Pressable hitSlop={10} style={styles.roundIcon} onPress={() => setAlbumOptionsOpen(true)}>
+            <Ellipsis />
           </Pressable>
         </View>
 
-        <Text style={styles.sectionLabel}>Populares de {artist}</Text>
+        {/* Botão play grande (com mini shuffle no canto) */}
+        <Pressable onPress={onPressPlay} style={styles.bigPlayBtn} hitSlop={8}>
+          {isPlaying ? <Pause color="#000" /> : <Play color="#000" />}
+          <Pressable
+            onPress={() => setIsShuffled((s) => !s)}
+            hitSlop={6}
+            style={[styles.shuffleBadge, { backgroundColor: isShuffled ? "#34D399" : "#A7F3D0" }]}
+          >
+            <Shuffle color="#000" />
+          </Pressable>
+        </Pressable>
       </View>
-    ),
-    [artist, hero, layerA, layerB, liked, isShuffled, isPlaying]
-  );
+
+      <Text style={styles.sectionLabel}>Populares de {artist}</Text>
+    </View>
+  ), [artist, hero, layerA, layerB, liked, isShuffled, isPlaying, heroParallax, blurOverlay]);
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      <FlatList
+      {/* Top Nav Overlay */}
+      <View style={styles.topNav} pointerEvents="box-none">
+        <Pressable onPress={() => navigation?.goBack?.()} style={styles.navBtn} hitSlop={10}>
+          <ChevronLeft size={22} color="#ffffff" />
+        </Pressable>
+        <Animated.Text style={[styles.topTitle, topTitleStyle]} numberOfLines={1}>{artist}</Animated.Text>
+        <Pressable onPress={() => setAlbumOptionsOpen(true)} style={styles.navBtn} hitSlop={10}>
+          <Ellipsis size={20} color="#ffffff" />
+        </Pressable>
+      </View>
+
+      <Animated.FlatList
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         data={tracks}
         keyExtractor={(item) => String(item.id)}
         ListHeaderComponent={Header}
@@ -267,6 +296,12 @@ export function AuthorPlaylistScreen({ route }: Props) {
         onHideFromList={hideFromList}
         showHideOption
       />
+      <TrackOptionsSheet
+        visible={albumOptionsOpen}
+        onClose={() => setAlbumOptionsOpen(false)}
+        context="album"
+        track={{ id: artist, title: artist, artist, albumCover: hero }}
+      />
       {playerTracks.length > 0 && currentIndex >= 0 && <MiniPlayer />}
     </View>
   );
@@ -276,6 +311,29 @@ const HERO_SIZE = width - PADDING * 2;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#121212" },
+  topNav: {
+    paddingTop: 30,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    zIndex: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  topTitle: {
+    textAlign: 'center',
+    color: '#fff',
+    fontWeight: '800',
+    fontSize: 16,
+  },
+  navBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   header: {
     paddingHorizontal: PADDING,
     paddingTop: 18,
@@ -285,8 +343,9 @@ const styles = StyleSheet.create({
     width: HERO_SIZE,
     height: HERO_SIZE,
     borderRadius: 6,
-    alignSelf: "center",
-    backgroundColor: "#222",
+    alignSelf: 'center',
+    backgroundColor: '#222',
+    overflow: 'hidden',
   },
   heroPlaceholder: { borderWidth: 1, borderColor: "#333" },
   title: {

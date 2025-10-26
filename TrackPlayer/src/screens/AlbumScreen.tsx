@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#111' },
   topNav: {
     paddingTop: 30,
-    paddingBottom: 30,
+    paddingBottom: 16,
     paddingHorizontal: 16,
     zIndex: 10,
     flexDirection: 'row',
@@ -425,10 +425,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   topTitle: {
-    position: 'absolute',
-    left: 56,
-    right: 56,
-    top: 30,
     textAlign: 'center',
     color: '#fff',
     fontWeight: '800',
