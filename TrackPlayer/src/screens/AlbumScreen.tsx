@@ -17,6 +17,9 @@ import Animated, {
   useAnimatedStyle,
   withRepeat,
   withTiming,
+  useAnimatedScrollHandler,
+  interpolate,
+  Extrapolate,
 } from 'react-native-reanimated';
 import {
   Play,
@@ -86,6 +89,74 @@ export default function AlbumScreen({ route, navigation }: Props) {
   const layerB = useAnimatedStyle(() => ({
     opacity: 0.35 + fade.value * 0.65,
   }));
+
+  // Parallax header
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler(event => {
+    scrollY.value = event.contentOffset.y;
+  });
+  const heroParallax = useAnimatedStyle(() => {
+    // Move up/down suavemente
+    const translateY = interpolate(
+      scrollY.value,
+      [-HERO, 0, HERO],
+      [-HERO * 0.5, 0, HERO * 0.2],
+      Extrapolate.CLAMP,
+    );
+    // Escala: puxa para baixo aumenta, ao rolar para cima diminui levemente
+    const scaleUp = interpolate(scrollY.value, [-HERO, 0], [1.6, 1], Extrapolate.CLAMP);
+    // Ao rolar para baixo, reduzir de 1 até 0
+    const scaleDown = interpolate(scrollY.value, [0, HERO], [1, 0], Extrapolate.CLAMP);
+    const scale = scrollY.value < 0 ? scaleUp : scaleDown;
+    // Opacidade: some gradualmente ao rolar para cima
+    // Mantém 1 por quase todo o percurso e só some quando a capa já está praticamente invisível
+    const opacity = interpolate(scrollY.value, [0, HERO * 0.85, HERO], [1, 1, 0], Extrapolate.CLAMP);
+    return {
+      transform: [{ translateY }, { scale }],
+      opacity,
+    };
+  });
+  const blurOverlay = useAnimatedStyle(() => {
+    return {
+      opacity: interpolate(
+        scrollY.value,
+        [HERO * 0.5, HERO * 0.85, HERO],
+        [0, 0.35, 0.6],
+        Extrapolate.CLAMP,
+      ),
+    };
+  });
+  const gradOverlay = useAnimatedStyle(() => {
+    return {
+      opacity: interpolate(scrollY.value, [0, HERO * 0.6, HERO], [0, 0.25, 0.5], Extrapolate.CLAMP),
+    };
+  });
+  const topTitleStyle = useAnimatedStyle(() => {
+    const start = HERO * 0.85;
+    return {
+      opacity: interpolate(scrollY.value, [start, HERO], [0, 1], Extrapolate.CLAMP),
+      transform: [
+        {
+          translateY: interpolate(scrollY.value, [start, HERO], [6, 0], Extrapolate.CLAMP),
+        },
+      ],
+    };
+  });
+  const headerActionsStyle = useAnimatedStyle(() => {
+    return {
+      opacity: interpolate(scrollY.value, [0, HERO * 0.6, HERO * 0.85], [1, 0.4, 0], Extrapolate.CLAMP),
+    };
+  });
+  const stickyPlayStyle = useAnimatedStyle(() => {
+    return {
+      opacity: interpolate(scrollY.value, [HERO * 0.6, HERO * 0.85, HERO], [0, 0.7, 1], Extrapolate.CLAMP),
+      transform: [
+        {
+          scale: interpolate(scrollY.value, [HERO * 0.6, HERO], [0.9, 1], Extrapolate.CLAMP),
+        },
+      ],
+    };
+  });
 
   useEffect(() => {
     (async () => {
@@ -209,6 +280,9 @@ export default function AlbumScreen({ route, navigation }: Props) {
         >
           <ChevronLeft size={22} color="#ffffff" />
         </Pressable>
+        <Animated.Text style={[styles.topTitle, topTitleStyle]} numberOfLines={1}>
+          {albumTitle}
+        </Animated.Text>
         <Pressable
           onPress={() => setAlbumOptionsOpen(true)}
           style={styles.navBtn}
@@ -236,14 +310,35 @@ export default function AlbumScreen({ route, navigation }: Props) {
         />
       </Animated.View>
 
-      <FlatList
+      <Animated.FlatList
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         ListHeaderComponent={
           <View style={styles.header}>
-            {hero ? (
-              <Image source={{ uri: hero }} style={styles.hero} />
-            ) : (
-              <View style={[styles.hero, styles.heroPh]} />
-            )}
+            <Animated.View style={[styles.heroWrap, heroParallax]}>
+              {hero ? (
+                <>
+                  <Image source={{ uri: hero }} style={styles.heroImage} />
+                  {/* Camada de blur progressivo */}
+                  <Animated.Image
+                    source={{ uri: hero }}
+                    style={[styles.heroBlur, blurOverlay]}
+                    blurRadius={16}
+                  />
+                  {/* Overlay de gradiente para contraste */}
+                  <Animated.View style={[StyleSheet.absoluteFill, gradOverlay]} pointerEvents="none">
+                    <LinearGradient
+                      style={StyleSheet.absoluteFill}
+                      colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.35)"]}
+                      start={{ x: 0.5, y: 0 }}
+                      end={{ x: 0.5, y: 1 }}
+                    />
+                  </Animated.View>
+                </>
+              ) : (
+                <View style={[styles.heroImage, styles.heroPh]} />
+              )}
+            </Animated.View>
             <Text style={styles.title} numberOfLines={2}>
               {albumTitle}
             </Text>
@@ -291,7 +386,7 @@ export default function AlbumScreen({ route, navigation }: Props) {
             </Text>
           ) : null
         }
-      />
+  />
       <TrackOptionsSheet
         visible={optionsOpen}
         onClose={() => setOptionsOpen(false)}
@@ -322,11 +417,22 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#111' },
   topNav: {
     paddingTop: 30,
+    paddingBottom: 30,
     paddingHorizontal: 16,
     zIndex: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  topTitle: {
+    position: 'absolute',
+    left: 56,
+    right: 56,
+    top: 30,
+    textAlign: 'center',
+    color: '#fff',
+    fontWeight: '800',
+    fontSize: 16,
   },
   navBtn: {
     width: 36,
@@ -337,11 +443,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   header: { paddingHorizontal: P, paddingTop: P, paddingBottom: 8 },
-  hero: {
+  heroWrap: {
     width: '100%',
     height: HERO,
     borderRadius: 10,
+    overflow: 'hidden',
     backgroundColor: '#222',
+  },
+  heroImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+    backgroundColor: '#222',
+  },
+  heroBlur: {
+    ...StyleSheet.absoluteFillObject,
+    opacity: 0,
   },
   heroPh: { borderWidth: 1, borderColor: '#333' },
   title: { color: '#fff', fontSize: 26, fontWeight: '800', marginTop: 16 },
@@ -368,6 +485,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#1ED760',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  stickyPlayBtn: {
+    width: 56,
+    height: 56,
+    borderRadius: 56,
+    backgroundColor: '#1ED760',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
   row: {
     flexDirection: 'row',
