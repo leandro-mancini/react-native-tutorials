@@ -23,14 +23,15 @@ type Props = {
   onHideFromList?: (id: string | number) => void;
   navigation?: NativeStackNavigationProp<RootStackParamList>;
   showHideOption?: boolean;
+  context?: "track" | "album";
 };
 
-export default function TrackOptionsSheet({ visible, onClose, track, onHideFromList, navigation, showHideOption = false }: Props) {
+export default function TrackOptionsSheet({ visible, onClose, track, onHideFromList, navigation, showHideOption = false, context = "track" }: Props) {
   const [liked, setLiked] = useState(false);
   const t = track;
 
   const options = useMemo(() => {
-    if (!t) return [] as Array<{ key: string; label: string; icon: React.ReactNode; action: () => void }>; 
+    if (!t) return [] as Array<{ key: string; label: string; icon: React.ReactNode; action: () => void }>;
     const addToQueue = async () => {
       try {
         await TrackPlayer.add({
@@ -69,10 +70,25 @@ export default function TrackOptionsSheet({ visible, onClose, track, onHideFromL
       setLiked(v => !v);
     };
 
+    const likeLabel = context === "album"
+      ? liked ? "Remover dos salvos" : "Salvar álbum"
+      : liked ? "Remover de Curtidas" : "Adicionar a Músicas Curtidas";
+
+    if (context === "album") {
+      const albumOptions = [
+        { key: "share", label: "Compartilhar", icon: <Share2 color="#fff" size={20} />, action: share },
+        { key: "like", label: likeLabel, icon: <Heart color={liked ? "#1ED760" : "#fff"} size={20} fill={liked ? "#1ED760" : "transparent"} />, action: likeToggle },
+        { key: "toArtist", label: "Ir para o artista", icon: <User color="#fff" size={20} />, action: goToArtist },
+        { key: "credits", label: "Ver créditos do álbum", icon: <Info color="#fff" size={20} />, action: () => Alert.alert("Créditos", `${t.title} • ${t.artist}`) },
+      ];
+      return albumOptions;
+    }
+
     const basic = [
       { key: "share", label: "Compartilhar", icon: <Share2 color="#fff" size={20} />, action: share },
-      { key: "like", label: liked ? "Remover de Curtidas" : "Adicionar a Músicas Curtidas", icon: <Heart color={liked ? "#1ED760" : "#fff"} size={20} fill={liked ? "#1ED760" : "transparent"} />, action: likeToggle },
-      { key: "addQueue", label: "Adicionar à fila", icon: <ListPlus color="#fff" size={20} />, action: addToQueue },
+      { key: "like", label: likeLabel, icon: <Heart color={liked ? "#1ED760" : "#fff"} size={20} fill={liked ? "#1ED760" : "transparent"} />, action: likeToggle },
+      // Somente mostrar "Adicionar à fila" quando houver preview/url
+      ...(t.preview ? [{ key: "addQueue", label: "Adicionar à fila", icon: <ListPlus color="#fff" size={20} />, action: addToQueue }] : []),
       { key: "toArtist", label: "Ir para o artista", icon: <User color="#fff" size={20} />, action: goToArtist },
       { key: "credits", label: "Ver créditos da música", icon: <Info color="#fff" size={20} />, action: () => Alert.alert("Créditos", `${t.title} • ${t.artist}\nÁlbum: ${t.album ?? "—"}`) },
     ];
@@ -81,7 +97,7 @@ export default function TrackOptionsSheet({ visible, onClose, track, onHideFromL
       basic.splice(3, 0, { key: "hide", label: "Ocultar nesta lista", icon: <EyeOff color="#fff" size={20} />, action: hideFromList });
     }
     return basic;
-  }, [t, liked, navigation, onHideFromList, onClose, showHideOption]);
+  }, [t, liked, navigation, onHideFromList, onClose, showHideOption, context]);
 
   return (
     <BottomSheet visible={visible} onClose={onClose}>
