@@ -4,12 +4,7 @@
 
 Fluxo completo de player de música no estilo Spotify: MiniPlayer → PlayerScreen com controles, animações e compartilhamento.
 
-<p>
-	<img alt="Demo" src="./.github/demo-player.gif" height="420" />
-	<br/>
-	<em>Preview ilustrativo — adicione seus GIFs/prints em .github/</em>
-  
-</p>
+<img width="2687" height="2688" alt="Group 2" src="https://github.com/user-attachments/assets/766d909b-1663-4538-97a5-676bfb0a087a" />
 
 </div>
 
