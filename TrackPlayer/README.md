@@ -1,97 +1,202 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+<div align="center">
 
-# Getting Started
+# React Native Music Player UI Kit (TrackPlayer + Reanimated)
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+Fluxo completo de player de música no estilo Spotify: MiniPlayer → PlayerScreen com controles, animações e compartilhamento.
 
-## Step 1: Start Metro
+<p>
+	<img alt="Demo" src="./.github/demo-player.gif" height="420" />
+	<br/>
+	<em>Preview ilustrativo — adicione seus GIFs/prints em .github/</em>
+  
+</p>
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+</div>
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## Visão geral
 
-```sh
-# Using npm
-npm start
+Este projeto entrega um player de música moderno e pronto para uso em React Native, combinando experiência premium de UI/UX com integrações reais de áudio e conteúdo. O fluxo principal demonstra a navegação de 1 toque do `MiniPlayer` para a `PlayerScreen`, com todos os controles essenciais, animações suaves e um bottom sheet para ações como compartilhar.
 
-# OR using Yarn
-yarn start
+Ideal para squads e devs que querem acelerar MVPs, produtos e estudos práticos de arquitetura com `react-native-track-player` + `react-native-reanimated` + `React Navigation` — tudo em TypeScript.
+
+## Destaques do kit
+
+- Navegação fluida: MiniPlayer → PlayerScreen (1 toque)
+- Controles completos: Play/Pause, Anterior/Próxima, Seek (Slider)
+- Shuffle e Repeat (inclui Repeat Track com badge “1”)
+- Bottom Sheet de opções com compartilhamento
+- Animações suaves (Reanimated) e gradientes dinâmicos
+- UI dark, responsiva e pronta para produção
+- Integração real com conteúdo (Deezer – previews de ~30s)
+- Arquitetura com hook dedicado (`useMusicPlayer`) e serviços bem definidos
+
+## O que está incluído
+
+### Telas
+
+- `MainScreen` – hub principal com seções e destaques
+- `PlayerScreen` – player completo com capa, controles e progresso
+- `AuthorPlaylistScreen` – melhores faixas por artista
+- `AlbumScreen`, `PlaylistScreen`, `RadioScreen`, `PodcastScreen` – exemplos de listagens e detalhe
+
+### Componentes
+
+- `MiniPlayer`, `PlayerControls`, `ProgressBar`
+- `TrackOptionsSheet` (bottom sheet com ações como compartilhar)
+- `AlbumCard`, `PodcastHeroCard`, `PodcastGrid`, `Avatar`
+- `BottomSheet` base e utilitários visuais
+
+### Arquitetura e serviços
+
+- Hook: `src/hooks/useMusicPlayer.ts`
+- Setup do player: `src/player/setup.ts`
+- API de dados: `src/services/api.ts` (uso do Deezer para feeds e previews)
+
+### Tecnologias
+
+- React Native 0.82 + React 19 + TypeScript
+- `react-native-track-player` v5 (alpha/nightly)
+- `react-native-reanimated` 4
+- `@react-native-community/slider`, `react-native-linear-gradient`
+- `@react-navigation/native` + `@react-navigation/native-stack`
+- `lucide-react-native` (ícones), `axios`, RNGH, Screens, Safe Area Context, SVG
+
+## Pré-requisitos
+
+- Node 20+
+- Xcode + CocoaPods (iOS)
+- Android Studio + SDKs (Android)
+- macOS para build iOS
+- Internet (consumo de API Deezer pública)
+
+Observações importantes:
+
+- As faixas do Deezer expõem apenas previews (~30s). Para reprodução completa, utilize seu próprio backend/stream ou outra fonte licenciada.
+- Alguns endpoints personalizados do Deezer exigem OAuth (ex.: “Mais do que você curte”). Este kit usa endpoints públicos por padrão.
+
+## Como começar
+
+1) Instale as dependências
+
+```bash
+# opcionalmente, na raiz do monorepo; aqui focamos no app TrackPlayer
+cd TrackPlayer
+npm install
 ```
 
-## Step 2: Build and run your app
+2) iOS – instale pods
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+```bash
+cd ios && pod install && cd ..
+```
 
-### Android
+3) Execute o Metro e a plataforma desejada
 
-```sh
-# Using npm
+```bash
+# Terminal 1
+npm run start
+
+# Terminal 2 (Android)
 npm run android
 
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+# Terminal 2 (iOS)
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+### Configurações nativas recomendadas
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+- iOS (Xcode):
+	- Capabilities → Background Modes: marque “Audio, AirPlay, and Picture in Picture”.
+	- Habilite Remote Control (o `react-native-track-player` gerencia eventos de controle).
+- Android:
+	- As permissões e o serviço são adicionados via autolinking do TrackPlayer v5 (Media3). Caso personalize o notification channel/ícones, ajuste no nativo conforme a doc da lib.
 
-## Step 3: Modify your app
+## Estrutura de pastas (resumo)
 
-Now that you have successfully run the app, let's make changes!
+```
+TrackPlayer/
+	App.tsx
+	index.js
+	package.json
+	ios/
+	android/
+	src/
+		components/
+			AlbumCard.tsx
+			Avatar.tsx
+			BottomSheet.tsx
+			MiniPlayer.tsx
+			PlayerControls.tsx
+			PodcastGrid.tsx
+			PodcastHeroCard.tsx
+			ProgressBar.tsx
+			TrackOptionsSheet.tsx
+			index.ts
+		hooks/
+			useMusicPlayer.ts
+		player/
+			setup.ts
+		screens/
+			MainScreen.tsx
+			PlayerScreen.tsx
+			AuthorPlaylistScreen.tsx
+			AlbumScreen.tsx
+			PlaylistScreen.tsx
+			RadioScreen.tsx
+			PodcastScreen.tsx
+		services/
+			api.ts
+	types.ts
+```
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+## Como funciona (contrato rápido)
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+- Fonte de dados: `src/services/api.ts` (Deezer público + utilitários). Cada track segue o shape:
+	- `{ id, title, artist, album, albumCover, preview, duration }`
+- Fila de reprodução: configurada via `useMusicPlayer` e `TrackPlayer.add(...)` no setup inicial.
+- Estados: progresso (`useProgress`), estado de playback (`usePlaybackState`), faixa ativa e índice.
+- PlayerScreen: controla seek, play/pause, prev/next, shuffle visual e repeat (Queue/Track/Off), e aciona o `TrackOptionsSheet` para compartilhar.
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+## Personalização
 
-## Congratulations! :tada:
+- Cores/gradientes do Player: `src/screens/PlayerScreen.tsx` (LinearGradient/Animated)
+- Ícones e tamanhos: `lucide-react-native` (substitua ou ajuste `size`, `color`)
+- Conteúdo: troque a implementação de `api.ts` pelo seu backend/SDK
+- Tipografia, espaçamentos e radius: via StyleSheet nas telas/componentes
+- Navegação: configure stacks/rotas em `App.tsx` (React Navigation)
 
-You've successfully run and modified your React Native App. :partying_face:
+## Perguntas frequentes (FAQ)
 
-### Now what?
+1) Por que só toca 30 segundos?
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+— O Deezer expõe previews públicos de ~30s. Para faixas completas, você deve usar fontes licenciadas ou seu próprio streaming.
 
-# Troubleshooting
+2) Funciona em background e com controles do sistema?
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+— Sim. O `react-native-track-player` v5 usa Android Media3 e integra com Control Center no iOS. Habilite os Background Modes no iOS conforme acima.
 
-# Learn More
+3) Posso usar meus próprios URLs de áudio?
 
-To learn more about React Native, take a look at the following resources:
+— Sim. Basta montar a fila (`TrackPlayer.add`) com seus `url`/metadados.
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+4) Preciso de OAuth do Deezer?
+
+— Não para os feeds públicos de exemplo. Endpoints personalizados (como “curtidas” do usuário) exigem token.
+
+## Licença
+
+MIT — Use livremente em projetos pessoais e comerciais. Respeite os termos de uso das APIs/serviços de terceiros (Deezer, ícones, etc.).
+
+## Créditos e referências
+
+- [react-native-track-player](https://github.com/doublesymmetry/react-native-track-player)
+- [React Native Reanimated](https://docs.swmansion.com/react-native-reanimated/)
+- [Lucide Icons](https://lucide.dev/)
+- Conteúdo de demonstração: API pública Deezer
+
+## Contribua e conecte-se
+
+Curtiu o kit? Deixe uma ⭐ no repositório, abra issues/sugestões e compartilhe com a comunidade.
+
+Siga para mais conteúdos práticos de React Native, animações e players reais prontos para produção.
+
