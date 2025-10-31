@@ -40,6 +40,11 @@ Cada aplicação neste repositório aborda um cenário específico e demonstra c
 <img width="1404" height="1080" alt="toggle swith" src="https://github.com/user-attachments/assets/15dbcf11-061d-4260-abb4-deb9954c353f" />
 </a>
 
+### 🔹 **Music Player**
+
+<a href="./TrackPlayer">
+<img width="2687" height="2688" alt="Group 2" src="https://github.com/user-attachments/assets/766d909b-1663-4538-97a5-676bfb0a087a" />
+</a>
 
 ## 🛠️ Como Utilizar
 Cada aplicação neste repositório serve como referência para implementação de funcionalidades no React Native.
